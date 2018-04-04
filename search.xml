@@ -41,4 +41,9 @@
     <url>%2Ftags%2Findex.html</url>
     <content type="text"></content>
   </entry>
+  <entry>
+    <title><![CDATA[密码学]]></title>
+    <url>%2F%E5%AF%86%E7%A0%81%E5%AD%A6%2Findex.html</url>
+    <content type="text"><![CDATA[rsa bash 一二三四 \这是单行代码``]]></content>
+  </entry>
 </search>
