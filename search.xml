@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[杂记]]></title>
-    <url>%2F2018%2F04%2F06%2F%E6%9D%82%E8%AE%B0%2F</url>
-    <content type="text"><![CDATA[一二三四 test]]></content>
-      <categories>
-        <category>密码学</category>
-      </categories>
+    <title><![CDATA[密码学]]></title>
+    <url>%2F2018%2F04%2F03%2Frsa%2F</url>
+    <content type="text"><![CDATA[rsa bash 一二三四 \这是单行代码``]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[page]]></title>
+    <url>%2F2018%2F04%2F01%2Fpage%2F</url>
+    <content type="text"><![CDATA[##lalalalala]]></content>
       <tags>
-        <tag>crypto</tag>
-        <tag> web</tag>
+        <tag>test</tag>
       </tags>
   </entry>
   <entry>
     <title><![CDATA[my frist bolg]]></title>
     <url>%2F2018%2F03%2F31%2Fmy-frist-bolg%2F</url>
     <content type="text"><![CDATA[努力做一名白帽子]]></content>
-      <categories>
-        <category>dream</category>
-      </categories>
       <tags>
-        <tag>test</tag>
         <tag>introduction</tag>
       </tags>
   </entry>
@@ -37,16 +34,36 @@
   <entry>
     <title><![CDATA[about]]></title>
     <url>%2Fabout%2Findex.html</url>
-    <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法;另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
+    <content type="text"></content>
+  </entry>
+  <entry>
+    <title><![CDATA[categories,test,密码学]]></title>
+    <url>%2Fcategories%2Findex-1.html</url>
+    <content type="text"><![CDATA[\这是单行代码``]]></content>
   </entry>
   <entry>
     <title><![CDATA[categories]]></title>
     <url>%2Fcategories%2Findex.html</url>
-    <content type="text"><![CDATA[hei,john]]></content>
+    <content type="text"><![CDATA[杂记]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[密码学]]></title>
+    <url>%2Fcategories%2Frsa.html</url>
+    <content type="text"><![CDATA[rsa bash 一二三四 \这是单行代码``]]></content>
   </entry>
   <entry>
     <title><![CDATA[tags]]></title>
+    <url>%2Ftags%2Faaa.html</url>
+    <content type="text"><![CDATA[hahaha]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>%2Ftags%2Findex.html</url>
-    <content type="text"></content>
+    <content type="text"><![CDATA[title: tagsdate: 2018-04-02 12:22:46 type: “tags”]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[密码学]]></title>
+    <url>%2Fcategories%2F%E5%AF%86%E7%A0%81%E5%AD%A6%2Findex.html</url>
+    <content type="text"><![CDATA[rsa bash 一二三四 \这是单行代码``]]></content>
   </entry>
 </search>
