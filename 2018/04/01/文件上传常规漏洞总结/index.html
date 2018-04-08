@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="web,文件上传,文件包含," />
 
 
 
@@ -81,13 +81,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="lalala&#39;s blog">
-<meta property="og:url" content="http://yoururl.com/archives/2018/03/index.html">
+<meta name="description" content="从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过   前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的">
+<meta name="keywords" content="web,文件上传,文件包含">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件上传常规漏洞总结">
+<meta property="og:url" content="http://yoururl.com/2018/04/01/文件上传常规漏洞总结/index.html">
 <meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过   前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-08T10:07:43.361Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="lalala&#39;s blog">
+<meta name="twitter:title" content="文件上传常规漏洞总结">
+<meta name="twitter:description" content="从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过   前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的">
 
 
 
@@ -117,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoururl.com/archives/2018/03/"/>
+  <link rel="canonical" href="http://yoururl.com/2018/04/01/文件上传常规漏洞总结/"/>
 
 
 
 
 
-  <title>归档 | lalala's blog</title>
+  <title>文件上传常规漏洞总结 | lalala's blog</title>
   
 
 
@@ -142,7 +147,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -268,74 +273,210 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
-
-      <span class="archive-page-counter">
-        
-        
-        
-          
-        
-        嗯..! 目前共计 6 篇日志。 继续努力。
-      </span>
-
-      
-
-        
-        
-        
-
-        
-          
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
-
-        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/04/01/文件上传常规漏洞总结/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2018/03/31/my-frist-bolg/" itemprop="url">
-              
-                <span itemprop="name">my frist bolg</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">文件上传常规漏洞总结</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-03-31T22:29:00+08:00"
-              content="2018-03-31" >
-          03-31
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T22:36:00+08:00">
+                2018-04-01
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/文件上传/" itemprop="url" rel="index">
+                    <span itemprop="name">文件上传</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
+      
 
+      
+        <h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p>
+<blockquote>
+<ul>
+<li>前台js验证——禁用js，burpsuit抓包绕过即可</li>
+<li>后台检查MIME——抓包改MIME</li>
+<li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li>
+<li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;
+SetHandler application/x-httpd-php
+&lt;/FilesMatch&gt;
+</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg
+</code></pre></li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>后台检查文件后缀名——</li>
+<li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)
+</code></pre></li>
+<li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)
+文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)
+</code></pre></li>
+<li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)
+</code></pre></li>
+<li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)
+</code></pre></li>
+</ul>
+</blockquote>
+<h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote>
+<ul>
+<li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li>
+<li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li>
+<li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li>
+</ul>
+</blockquote>
+
+      
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/web/" rel="tag"># web</a>
+          
+            <a href="/tags/文件上传/" rel="tag"># 文件上传</a>
+          
+            <a href="/tags/文件包含/" rel="tag"># 文件包含</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/01/第一次功防训练赛小记/" rel="next" title="第一次攻防训练赛小记">
+                <i class="fa fa-chevron-left"></i> 第一次攻防训练赛小记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/06/杂记/" rel="prev" title="杂记">
+                杂记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -343,6 +484,13 @@
 
 
           
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
 
         </div>
         
@@ -363,8 +511,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -451,6 +608,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#从文件上传到getshell"><span class="nav-number">1.</span> <span class="nav-text">从文件上传到getshell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件包含漏洞和利用"><span class="nav-number">2.</span> <span class="nav-text">文件包含漏洞和利用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -584,6 +757,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
@@ -609,6 +786,11 @@
   
     
 
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
     
   
 
