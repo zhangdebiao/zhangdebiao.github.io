@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="文件上传,代码审计,二次注入,CTF," />
+  <meta name="keywords" content="文件上传,代码审计,二次注入," />
 
 
 
@@ -82,9 +82,9 @@
 
 
 <meta name="description" content="文件上传之代码审计前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。 首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。先审计代码，看一下upload.php文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入 文">
-<meta name="keywords" content="文件上传,代码审计,二次注入,CTF">
+<meta name="keywords" content="文件上传,代码审计,二次注入">
 <meta property="og:type" content="article">
-<meta property="og:title" content="文件上传之代码审计">
+<meta property="og:title" content="文件管理系统writeup">
 <meta property="og:url" content="http://yoururl.com/2018/04/08/day1文件管理系统/index.html">
 <meta property="og:site_name" content="lalala&#39;s blog">
 <meta property="og:description" content="文件上传之代码审计前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。 首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。先审计代码，看一下upload.php文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入 文">
@@ -92,9 +92,9 @@
 <meta property="og:image" content="http://yoururl.com/images/pasted-1.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-2.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-3.png">
-<meta property="og:updated_time" content="2018-04-08T12:50:51.244Z">
+<meta property="og:updated_time" content="2018-04-10T07:52:33.587Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="文件上传之代码审计">
+<meta name="twitter:title" content="文件管理系统writeup">
 <meta name="twitter:description" content="文件上传之代码审计前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。 首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。先审计代码，看一下upload.php文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入 文">
 <meta name="twitter:image" content="http://yoururl.com/images/pasted-1.png">
 
@@ -132,7 +132,7 @@
 
 
 
-  <title>文件上传之代码审计 | lalala's blog</title>
+  <title>文件管理系统writeup | lalala's blog</title>
   
 
 
@@ -308,7 +308,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">文件上传之代码审计</h1>
+          <h1 class="post-title" itemprop="name headline">文件管理系统writeup</h1>
         
 
         <div class="post-meta">
@@ -343,8 +343,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/文件上传/" itemprop="url" rel="index">
-                    <span itemprop="name">文件上传</span>
+                  <a href="/categories/CTF/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/web/" itemprop="url" rel="index">
+                    <span itemprop="name">web</span>
                   </a>
                 </span>
 
@@ -421,8 +432,6 @@
           
             <a href="/tags/二次注入/" rel="tag"># 二次注入</a>
           
-            <a href="/tags/CTF/" rel="tag"># CTF</a>
-          
         </div>
       
 
@@ -443,6 +452,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/10/蓝鲸笔记系统writeup/" rel="prev" title="蓝鲸笔记系统writeup">
+                蓝鲸笔记系统writeup <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -526,7 +539,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -537,7 +550,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -548,7 +561,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
