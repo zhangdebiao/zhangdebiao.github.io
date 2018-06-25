@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[ISCC2018线下赛总结]]></title>
+    <url>%2F2018%2F06%2F26%2FISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93%2F</url>
+    <content type="text"><![CDATA[环境介绍先拿自己靶机，攻下高地，进入公共区域攻防这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的给了一个环境，是Tomcat，开了8080端口 比赛信息是192.168.43.70/whatisyourname/，这里用到了fastjson反序列化漏洞，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ ) fastjson反序列化漏洞参考：https://blog.csdn.net/yaofeino1/article/details/76377080https://github.com/iBearcat/Fastjson-Payloadhttps://github.com/shengqi158/fastjson-remote-code-execute-poc 环境源码下载通过github下载含有漏洞环境的web源代码下载地址直接将war包放到tomcat的wabapp目录下，运行tomcat就行： 漏洞复现：通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据{“name”:”feifei”,age:12} ，查看效果：然后根据参考文献找到Test.java文件构造poc(反弹shell)，编译一下生成.class文件base64 encode一下替换name字段，post过去可以看到命令执行成功nc连接上执行命令然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡nc也死活连不上说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点 &lt;(￣ c￣)y▂ξ]]></content>
+      <categories>
+        <category>CTF</category>
+        <category>AWD</category>
+      </categories>
+      <tags>
+        <tag>攻防</tag>
+        <tag>web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[第三届安恒杯线下赛总结]]></title>
+    <url>%2F2018%2F06%2F26%2F%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1%2F</url>
+    <content type="text"><![CDATA[&emsp;&emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3&emsp;&emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求http://10.0.1.2，并带上自己的token，即可获取flag poc1post方式文件url：http://10.50.%s.2/mobile/index.php参数：url=http://10.0.1.2?token=RCNWBJXQ poc2post方式文件url：http://10.50.33.2/mobile/index.php?m=default&amp;c=auction参数：1=phpinfo() 提示线索1:mobile/themes/default/auction_list.dwt这是一个预留后门，比较叼D盾扫不出来提示线索2:mobile/api/uc.php 任意文件读取(poc 1)根据给出的poc1，我们快速去定位问题文件位置我们从mobile入口文件入手即： mobile/index.php查看内容跟踪文件 看到内容 跟踪apps/目录可以发现3个文件夹 我们首先看到默认文件夹 此时又得到5个文件夹 从第一个common文件夹开始可以看到insert.php中的一个函数 看到关键代码 其中 明显是一个任意文件读取利用脚本： 一句话木马文件(poc 2)防守方法删除预留后门auction_list.dwt文件即可当时官方给出提示：auction_list.dwt文件!upload successful由于此文件用于渲染，直接将小马删除即可 任意写文件防守方法改掉writesth函数名即可定位到mobile/api/uc.php在action数组中发现了一些奇怪的东西最后一个writesth十分瞩目，一看就应该是主办方留下的功能，我们全局搜索这个writesth函数不难发现以下关键代码：即：文件名可控文件内容可控即可写入Webshell我们测试运行即可发现我们当前目录下写入sky.php，内容为但是由于当时的环境里，只有data目录有可写全写，而我们默认路径为所以直接写可能无效，应该选择上跳，例如 ../data/sky.php ECShop v2.7.3后台直接getshell防守方法改掉后台密码即可（默认admin admin888） 弱口令本次比赛还有一个漏洞就是ctf用户弱口令cat /etc/shadow得到ctf账户密码123456就因为这个漏洞被dalao全场从头打到尾…]]></content>
+      <categories>
+        <category>CTF</category>
+        <category>AWD</category>
+      </categories>
+      <tags>
+        <tag>攻防</tag>
+        <tag>web</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[hash长度拓展攻击]]></title>
     <url>%2F2018%2F05%2F08%2Fhash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB%2F</url>
     <content type="text"><![CDATA[Hash Length Extension Attack&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文） MD5加密原理先介绍一下md5加密的原理 个人理解: md5的过程可以分成填充和压缩的过程 md5 padding(填充)&emsp;&emsp;message padding&emsp;&emsp;length%64=56(8位标识原始长度)填充的时候，将会使用16进制数据：&emsp;~1个\x80&emsp;~N个\0x00 md5 compress(压缩)&emsp;&emsp;message padding length—–&gt;hash&emsp;&emsp;length=N*64(bit) —–&gt;length%64(bit) md5 padding例如我们把admin来hash一下:admin 先hex编码-&gt;61646d696e再填充80不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)最后数据表示位2800000000000000（8个字节）最终结果为: 61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000 什么是Magic number (确定值)代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量) md5 compress我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：A=0x292f2321LB=0xa7a5577aLC=0xe4a8943LD=0xc31f804aL而md5的结果:我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙） hash长度拓展攻击其实只要知道三点就能后进行攻击： MD5(salt+message)的值 message内容 salt+message长度这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。 攻击过程逆向算法很简单 def compute_magic_number(self, md5str): self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0] self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0] self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0] self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0] 由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)这样就完成了长度拓展攻击 例题测试]]></content>
@@ -67,8 +93,8 @@
         <category>文件上传</category>
       </categories>
       <tags>
-        <tag>文件上传</tag>
         <tag>web</tag>
+        <tag>文件上传</tag>
         <tag>文件包含</tag>
       </tags>
   </entry>
@@ -77,9 +103,11 @@
     <url>%2F2018%2F04%2F01%2F%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%9F%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0%2F</url>
     <content type="text"><![CDATA[&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下 &emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） 第一道题是semcms1.1版本，上网查到相应漏洞，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了… 第三题是一个微窗cms，有一个命令执行的洞。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag 第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂 这次比赛下来身为小白总结了几点：&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。 1234攻击方面： 拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。 白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。 还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。 12345防御方面：首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。 通用防御：上waf，直接吧不想要的请求比如post，get全部给禁掉等等； 设置目录权限，例如上传目录权限给死。 最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。 &emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…]]></content>
       <categories>
-        <category>杂记</category>
+        <category>CTF</category>
+        <category>AWD</category>
       </categories>
       <tags>
+        <tag>web</tag>
         <tag>AWD</tag>
       </tags>
   </entry>
@@ -105,13 +133,13 @@
     <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法;另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
   </entry>
   <entry>
-    <title><![CDATA[categories]]></title>
-    <url>%2Fcategories%2Findex.html</url>
-    <content type="text"><![CDATA[hei,john]]></content>
-  </entry>
-  <entry>
     <title><![CDATA[tags]]></title>
     <url>%2Ftags%2Findex.html</url>
     <content type="text"></content>
+  </entry>
+  <entry>
+    <title><![CDATA[categories]]></title>
+    <url>%2Fcategories%2Findex.html</url>
+    <content type="text"><![CDATA[hei,john]]></content>
   </entry>
 </search>

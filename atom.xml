@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-05-09T06:43:47.064Z</updated>
+  <updated>2018-06-25T17:51:30.964Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -15,6 +15,64 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ISCC2018线下赛总结</title>
+    <link href="http://yoururl.com/2018/06/26/ISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93/"/>
+    <id>http://yoururl.com/2018/06/26/ISCC2018线下赛总结/</id>
+    <published>2018-06-25T17:22:00.000Z</published>
+    <updated>2018-06-25T17:51:30.964Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p><p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p><h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p><h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的wabapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p><h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;环境介绍&quot;&gt;&lt;a href=&quot;#环境介绍&quot; class=&quot;headerlink&quot; title=&quot;环境介绍&quot;&gt;&lt;/a&gt;环境介绍&lt;/h1&gt;&lt;p&gt;先拿自己靶机，攻下高地，进入公共区域攻防&lt;br&gt;这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的&lt;br
+      
+    
+    </summary>
+    
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
+    
+    
+      <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第三届安恒杯线下赛总结</title>
+    <link href="http://yoururl.com/2018/06/26/%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1/"/>
+    <id>http://yoururl.com/2018/06/26/第三届安恒杯线下赛总结-1/</id>
+    <published>2018-06-25T16:03:00.000Z</published>
+    <updated>2018-06-25T17:18:37.972Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3<br><br>&emsp;&emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求<a href="http://10.0.1.2，并带上自己的token，即可获取flag" target="_blank" rel="noopener">http://10.0.1.2，并带上自己的token，即可获取flag</a>  <br><br></p><h1 id="poc1"><a href="#poc1" class="headerlink" title="poc1"></a>poc1</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.%s.2/mobile/index.php" target="_blank" rel="noopener">http://10.50.%s.2/mobile/index.php</a><br>参数：url=<a href="http://10.0.1.2?token=RCNWBJXQ" target="_blank" rel="noopener">http://10.0.1.2?token=RCNWBJXQ</a><br><br></p><h1 id="poc2"><a href="#poc2" class="headerlink" title="poc2"></a>poc2</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.33.2/mobile/index.php?m=default&amp;c=auction" target="_blank" rel="noopener">http://10.50.33.2/mobile/index.php?m=default&amp;c=auction</a><br>参数：1=phpinfo()<br><br></p><p><strong>提示线索1:</strong><br>mobile/themes/default/auction_list.dwt<br>这是一个预留后门，比较叼D盾扫不出来<br><strong>提示线索2:</strong><br>mobile/api/uc.php<br><br></p><h1 id="任意文件读取-poc-1"><a href="#任意文件读取-poc-1" class="headerlink" title="任意文件读取(poc 1)"></a>任意文件读取(poc 1)</h1><p>根据给出的poc1，我们快速去定位问题文件位置<br>我们从mobile入口文件入手<br>即：  mobile/index.php<br>查看内容<br><img src="\images\pasted-36.png" alt="upload successful"><br>跟踪文件 <img src="\images\pasted-37.png" alt="upload successful"><br>看到内容 <img src="\images\pasted-38.png" alt="upload successful"><br>跟踪apps/目录<br>可以发现3个文件夹 <img src="\images\pasted-39.png" alt="upload successful"><br>我们首先看到默认文件夹 <img src="\images\pasted-40.png" alt="upload successful"><br>此时又得到5个文件夹 <img src="\images\pasted-41.png" alt="upload successful"><br>从第一个common文件夹开始<br>可以看到insert.php中的一个函数 <img src="\images\pasted-42.png" alt="upload successful"><br>看到关键代码 <img src="\images\pasted-43.png" alt="upload successful"><br>其中 <img src="\images\pasted-44.png" alt="upload successful"><br>明显是一个任意文件读取<br>利用脚本： <img src="\images\pasted-45.png" alt="upload successful"><br><br><br></p><h1 id="一句话木马文件-poc-2"><a href="#一句话木马文件-poc-2" class="headerlink" title="一句话木马文件(poc 2)"></a>一句话木马文件(poc 2)</h1><p><strong>防守方法删除预留后门auction_list.dwt文件即可</strong><br>当时官方给出提示：auction_list.dwt文件!<br><a href="\images\pasted-46.png">upload successful</a><br>由于此文件用于渲染，直接将小马删除即可<br><br><br><br></p><h1 id="任意写文件"><a href="#任意写文件" class="headerlink" title="任意写文件"></a>任意写文件</h1><p><strong>防守方法改掉writesth函数名即可</strong><br>定位到mobile/api/uc.php<br>在action数组中发现了一些奇怪的东西<br><img src="\images\pasted-47.png" alt="upload successful"><br>最后一个writesth十分瞩目，一看就应该是主办方留下的功能，我们全局搜索这个writesth函数<br>不难发现以下关键代码：<br><img src="\images\pasted-48.png" alt="upload successful"><br>即：<br>文件名可控<br>文件内容可控<br>即可写入Webshell<br>我们测试<br><img src="\images\pasted-49.png" alt="upload successful"><br>运行即可发现我们当前目录下写入sky.php，内容为<img src="\images\pasted-50.png" alt="upload successful"><br>但是由于当时的环境里，只有data目录有可写全写，而我们默认路径为<br><img src="\images\pasted-51.png" alt="upload successful"><br>所以直接写可能无效，应该选择上跳，例如  ../data/sky.php<br><br><br><br></p><h1 id="ECShop-v2-7-3后台直接getshell"><a href="#ECShop-v2-7-3后台直接getshell" class="headerlink" title="ECShop v2.7.3后台直接getshell"></a><strong><a href="!http://www.haaker.cn/?p=6420">ECShop v2.7.3后台直接getshell</a></strong></h1><p><img src="\images\pasted-52.png" alt="upload successful"><br><img src="\images\pasted-53.png" alt="upload successful"><br><img src="\images\pasted-54.png" alt="upload successful"><br><img src="\images\pasted-55.png" alt="upload successful"><br>防守方法改掉后台密码即可（默认admin admin888）<br><br><br><br></p><h1 id="弱口令"><a href="#弱口令" class="headerlink" title="弱口令"></a>弱口令</h1><p>本次比赛还有一个漏洞就是ctf用户弱口令<br>cat /etc/shadow<br>得到ctf账户密码123456<br>就因为这个漏洞被dalao全场从头打到尾…</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&amp;emsp;&amp;emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3&lt;br&gt;&lt;br&gt;&amp;emsp;&amp;emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求&lt;a href=&quot;http://10.0.1.2，并带上自己的token，即可
+      
+    
+    </summary>
+    
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
+    
+    
+      <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+  </entry>
   
   <entry>
     <title>hash长度拓展攻击</title>
@@ -172,9 +230,9 @@
       <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
     
     
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
     
       <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
@@ -185,7 +243,7 @@
     <link href="http://yoururl.com/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%9F%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
     <id>http://yoururl.com/2018/04/01/第一次功防训练赛小记/</id>
     <published>2018-04-01T14:36:00.000Z</published>
-    <updated>2018-04-08T11:41:45.985Z</updated>
+    <updated>2018-06-25T17:17:52.308Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下</p><p>&emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） </p><blockquote><ul><li>第一道题是semcms1.1版本，上网查到<a href="http://0day5.com/archives/4320/" target="_blank" rel="noopener">相应漏洞</a>，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了…</li></ul></blockquote><blockquote><ul><li>第三题是一个微窗cms，有一个<a href="http://0day5.com/archives/3996/" target="_blank" rel="noopener">命令执行的洞</a>。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag</li></ul></blockquote><blockquote><ul><li>第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)<br>正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂</li></ul></blockquote><p>这次比赛下来身为小白总结了几点：<br>&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">攻击方面：</span><br><span class="line">    拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。</span><br><span class="line">    白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。</span><br><span class="line">    还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。</span><br></pre></td></tr></table></figure><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">防御方面：</span><br><span class="line">首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。</span><br><span class="line">    通用防御：上waf，直接吧不想要的请求比如<span class="built_in">post</span>，<span class="built_in">get</span>全部给禁掉等等；</span><br><span class="line">    设置目录权限，例如上传目录权限给死。</span><br><span class="line">    最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。</span><br></pre></td></tr></table></figure><p>&emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…</p>]]></content>
     
@@ -199,8 +257,12 @@
     
     </summary>
     
-      <category term="杂记" scheme="http://yoururl.com/categories/%E6%9D%82%E8%AE%B0/"/>
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
     
+      <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
+    
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
       <category term="AWD" scheme="http://yoururl.com/tags/AWD/"/>
     
