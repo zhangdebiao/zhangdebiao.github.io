@@ -99,7 +99,7 @@
 <meta property="og:image" content="http://yoururl.com/images/pasted-63.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-64.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-65.png">
-<meta property="og:updated_time" content="2018-06-25T17:51:30.964Z">
+<meta property="og:updated_time" content="2018-06-26T02:46:43.912Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ISCC2018线下赛总结">
 <meta name="twitter:description" content="环境介绍先拿自己靶机，攻下高地，进入公共区域攻防这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的给了一个环境，是Tomcat，开了8080端口 比赛信息是192.168.43.70/whatisyourname/，这里用到了fastjson反序列化漏洞，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ ) fastjson反序列化漏洞参考：https://">
@@ -401,7 +401,7 @@
         <h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p>
 <p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p>
 <h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p>
-<h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的wabapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p>
+<h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的webapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p>
 <h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>
 
       
@@ -527,7 +527,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -538,7 +538,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -549,7 +549,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

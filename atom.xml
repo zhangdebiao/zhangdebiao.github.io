@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-06-25T17:51:30.964Z</updated>
+  <updated>2018-06-26T02:46:43.912Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://yoururl.com/2018/06/26/ISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93/"/>
     <id>http://yoururl.com/2018/06/26/ISCC2018线下赛总结/</id>
     <published>2018-06-25T17:22:00.000Z</published>
-    <updated>2018-06-25T17:51:30.964Z</updated>
+    <updated>2018-06-26T02:46:43.912Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p><p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p><h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p><h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的wabapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p><h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p><p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p><h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p><h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的webapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p><h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>]]></content>
     
     <summary type="html">
     
@@ -79,7 +79,7 @@
     <link href="http://yoururl.com/2018/05/08/hash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB/"/>
     <id>http://yoururl.com/2018/05/08/hash长度拓展攻击/</id>
     <published>2018-05-08T14:15:00.000Z</published>
-    <updated>2018-05-09T06:43:47.064Z</updated>
+    <updated>2018-06-26T02:54:19.721Z</updated>
     
     <content type="html"><![CDATA[<h3 id="Hash-Length-Extension-Attack"><a href="#Hash-Length-Extension-Attack" class="headerlink" title="Hash Length Extension Attack"></a>Hash Length Extension Attack</h3><p>&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文）<br><br></p><h1 id="MD5加密原理"><a href="#MD5加密原理" class="headerlink" title="MD5加密原理"></a>MD5加密原理</h1><p>先介绍一下md5加密的原理<br><img src="\images\pasted-25.png" alt="upload successful"></p><p>个人理解: md5的过程可以分成<strong>填充</strong>和<strong>压缩</strong>的过程<br></p><ul><li>md5 padding(填充)<br>&emsp;&emsp;message padding<br>&emsp;&emsp;length%64=56(8位标识原始长度)<br>填充的时候，将会使用16进制数据：<br>&emsp;~1个\x80<br>&emsp;~N个\0x00      </li><li>md5 compress(压缩)<br>&emsp;&emsp;message padding length—–&gt;hash<br>&emsp;&emsp;length=N*64(bit)      —–&gt;length%64(bit)<br><br></li></ul><h2 id="md5-padding"><a href="#md5-padding" class="headerlink" title="md5 padding"></a>md5 padding</h2><p><em>例如我们把admin来hash一下:</em><br>admin  先hex编码-&gt;61646d696e<br>再填充80<br>不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)<br>最后数据表示位2800000000000000（8个字节）<br>最终结果为:</p><blockquote><p>61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000<br><br></p></blockquote><p><strong>什么是Magic number (确定值)</strong><br>代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量)<br><br><br></p><h2 id="md5-compress"><a href="#md5-compress" class="headerlink" title="md5 compress"></a>md5 compress</h2><p>我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。<br>Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。<br>每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值<br><br><br>我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：<br>A=0x292f2321L<br>B=0xa7a5577aL<br>C=0xe4a8943L<br>D=0xc31f804aL<br>而md5的结果:<br><img src="\images\pasted-26.png" alt="upload successful"><br>我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙）<br><br></p><h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点就能后进行攻击：</p><ul><li>MD5(salt+message)的值</li><li>message内容</li><li>salt+message长度<br>这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值<br>因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。<br><img src="\images\pasted-27.png" alt="upload successful"></li></ul><h2 id="攻击过程"><a href="#攻击过程" class="headerlink" title="攻击过程"></a>攻击过程</h2><p>逆向算法很简单</p><pre><code>def compute_magic_number(self, md5str):    self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0]    self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0]    self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0]    self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0]</code></pre><p>由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL<br>根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)<br>这样就完成了长度拓展攻击</p><h2 id="例题测试"><a href="#例题测试" class="headerlink" title="例题测试"></a>例题测试</h2>]]></content>
     
@@ -98,6 +98,8 @@
     
     
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+      <category term="crypto" scheme="http://yoururl.com/tags/crypto/"/>
     
   </entry>
   
@@ -173,7 +175,7 @@
     <link href="http://yoururl.com/2018/04/07/hello-world/"/>
     <id>http://yoururl.com/2018/04/07/hello-world/</id>
     <published>2018-04-07T09:41:00.000Z</published>
-    <updated>2018-04-10T07:53:50.721Z</updated>
+    <updated>2018-06-26T02:48:37.977Z</updated>
     
     <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
     
@@ -190,13 +192,21 @@
   </entry>
   
   <entry>
-    <title>杂记</title>
+    <title>RSA总结</title>
     <link href="http://yoururl.com/2018/04/06/rsa%E6%80%BB%E7%BB%93/"/>
     <id>http://yoururl.com/2018/04/06/rsa总结/</id>
     <published>2018-04-06T08:33:00.000Z</published>
-    <updated>2018-04-10T07:56:06.328Z</updated>
+    <updated>2018-06-26T02:58:43.228Z</updated>
+    
+    <content type="html"><![CDATA[<p>先留个坑，回头写…</p>]]></content>
     
     <summary type="html">
+    
+      
+      
+        &lt;p&gt;先留个坑，回头写…&lt;/p&gt;
+
+      
     
     </summary>
     
@@ -240,10 +250,10 @@
   
   <entry>
     <title>第一次攻防训练赛小记</title>
-    <link href="http://yoururl.com/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%9F%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
-    <id>http://yoururl.com/2018/04/01/第一次功防训练赛小记/</id>
+    <link href="http://yoururl.com/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
+    <id>http://yoururl.com/2018/04/01/第一次攻防训练赛小记/</id>
     <published>2018-04-01T14:36:00.000Z</published>
-    <updated>2018-06-25T17:17:52.308Z</updated>
+    <updated>2018-06-26T02:51:13.146Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下</p><p>&emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） </p><blockquote><ul><li>第一道题是semcms1.1版本，上网查到<a href="http://0day5.com/archives/4320/" target="_blank" rel="noopener">相应漏洞</a>，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了…</li></ul></blockquote><blockquote><ul><li>第三题是一个微窗cms，有一个<a href="http://0day5.com/archives/3996/" target="_blank" rel="noopener">命令执行的洞</a>。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag</li></ul></blockquote><blockquote><ul><li>第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)<br>正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂</li></ul></blockquote><p>这次比赛下来身为小白总结了几点：<br>&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">攻击方面：</span><br><span class="line">    拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。</span><br><span class="line">    白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。</span><br><span class="line">    还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。</span><br></pre></td></tr></table></figure><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">防御方面：</span><br><span class="line">首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。</span><br><span class="line">    通用防御：上waf，直接吧不想要的请求比如<span class="built_in">post</span>，<span class="built_in">get</span>全部给禁掉等等；</span><br><span class="line">    设置目录权限，例如上传目录权限给死。</span><br><span class="line">    最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。</span><br></pre></td></tr></table></figure><p>&emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…</p>]]></content>
     
@@ -265,32 +275,6 @@
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
       <category term="AWD" scheme="http://yoururl.com/tags/AWD/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>my frist bolg</title>
-    <link href="http://yoururl.com/2018/03/31/my-frist-bolg/"/>
-    <id>http://yoururl.com/2018/03/31/my-frist-bolg/</id>
-    <published>2018-03-31T14:29:00.000Z</published>
-    <updated>2018-04-10T07:53:41.495Z</updated>
-    
-    <content type="html"><![CDATA[<p>努力做一名白帽子</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;努力做一名白帽子&lt;/p&gt;
-
-      
-    
-    </summary>
-    
-      <category term="dream" scheme="http://yoururl.com/categories/dream/"/>
-    
-    
-      <category term="test" scheme="http://yoururl.com/tags/test/"/>
     
   </entry>
   
