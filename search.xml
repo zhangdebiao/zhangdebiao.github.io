@@ -87,19 +87,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[文件上传常规漏洞总结]]></title>
-    <url>%2F2018%2F04%2F01%2F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过 前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的文件当作php文件解析执行：&lt;FilesMatch “php.gif”&gt; SetHandler application/x-httpd-php &lt;/FilesMatch&gt; 上传的jpg文件都会以php格式解析：AddType application/x-httpd-php .jpg 后台检查文件后缀名—— 0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)1.php .png(空格改为00) IIS6.0解析漏洞文件 xxx.asp;.jpg (服务器默认不解析;号后面的内容) 文件夹 xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件) apache解析漏洞www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析) iis7.0和nginx解析漏洞www.xxx.com/logo.jpg/*.php(开启fix_pathinfo) 文件包含漏洞和利用 如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞 通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00 文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)]]></content>
-      <categories>
-        <category>文件上传</category>
-      </categories>
-      <tags>
-        <tag>文件上传</tag>
-        <tag>web</tag>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[第一次攻防训练赛小记]]></title>
     <url>%2F2018%2F04%2F01%2F%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0%2F</url>
     <content type="text"><![CDATA[&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下 &emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） 第一道题是semcms1.1版本，上网查到相应漏洞，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了… 第三题是一个微窗cms，有一个命令执行的洞。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag 第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂 这次比赛下来身为小白总结了几点：&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。 1234攻击方面： 拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。 白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。 还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。 12345防御方面：首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。 通用防御：上waf，直接吧不想要的请求比如post，get全部给禁掉等等； 设置目录权限，例如上传目录权限给死。 最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。 &emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…]]></content>
@@ -110,6 +97,19 @@
       <tags>
         <tag>web</tag>
         <tag>AWD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[文件上传常规漏洞总结]]></title>
+    <url>%2F2018%2F04%2F01%2F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%2F</url>
+    <content type="text"><![CDATA[从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过 前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的文件当作php文件解析执行：&lt;FilesMatch “php.gif”&gt; SetHandler application/x-httpd-php &lt;/FilesMatch&gt; 上传的jpg文件都会以php格式解析：AddType application/x-httpd-php .jpg 后台检查文件后缀名—— 0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)1.php .png(空格改为00) IIS6.0解析漏洞文件 xxx.asp;.jpg (服务器默认不解析;号后面的内容) 文件夹 xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件) apache解析漏洞www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析) iis7.0和nginx解析漏洞www.xxx.com/logo.jpg/*.php(开启fix_pathinfo) 文件包含漏洞和利用 如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞 通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00 文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)]]></content>
+      <categories>
+        <category>文件上传</category>
+      </categories>
+      <tags>
+        <tag>web</tag>
+        <tag>文件上传</tag>
+        <tag>文件包含</tag>
       </tags>
   </entry>
   <entry>
