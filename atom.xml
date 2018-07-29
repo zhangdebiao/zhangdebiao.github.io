@@ -220,35 +220,6 @@
   </entry>
   
   <entry>
-    <title>文件上传常规漏洞总结</title>
-    <link href="http://yoururl.com/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoururl.com/2018/04/01/文件上传常规漏洞总结/</id>
-    <published>2018-04-01T14:36:00.000Z</published>
-    <updated>2018-04-08T10:07:43.361Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;从文件上传到getshell&quot;&gt;&lt;a href=&quot;#从文件上传到getshell&quot; class=&quot;headerlink&quot; title=&quot;从文件上传到getshell&quot;&gt;&lt;/a&gt;从文件上传到getshell&lt;/h3&gt;&lt;p&gt;一般找到文件上传页面，常规getshell思
-      
-    
-    </summary>
-    
-      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-      <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
-    
-  </entry>
-  
-  <entry>
     <title>第一次攻防训练赛小记</title>
     <link href="http://yoururl.com/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
     <id>http://yoururl.com/2018/04/01/第一次攻防训练赛小记/</id>
@@ -275,6 +246,35 @@
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
       <category term="AWD" scheme="http://yoururl.com/tags/AWD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>文件上传常规漏洞总结</title>
+    <link href="http://yoururl.com/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
+    <id>http://yoururl.com/2018/04/01/文件上传常规漏洞总结/</id>
+    <published>2018-04-01T14:36:00.000Z</published>
+    <updated>2018-04-08T10:07:43.361Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;从文件上传到getshell&quot;&gt;&lt;a href=&quot;#从文件上传到getshell&quot; class=&quot;headerlink&quot; title=&quot;从文件上传到getshell&quot;&gt;&lt;/a&gt;从文件上传到getshell&lt;/h3&gt;&lt;p&gt;一般找到文件上传页面，常规getshell思
+      
+    
+    </summary>
+    
+      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+      <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
   </entry>
   
