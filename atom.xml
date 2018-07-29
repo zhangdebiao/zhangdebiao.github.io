@@ -150,9 +150,9 @@
       <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
     
     
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
       <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
   </entry>
   
@@ -179,9 +179,9 @@
       <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
     
     
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
       <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
   </entry>
   
@@ -351,9 +351,9 @@
       <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
     
     
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
     
       <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     

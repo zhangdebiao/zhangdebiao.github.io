@@ -53,8 +53,8 @@
         <category>AWD</category>
       </categories>
       <tags>
-        <tag>web</tag>
         <tag>攻防</tag>
+        <tag>web</tag>
       </tags>
   </entry>
   <entry>
@@ -66,8 +66,8 @@
         <category>AWD</category>
       </categories>
       <tags>
-        <tag>web</tag>
         <tag>攻防</tag>
+        <tag>web</tag>
       </tags>
   </entry>
   <entry>
@@ -138,8 +138,8 @@
         <category>文件上传</category>
       </categories>
       <tags>
-        <tag>文件上传</tag>
         <tag>web</tag>
+        <tag>文件上传</tag>
         <tag>文件包含</tag>
       </tags>
   </entry>
@@ -167,13 +167,13 @@
     <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法;另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
   </entry>
   <entry>
-    <title><![CDATA[categories]]></title>
-    <url>%2Fcategories%2Findex.html</url>
-    <content type="text"><![CDATA[hei,john]]></content>
-  </entry>
-  <entry>
     <title><![CDATA[tags]]></title>
     <url>%2Ftags%2Findex.html</url>
     <content type="text"></content>
+  </entry>
+  <entry>
+    <title><![CDATA[categories]]></title>
+    <url>%2Fcategories%2Findex.html</url>
+    <content type="text"><![CDATA[hei,john]]></content>
   </entry>
 </search>
