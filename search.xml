@@ -1,6 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Django学习笔记_4]]></title>
+    <url>%2F2018%2F07%2F29%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4%2F</url>
+    <content type="text"><![CDATA[———————————————————————templates.py——————————————————————— 模板 模板处理 快捷函数 定义模板模板语言包括 变量 标签 过滤器 { % 代码块 %} 注释 变量在模板中调用对象的方法标签过滤器注释 模板继承 说明 三层继承模型 HTML转义 会被自动转义的字符 关闭转义 字符串字面值 CSRF 验证码 验证码视图 配置url 显示验证码 验证 第三方 可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[Django学习笔记_3]]></title>
+    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3%2F</url>
+    <content type="text"><![CDATA[———————————————————————Models.py——————————————————————— ORM对象-关系-映射根据对象的类型生成表结构将对象，列表的操作，转换为sql语句将sql查询到的结果转换为对象，列表 Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表 使用mysql数据库pip install mysql-python 在mysql中创建数据库create database test2 charest=utf8; 打开settings.py文件，修改DATABASES项可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)settings.py中改个配置就可以用我们的mysql数据库 开发流程 使用已有数据库生成模型类python manage.py inspectdb &gt; booktest/models.py 创建添加应用python manage.py startapp booktest创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS 定义模型 定义属性 字段类型 字段选项 关系 示例 在models.py中定义表结构 生成迁移之后python manage.py makemigrations 执行迁移之后python manage.py migrate 类的属性 管理器（可自定义）模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射） 模型类的创建方法&emsp;&emsp;在自定义的模型类中写init方法时会报错，因为model.Model中已经有了init方法，那我们怎么快捷创建每个模型类呢？解决方法： (1) 创建类方法。 我们在模型类中，自定义一个创建模型类的方法我们在python manage.py shell中，创建一个abc对象：报错是因为时区问题，不影响 (2) 在自定义的管理器中，创建对象方法 （不在类中做这件事） 模型查询 查询集 限制查询集 查询集的缓存 字段查询 比较运算符 聚合函数 F对象 Q对象]]></content>
+      <categories>
+        <category>Django学习笔记</category>
+        <category>3_Django模型</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>django</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Django学习笔记_2]]></title>
+    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2%2F</url>
+    <content type="text"><![CDATA[———————————————————————–Views.py———————————————————————– 视图 URL匹配的过程url也可以写在应用(booktest)中: URLconf 其他的URLconfs URL的反向解析 错误视图Django原生自带几个默认视图用于处理HTTP错误 404(page not found)视图 500(server error)视图 400(bad request)视图 HttpRequest对象 服务器收到http协议的请求后，会根据报文创建HttpRequest对象 视图函数的第一个参数是HttpRequest对象 在django.http模块中定义了HttpRequest对象的API属性方法 1、get()作用：根据键获取值只能获取一个值www.baidu.com/abc?a=1&amp;b=2&amp;c=3 2、getlist()将键的值以列表的形式返回可以获取多个值www.baidu.com/abc?a=1&amp;a=2&amp;c=3 QueryDict对象GET属性POST属性 HttpResponse对象 属性 方法 子类HttpResponseRedirectHttpResponseRedirect()可简写为redirect() 子类JsonResponse 状态保持 启用session 使用session 用户登录示例在views.py中创建视图 配置url 创建模板index.html 创建模板login.html 会话过期时间 存储session 使用Redis缓存session 登录认证逻辑利用django封装好的authenticate()函数，认证登录Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问 from django.contrib.auth.decorators import login_required @login_required 如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可(记得清除浏览器缓存)]]></content>
+      <categories>
+        <category>Django学习笔记</category>
+        <category>2_Django视图</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>django</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Django学习笔记_1]]></title>
+    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1%2F</url>
+    <content type="text"><![CDATA[环境安装Django安装：pip install django==1.10.3安装前段框架Bootstrap3，利用其结合Django开发Web页面： pip install django-bootstrap3使用PyMysql连接mysql数据库： pip install PyMySQL Django框架介绍&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MVT模式。它们各自的职责如下： 层次 职责 模型（Model），即数据存取层 处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。 模板(Template)，即业务逻辑层 处理与表现相关的决定： 如何在页面或其他类型文档中进行显示。 视图（View），即表现层 存取模型及调取恰当模板的相关逻辑。模型与模板的桥梁。 &emsp;&emsp;从以上表述可以看出Django 视图不处理用户输入，而仅仅决定要展现哪些数据给用户，而Django 模板 仅仅决定如何展现Django视图指定的数据。或者说, Django将MVC中的视图进一步分解为 Django视图 和 Django模板两个部分，分别决定 “展现哪些数据” 和 “如何展现”，使得Django的模板可以根据需要随时替换，而不仅仅限制于内置的模板。 &emsp;&emsp;至于MVC控制器部分，由Django框架的URLconf来实现。URLconf机制是使用正则表达式匹配URL，然后调用合适的Python函数。URLconf对于URL的规则没有任何限制，你完全可以设计成任意的URL风格，不管是传统的，RESTful的，或者是另类的。框架把控制层给封装了，无非与数据交互这层都是数据库表的读,写,删除,更新的操作。在写程序的时候，只要调用相应的方法就行了，感觉很方便。程序员把控制层东西交给Django自动完成了。 只需要编写非常少的代码完成很多的事情。所以，它比MVC框架考虑的问题要深一步，因为我们程序员大都在写控制层的程序。现在这个工作交给了框架，仅需写很少的调用代码，大大提高了工作效率。 web框架 什么是ORM？ Django框架&emsp;&emsp;目录分开，就必须有机制将他们在内里进行耦合。在Django中，urls、orm、static、settings等起着重要的作用。一个典型的业务流程是如下图所示：&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MTV模式。 Django优点 强大的数据库功能 用 python 的类继承，几行代码就可以拥有一个丰富、动态的数据库操作接口（API），如果需要，你也能执行 SQL 语句ORM（Object-Relational-Mapping“对象-关系-映射”），它实现了数据模型与数据库的解耦，即数据模型的设计不需要依赖于特定的数据库，通过简单的配置就可以轻松更换数据库。 自带强大的后台功能 几行代码就让网站拥有一个强大的后台，轻松管理内容。 优雅的网址 在urls.py中用正则匹配网址，传递到对应的函数。(需要注意的是:正则是一种独立的语法，并不是哪个语言所拥有的。) 具有模板系统 强大，易扩展的模板系统，设计简易，代码和样式分开设计，更易管理。 缓存系统&emsp;&emsp;Django和memcached、redis或者其他的缓存系统联用，表现更出色，提高了页面的加载速度。&emsp;&emsp;templates 文件夹views.py 中的函数渲染 templates 中的 Html 模板，得到动态内容的网页，当然可以用缓存来提高速度。 国际化 完全支持多语言应用，允许你定义翻译的字符，轻松翻译成不同国家的语言。 Django基本操作创建项目(test1)django-admin startproject test1 创建应用(booktest)python manage.py startapp booktest 创建更改的文件 （生成迁移）python manage.py makemigrations 将生成的py文件应用到数据库 （执行迁移）python manage.py migrate 创建一个管理员用户（按提示输入用户名，邮箱，密码）python manage.py createsuperuser 运行（可以指定ip地址和端口号）#python manage.py runserver 127.0.0.1:8001]]></content>
+      <categories>
+        <category>Django学习笔记</category>
+        <category>1_Django概述</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>django</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[ISCC2018线下赛总结]]></title>
     <url>%2F2018%2F06%2F26%2FISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93%2F</url>
     <content type="text"><![CDATA[环境介绍先拿自己靶机，攻下高地，进入公共区域攻防这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的给了一个环境，是Tomcat，开了8080端口 比赛信息是192.168.43.70/whatisyourname/，这里用到了fastjson反序列化漏洞，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ ) fastjson反序列化漏洞参考：https://blog.csdn.net/yaofeino1/article/details/76377080https://github.com/iBearcat/Fastjson-Payloadhttps://github.com/shengqi158/fastjson-remote-code-execute-poc 环境源码下载通过github下载含有漏洞环境的web源代码下载地址直接将war包放到tomcat的webapp目录下，运行tomcat就行： 漏洞复现：通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据{“name”:”feifei”,age:12} ，查看效果：然后根据参考文献找到Test.java文件构造poc(反弹shell)，编译一下生成.class文件base64 encode一下替换name字段，post过去可以看到命令执行成功nc连接上执行命令然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡nc也死活连不上说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点 &lt;(￣ c￣)y▂ξ]]></content>
@@ -9,8 +53,8 @@
         <category>AWD</category>
       </categories>
       <tags>
-        <tag>攻防</tag>
         <tag>web</tag>
+        <tag>攻防</tag>
       </tags>
   </entry>
   <entry>
@@ -22,14 +66,14 @@
         <category>AWD</category>
       </categories>
       <tags>
-        <tag>攻防</tag>
         <tag>web</tag>
+        <tag>攻防</tag>
       </tags>
   </entry>
   <entry>
     <title><![CDATA[hash长度拓展攻击]]></title>
     <url>%2F2018%2F05%2F08%2Fhash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB%2F</url>
-    <content type="text"><![CDATA[Hash Length Extension Attack&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文） MD5加密原理先介绍一下md5加密的原理 个人理解: md5的过程可以分成填充和压缩的过程 md5 padding(填充)&emsp;&emsp;message padding&emsp;&emsp;length%64=56(8位标识原始长度)填充的时候，将会使用16进制数据：&emsp;~1个\x80&emsp;~N个\0x00 md5 compress(压缩)&emsp;&emsp;message padding length—–&gt;hash&emsp;&emsp;length=N*64(bit) —–&gt;length%64(bit) md5 padding例如我们把admin来hash一下:admin 先hex编码-&gt;61646d696e再填充80不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)最后数据表示位2800000000000000（8个字节）最终结果为: 61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000 什么是Magic number (确定值)代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量) md5 compress我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：A=0x292f2321LB=0xa7a5577aLC=0xe4a8943LD=0xc31f804aL而md5的结果:我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙） hash长度拓展攻击其实只要知道三点就能后进行攻击： MD5(salt+message)的值 message内容 salt+message长度这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。 攻击过程逆向算法很简单 def compute_magic_number(self, md5str): self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0] self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0] self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0] self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0] 由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)这样就完成了长度拓展攻击 例题测试实验吧-让我进去抓包改source，Repeater过去发现源码 $flag = &quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;; $secret = &quot;XXXXXXXXXXXXXXX&quot;; // This secret is 15 characters long for security $username = $_POST[&quot;username&quot;]; $password = $_POST[&quot;password&quot;]; if (!empty($_COOKIE[&quot;getmein&quot;])) { if (urldecode($username) === &quot;admin&quot; &amp;&amp; urldecode($password) != &quot;admin&quot;) { if ($COOKIE[&quot;getmein&quot;] === md5($secret . urldecode($username . $password))) { echo &quot;Congratulations! You are a registered user.\n&quot;; die (&quot;The flag is &quot;. $flag); } else { die (&quot;Your cookies don&apos;t match up! STOP HACKING THIS SITE.&quot;); } } else { die (&quot;You are not an admin! LEAVE.&quot;); } } setcookie(&quot;sample-hash&quot;, md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;)), time() + (60 * 60 * 24 * 7)); if (empty($_COOKIE[&quot;source&quot;])) { setcookie(&quot;source&quot;, 0, time() + (60 * 60 * 24 * 7)); } else { if ($_COOKIE[&quot;source&quot;] != 0) { echo &quot;&quot;; // This source code is outputted here } } 按照源码要求，cookie中要存在变量getmein，而且，要 $COOKIE[“getmein”] === md5($secret . urldecode($username . $password))sample-hash是secret+adminadmin的MD5这里secret相当于盐，我们并不知道，但是我们知道它的长度是15，算上后面admin就是20。数据是admin签名（哈希值）是571580b26c65f306376d4f64e53cb5c7生成的hash是新的签名，设置到cookies的getmein里面把\x换成%后post提交，得到flag]]></content>
+    <content type="text"><![CDATA[Hash Length Extension Attack&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文） MD5加密原理先介绍一下md5加密的原理 个人理解: md5的过程可以分成填充和压缩的过程 md5 padding(填充)&emsp;&emsp;message padding&emsp;&emsp;length%64=56(8位标识原始长度)填充的时候，将会使用16进制数据：&emsp;~1个\x80&emsp;~N个\0x00 md5 compress(压缩)&emsp;&emsp;message padding length—–&gt;hash&emsp;&emsp;length=N*64(bit) —–&gt;length%64(bit) md5 padding例如我们把admin来hash一下:admin 先hex编码-&gt;61646d696e再填充80不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)最后数据表示位2800000000000000（8个字节）最终结果为: 61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000 什么是Magic number (确定值)代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量) md5 compress我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：A=0x292f2321LB=0xa7a5577aLC=0xe4a8943LD=0xc31f804aL而md5的结果:我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙） hash长度拓展攻击其实只要知道三点后就能进行攻击： MD5(salt+message)的值 message内容 salt+message长度这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。 攻击过程逆向算法很简单 def compute_magic_number(self, md5str): self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0] self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0] self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0] self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0] 由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)这样就完成了长度拓展攻击 例题测试实验吧-让我进去抓包改source，Repeater过去发现源码 $flag = &quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;; $secret = &quot;XXXXXXXXXXXXXXX&quot;; // This secret is 15 characters long for security $username = $_POST[&quot;username&quot;]; $password = $_POST[&quot;password&quot;]; if (!empty($_COOKIE[&quot;getmein&quot;])) { if (urldecode($username) === &quot;admin&quot; &amp;&amp; urldecode($password) != &quot;admin&quot;) { if ($COOKIE[&quot;getmein&quot;] === md5($secret . urldecode($username . $password))) { echo &quot;Congratulations! You are a registered user.\n&quot;; die (&quot;The flag is &quot;. $flag); } else { die (&quot;Your cookies don&apos;t match up! STOP HACKING THIS SITE.&quot;); } } else { die (&quot;You are not an admin! LEAVE.&quot;); } } setcookie(&quot;sample-hash&quot;, md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;)), time() + (60 * 60 * 24 * 7)); if (empty($_COOKIE[&quot;source&quot;])) { setcookie(&quot;source&quot;, 0, time() + (60 * 60 * 24 * 7)); } else { if ($_COOKIE[&quot;source&quot;] != 0) { echo &quot;&quot;; // This source code is outputted here } } 按照源码要求，cookie中要存在变量getmein，而且，要 $COOKIE[“getmein”] === md5($secret . urldecode($username . $password))sample-hash是secret+adminadmin的MD5这里secret相当于盐，我们并不知道，但是我们知道它的长度是15，算上后面admin就是20。数据是admin签名（哈希值）是571580b26c65f306376d4f64e53cb5c7生成的hash是新的签名，设置到cookies的getmein里面把\x换成%后post提交，得到flag]]></content>
       <categories>
         <category>CTF</category>
         <category>web</category>

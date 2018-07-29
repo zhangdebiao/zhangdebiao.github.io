@@ -95,7 +95,7 @@
 <meta property="og:image" content="http://yoururl.com/images/pasted-67.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-68.png">
 <meta property="og:image" content="http://yoururl.com/images/pasted-69.png">
-<meta property="og:updated_time" content="2018-06-26T07:23:13.302Z">
+<meta property="og:updated_time" content="2018-06-26T12:38:51.044Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hash长度拓展攻击">
 <meta name="twitter:description" content="Hash Length Extension Attack&amp;emsp;&amp;emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文） MD5加密原理先介绍一下md5加密的原理 个人理解: md5的过程可以分成填充和压缩的过程  md5 padding(填充)&amp;emsp;&amp;emsp;message padding">
@@ -407,7 +407,7 @@
 </blockquote>
 <p><strong>什么是Magic number (确定值)</strong><br>代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量)<br><br><br></p>
 <h2 id="md5-compress"><a href="#md5-compress" class="headerlink" title="md5 compress"></a>md5 compress</h2><p>我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。<br>Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。<br>每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值<br><br><br>我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：<br>A=0x292f2321L<br>B=0xa7a5577aL<br>C=0xe4a8943L<br>D=0xc31f804aL<br>而md5的结果:<br><img src="\images\pasted-26.png" alt="upload successful"><br>我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙）<br><br></p>
-<h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点就能后进行攻击：</p>
+<h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点后就能进行攻击：</p>
 <ul>
 <li>MD5(salt+message)的值</li>
 <li>message内容</li>
@@ -581,7 +581,7 @@ else {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -592,7 +592,7 @@ else {
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -603,7 +603,7 @@ else {
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
