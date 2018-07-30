@@ -3,12 +3,12 @@
   <entry>
     <title><![CDATA[Django学习笔记_4]]></title>
     <url>%2F2018%2F07%2F29%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4%2F</url>
-    <content type="text"><![CDATA[———————————————————————templates.py——————————————————————— 模板 模板处理 快捷函数 定义模板模板语言包括 变量 标签 过滤器 { % 代码块 %} 注释 变量在模板中调用对象的方法标签过滤器注释 模板继承 说明 三层继承模型 HTML转义 会被自动转义的字符 关闭转义 字符串字面值 CSRF 验证码 验证码视图 配置url 显示验证码 验证 第三方 可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中]]></content>
+    <content type="text"><![CDATA[Templates 模板 模板处理 快捷函数 定义模板模板语言包括 变量 标签 过滤器 { % 代码块 %} 注释 变量在模板中调用对象的方法标签过滤器注释 模板继承 说明 三层继承模型 HTML转义 会被自动转义的字符 关闭转义 字符串字面值 CSRF 验证码 验证码视图 配置url 显示验证码 验证 第三方 可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中]]></content>
   </entry>
   <entry>
     <title><![CDATA[Django学习笔记_3]]></title>
     <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3%2F</url>
-    <content type="text"><![CDATA[———————————————————————Models.py——————————————————————— ORM对象-关系-映射根据对象的类型生成表结构将对象，列表的操作，转换为sql语句将sql查询到的结果转换为对象，列表 Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表 使用mysql数据库pip install mysql-python 在mysql中创建数据库create database test2 charest=utf8; 打开settings.py文件，修改DATABASES项可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)settings.py中改个配置就可以用我们的mysql数据库 开发流程 使用已有数据库生成模型类python manage.py inspectdb &gt; booktest/models.py 创建添加应用python manage.py startapp booktest创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS 定义模型 定义属性 字段类型 字段选项 关系 示例 在models.py中定义表结构 生成迁移之后python manage.py makemigrations 执行迁移之后python manage.py migrate 类的属性 管理器（可自定义）模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射） 模型类的创建方法&emsp;&emsp;在自定义的模型类中写init方法时会报错，因为model.Model中已经有了init方法，那我们怎么快捷创建每个模型类呢？解决方法： (1) 创建类方法。 我们在模型类中，自定义一个创建模型类的方法我们在python manage.py shell中，创建一个abc对象：报错是因为时区问题，不影响 (2) 在自定义的管理器中，创建对象方法 （不在类中做这件事） 模型查询 查询集 限制查询集 查询集的缓存 字段查询 比较运算符 聚合函数 F对象 Q对象]]></content>
+    <content type="text"><![CDATA[Models.py ORM对象-关系-映射根据对象的类型生成表结构将对象，列表的操作，转换为sql语句将sql查询到的结果转换为对象，列表 Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表 使用mysql数据库pip install mysql-python 在mysql中创建数据库create database test2 charest=utf8; 打开settings.py文件，修改DATABASES项可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)settings.py中改个配置就可以用我们的mysql数据库 开发流程 使用已有数据库生成模型类python manage.py inspectdb &gt; booktest/models.py 创建添加应用python manage.py startapp booktest创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS 定义模型 定义属性 字段类型 字段选项 关系 示例 在models.py中定义表结构 生成迁移之后python manage.py makemigrations 执行迁移之后python manage.py migrate 类的属性 管理器（可自定义）模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射） 模型类的创建方法&emsp;&emsp;在自定义的模型类中写init方法时会报错，因为model.Model中已经有了init方法，那我们怎么快捷创建每个模型类呢？解决方法： (1) 创建类方法。 我们在模型类中，自定义一个创建模型类的方法我们在python manage.py shell中，创建一个abc对象：报错是因为时区问题，不影响 (2) 在自定义的管理器中，创建对象方法 （不在类中做这件事） 模型查询 查询集 限制查询集 查询集的缓存 字段查询 比较运算符 聚合函数 F对象 Q对象]]></content>
       <categories>
         <category>Django学习笔记</category>
         <category>3_Django模型</category>
@@ -21,7 +21,7 @@
   <entry>
     <title><![CDATA[Django学习笔记_2]]></title>
     <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2%2F</url>
-    <content type="text"><![CDATA[———————————————————————–Views.py———————————————————————– 视图 URL匹配的过程url也可以写在应用(booktest)中: URLconf 其他的URLconfs URL的反向解析 错误视图Django原生自带几个默认视图用于处理HTTP错误 404(page not found)视图 500(server error)视图 400(bad request)视图 HttpRequest对象 服务器收到http协议的请求后，会根据报文创建HttpRequest对象 视图函数的第一个参数是HttpRequest对象 在django.http模块中定义了HttpRequest对象的API属性方法 1、get()作用：根据键获取值只能获取一个值www.baidu.com/abc?a=1&amp;b=2&amp;c=3 2、getlist()将键的值以列表的形式返回可以获取多个值www.baidu.com/abc?a=1&amp;a=2&amp;c=3 QueryDict对象GET属性POST属性 HttpResponse对象 属性 方法 子类HttpResponseRedirectHttpResponseRedirect()可简写为redirect() 子类JsonResponse 状态保持 启用session 使用session 用户登录示例在views.py中创建视图 配置url 创建模板index.html 创建模板login.html 会话过期时间 存储session 使用Redis缓存session 登录认证逻辑利用django封装好的authenticate()函数，认证登录Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问 from django.contrib.auth.decorators import login_required @login_required 如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可(记得清除浏览器缓存)]]></content>
+    <content type="text"><![CDATA[Views.py 视图 URL匹配的过程url也可以写在应用(booktest)中: URLconf 其他的URLconfs URL的反向解析 错误视图Django原生自带几个默认视图用于处理HTTP错误 404(page not found)视图 500(server error)视图 400(bad request)视图 HttpRequest对象 服务器收到http协议的请求后，会根据报文创建HttpRequest对象 视图函数的第一个参数是HttpRequest对象 在django.http模块中定义了HttpRequest对象的API属性方法 1、get()作用：根据键获取值只能获取一个值www.baidu.com/abc?a=1&amp;b=2&amp;c=3 2、getlist()将键的值以列表的形式返回可以获取多个值www.baidu.com/abc?a=1&amp;a=2&amp;c=3 QueryDict对象GET属性POST属性 HttpResponse对象 属性 方法 子类HttpResponseRedirectHttpResponseRedirect()可简写为redirect() 子类JsonResponse 状态保持 启用session 使用session 用户登录示例在views.py中创建视图 配置url 创建模板index.html 创建模板login.html 会话过期时间 存储session 使用Redis缓存session 登录认证逻辑利用django封装好的authenticate()函数，认证登录Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问 from django.contrib.auth.decorators import login_required @login_required 如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可(记得清除浏览器缓存)]]></content>
       <categories>
         <category>Django学习笔记</category>
         <category>2_Django视图</category>
@@ -138,8 +138,8 @@
         <category>文件上传</category>
       </categories>
       <tags>
-        <tag>web</tag>
         <tag>文件上传</tag>
+        <tag>web</tag>
         <tag>文件包含</tag>
       </tags>
   </entry>
@@ -167,13 +167,13 @@
     <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法;另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
   </entry>
   <entry>
-    <title><![CDATA[tags]]></title>
-    <url>%2Ftags%2Findex.html</url>
-    <content type="text"></content>
-  </entry>
-  <entry>
     <title><![CDATA[categories]]></title>
     <url>%2Fcategories%2Findex.html</url>
     <content type="text"><![CDATA[hei,john]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[tags]]></title>
+    <url>%2Ftags%2Findex.html</url>
+    <content type="text"></content>
   </entry>
 </search>
