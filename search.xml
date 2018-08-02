@@ -8,6 +8,20 @@
       <url>/2018/08/03/%E5%B7%A5%E6%8E%A7%E5%AD%A6%E4%B9%A0%E4%B8%BB%E8%A6%81%E7%A7%91%E7%9B%AE/</url>
       <content type="html"><![CDATA[<h1 id="工业控制系统概述"><a href="#工业控制系统概述" class="headerlink" title="工业控制系统概述"></a>工业控制系统概述</h1><p>目的：简单的了解什么是工业控制系统、工业控制系统框架、工业控制系统安全现状等理论基础知识，在对工业控制系统有了一定的了解后在展开实践。<br>学习方法：通过网上搜集相关资料进行学习，最好直接看一些工控安全的相关书籍，书籍里都讲的很清楚。下面推荐几本入门书籍：<br>1.《黑客大曝光：工业控制系统安全》<br>2.《工业控制网络安全技术与实践》<br>3.《S7-300/400 PLC应用技术》<br>4……<br><br><br><br></p><h1 id="工业控制系统的组态和编程"><a href="#工业控制系统的组态和编程" class="headerlink" title="工业控制系统的组态和编程"></a>工业控制系统的组态和编程</h1><p>目的：了解PLC的架构与特点，认识PLC的硬件及网络组态、学习PLC程序的基础编写，使用TIA对S7-300进行硬件组态和PLC编程。<br>学习方法：学会控制器的组态方法，多看说明文档，能够读懂简单的梯形图控制逻辑和其他的基于IEC61131-3的五种工控编程语言，并进行简单的编程，使用真实的PLC设备进行实操，如国内外的PLC，西门子、施耐德、ABB、和利时、大工计控、优稳……（一般入门都是从西门子的PLC开始）设备能够跑起来是第一步，接下来就可以做一些事了。<br><br><br><br></p><h1 id="常用的工业控制系统协议分析"><a href="#常用的工业控制系统协议分析" class="headerlink" title="常用的工业控制系统协议分析"></a>常用的工业控制系统协议分析</h1><p>要求：分析常用的工业以太网协议，如Modbus、S7comm、IEC61850、EtherNet/IP、DNP3、EPA等等协议，了解这些工业以太网协议的协议规范和存在的安全性问题。<br>学习方法：有真实设备的可以直接使用真实设备进行分析、无真实设备的可以从网上下载相关的协议数据包进行离线分析，通过对协议的不断了解，要形成对这些协议的模糊测试工具。<br><br><br><br></p><h1 id="工控软硬件漏洞挖掘"><a href="#工控软硬件漏洞挖掘" class="headerlink" title="工控软硬件漏洞挖掘"></a>工控软硬件漏洞挖掘</h1><p>工业控制系统的漏洞挖掘主要包含三部分，上位机软件漏洞挖掘、工控协议的漏洞挖掘，控制器设备固件漏洞挖掘。其中最简单的是工控协议漏洞挖掘，上手比较快，需要具备一定的工控协议逆向能力，其他两方面需要一定的基础才能精心研究。<br>学习方法：首先对协议进行分析，然后编写模糊测试脚本，最后进行测试和分析。开始研究是可以找一些已有的漏洞，先复现他的攻击过程，在分析器攻击机理，从而能够举一反三，发掘0day漏洞。<br><br><br><br></p><h1 id="工控系统攻击工具使用"><a href="#工控系统攻击工具使用" class="headerlink" title="工控系统攻击工具使用"></a>工控系统攻击工具使用</h1><p>想要做一些工控安全的研究，光靠自己琢磨效率低下，需要借助前人已有的成果进行研究和学习。其中涉及到很多实用的工具，我们需要建立自己的工具集这里列出一些使用的工具：<br>（1）S7 Client Demo开源的S7协议库”snap7“基础上进行开发的，主要支持西门子的S7-300/s7-400设备，可以直接连接西门子的控制器，获取控制器上的设备信息（如固件版本，块信息等），还可以直接操作控制器的CPU的启停。<br>（2）PLCSCAN、NMAP中的工控设备扫描模块通过探测设备，获取关于设备的供应商类型、模块信息等，目前仅支持S7协议与MODBUS协议。<br>（3）ISF该框架主要使用Python语言开发，集成了ShadowBroker释放的NSA工具Fuzzbunch攻击框架，是一款适合工控漏洞利用的框架。其中集成很多常用的针对工控安全的攻击集。<br>（4）GrassMarlinGRASSMARLIN是一款由美国国家安全局开发的，能够帮助运维工程师在IP网络上发现并编目监控和数据采集系统（SCADA）和工业控制系统（ICS）主机的开源软件工具，也被称为被动网络映射器。其数据源十分多样化，包括PCAP文件、路由器和交换机配置文件、CAM表以及实时网络数据包的捕获。该工具能够自动识别可用网络，生成网络拓扑，实现主机间通信的可视化，还能够展示从主机通信中所提取的元数据。<br>（5）S7-Brute-OfflineS7密码离线暴力破解工具。<br>（6）SCADA_Metasploit_Modules列举了MSF上所有的针对工业控制系统的漏洞脚本。<br>（7）Scada_Password列举了工业控制系统中的常见的用户和密码。<br>（8）SmodModbus模糊测试工具。<br>（9）PLCinject<br>（10）Modscan<br>（11）…<br>这里就不一一列举了，用到的使用自己去找吧，最后我这里给出几个github上对工控资源整合的网站：<br><a href="https://github.com/zhangdebiao/icsmaster" target="_blank" rel="noopener">https://github.com/zhangdebiao/icsmaster</a><br><a href="https://github.com/zhangdebiao/ICS-Security-Tools" target="_blank" rel="noopener">https://github.com/zhangdebiao/ICS-Security-Tools</a><br><a href="https://github.com/zhangdebiao/awesome-industrial-control-system-security" target="_blank" rel="noopener">https://github.com/zhangdebiao/awesome-industrial-control-system-security</a> &emsp;&emsp;&emsp;<a href="http://www.freebuf.com/sectool/174567.html" target="_blank" rel="noopener">FREEBUF</a><br>这几个链接中整合了国内外和工控安全相关的顶会文章，工控系统的利用脚本、常用的攻击工具、工控协议相关的数据包和协议文档等等。<br><br><br><br></p>]]></content>
       
+      <categories>
+          
+          <category> 工控安全 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> ICS </tag>
+            
+            <tag> 工控安全 </tag>
+            
+        </tags>
       
     </entry>
     
@@ -56,7 +70,7 @@
     </entry>
     
     <entry>
-      <title>Django学习笔记_4</title>
+      <title>4_Django模板</title>
       <link href="/2018/07/29/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4/"/>
       <url>/2018/07/29/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4/</url>
       <content type="html"><![CDATA[<p><strong><em>Templates</em></strong></p><hr><p><br><br><br></p><h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><p><img src="\images\pasted-149.png" alt="upload successful"></p><h2 id="模板处理"><a href="#模板处理" class="headerlink" title="模板处理"></a>模板处理</h2><p><img src="\images\pasted-150.png" alt="upload successful"></p><h2 id="快捷函数"><a href="#快捷函数" class="headerlink" title="快捷函数"></a>快捷函数</h2><p><img src="\images\pasted-151.png" alt="upload successful"><br><br><br><br></p><h1 id="定义模板"><a href="#定义模板" class="headerlink" title="定义模板"></a>定义模板</h1><p><strong><em>模板语言包括</em></strong></p><ul><li>变量</li><li>标签    </li><li>过滤器    { % 代码块 %}</li><li>注释      <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><img src="\images\pasted-152.png" alt="upload successful"><h2 id="在模板中调用对象的方法"><a href="#在模板中调用对象的方法" class="headerlink" title="在模板中调用对象的方法"></a>在模板中调用对象的方法</h2><img src="\images\pasted-153.png" alt="upload successful"><h2 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h2><img src="\images\pasted-154.png" alt="upload successful"><br><img src="\images\pasted-155.png" alt="upload successful"><h2 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h2><img src="\images\pasted-156.png" alt="upload successful"><h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><img src="\images\pasted-157.png" alt="upload successful"><br><br><br><br></li></ul><h1 id="模板继承"><a href="#模板继承" class="headerlink" title="模板继承"></a>模板继承</h1><p><img src="\images\pasted-158.png" alt="upload successful"></p><h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p><img src="\images\pasted-159.png" alt="upload successful"></p><h2 id="三层继承模型"><a href="#三层继承模型" class="headerlink" title="三层继承模型"></a>三层继承模型</h2><p><img src="\images\pasted-160.png" alt="upload successful"><br><br><br><br></p><h1 id="HTML转义"><a href="#HTML转义" class="headerlink" title="HTML转义"></a>HTML转义</h1><p><img src="\images\pasted-161.png" alt="upload successful"></p><h2 id="会被自动转义的字符"><a href="#会被自动转义的字符" class="headerlink" title="会被自动转义的字符"></a>会被自动转义的字符</h2><p><img src="\images\pasted-162.png" alt="upload successful"></p><h2 id="关闭转义"><a href="#关闭转义" class="headerlink" title="关闭转义"></a>关闭转义</h2><p><img src="\images\pasted-163.png" alt="upload successful"></p><h2 id="字符串字面值"><a href="#字符串字面值" class="headerlink" title="字符串字面值"></a>字符串字面值</h2><p><img src="\images\pasted-164.png" alt="upload successful"><br><br><br><br></p><h1 id="CSRF"><a href="#CSRF" class="headerlink" title="CSRF"></a>CSRF</h1><p><img src="\images\pasted-166.png" alt="upload successful"><br><br><br><br></p><h1 id="验证码"><a href="#验证码" class="headerlink" title="验证码"></a>验证码</h1><p><img src="\images\pasted-167.png" alt="upload successful"></p><h2 id="验证码视图"><a href="#验证码视图" class="headerlink" title="验证码视图"></a>验证码视图</h2><p><img src="\images\pasted-168.png" alt="upload successful"><br><img src="\images\pasted-169.png" alt="upload successful"><br><img src="\images\pasted-170.png" alt="upload successful"></p><h2 id="配置url"><a href="#配置url" class="headerlink" title="配置url"></a>配置url</h2><p><img src="\images\pasted-171.png" alt="upload successful"></p><h2 id="显示验证码"><a href="#显示验证码" class="headerlink" title="显示验证码"></a>显示验证码</h2><p><img src="\images\pasted-172.png" alt="upload successful"></p><h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p><img src="\images\pasted-173.png" alt="upload successful"></p><h2 id="第三方"><a href="#第三方" class="headerlink" title="第三方"></a>第三方</h2><ul><li>可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中<br><br><br><br></li></ul>]]></content>
@@ -65,8 +79,6 @@
           
           <category> Django学习笔记 </category>
           
-          <category> 4_Django模板 </category>
-          
       </categories>
       
       
@@ -81,7 +93,7 @@
     </entry>
     
     <entry>
-      <title>Django学习笔记_3</title>
+      <title>3_Django模型</title>
       <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3/"/>
       <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3/</url>
       <content type="html"><![CDATA[<p><strong><em>Models.py</em></strong></p><hr><p><br><br><br></p><h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><h2 id="对象-关系-映射"><a href="#对象-关系-映射" class="headerlink" title="对象-关系-映射"></a>对象-关系-映射</h2><p>根据对象的类型生成表结构<br>将对象，列表的操作，转换为sql语句<br>将sql查询到的结果转换为对象，列表  </p><p>Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表<br><img src="\images\pasted-75.png" alt="upload successful"><br><br></p><h2 id="使用mysql数据库"><a href="#使用mysql数据库" class="headerlink" title="使用mysql数据库"></a>使用mysql数据库</h2><p>pip install mysql-python</p><ul><li>在mysql中创建数据库<br>create database test2 charest=utf8;</li><li>打开settings.py文件，修改DATABASES项<br>可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)<br><img src="\images\pasted-77.png" alt="upload successful"><br><img src="\images\pasted-79.png" alt="upload successful"><br>settings.py中改个配置就可以用我们的mysql数据库<br><img src="\images\pasted-76.png" alt="upload successful"><br><img src="\images\pasted-78.png" alt="upload successful"><br><br></li></ul><h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p><img src="\images\pasted-81.png" alt="upload successful"></p><h2 id="使用已有数据库生成模型类"><a href="#使用已有数据库生成模型类" class="headerlink" title="使用已有数据库生成模型类"></a>使用已有数据库生成模型类</h2><p>python manage.py inspectdb &gt; booktest/models.py<br><br><br><br></p><h1 id="创建添加应用"><a href="#创建添加应用" class="headerlink" title="创建添加应用"></a>创建添加应用</h1><p>python manage.py startapp booktest<br>创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS<br><img src="\images\pasted-82.png" alt="upload successful"></p><h2 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h2><p><img src="\images\pasted-83.png" alt="upload successful"></p><h2 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h2><p><img src="\images\pasted-84.png" alt="upload successful"></p><h2 id="字段类型"><a href="#字段类型" class="headerlink" title="字段类型"></a>字段类型</h2><p><img src="\images\pasted-85.png" alt="upload successful"></p><h2 id="字段选项"><a href="#字段选项" class="headerlink" title="字段选项"></a>字段选项</h2><p><img src="\images\pasted-86.png" alt="upload successful"></p><h2 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h2><p><img src="\images\pasted-87.png" alt="upload successful"><br><br><br></p><h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><ul><li>在models.py中定义表结构<br><img src="\images\pasted-88.png" alt="upload successful"></li><li>生成迁移之后<br>python manage.py makemigrations<br><img src="\images\pasted-89.png" alt="upload successful"></li><li>执行迁移之后<br>python manage.py migrate<br><img src="\images\pasted-90.png" alt="upload successful"><br><br><br></li></ul><h1 id="类的属性"><a href="#类的属性" class="headerlink" title="类的属性"></a>类的属性</h1><p><img src="\images\pasted-91.png" alt="upload successful"></p><h2 id="管理器（可自定义）"><a href="#管理器（可自定义）" class="headerlink" title="管理器（可自定义）"></a>管理器（可自定义）</h2><p>模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射）<br><img src="\images\pasted-92.png" alt="upload successful"><br><img src="\images\pasted-93.png" alt="upload successful"><br><img src="\images\pasted-94.png" alt="upload successful"><br><img src="\images\pasted-95.png" alt="upload successful"></p><h2 id="模型类的创建方法"><a href="#模型类的创建方法" class="headerlink" title="模型类的创建方法"></a>模型类的创建方法</h2><p>&emsp;&emsp;在自定义的模型类中写<strong>init</strong>方法时会报错，因为model.Model中已经有了<strong>init</strong>方法，那我们怎么快捷创建每个模型类呢？<br><strong><em>解决方法：</em></strong>  </p><ul><li>(1) 创建<strong><em>类方法</em></strong>。 我们在模型类中，自定义一个创建模型类的方法<br><img src="\images\pasted-96.png" alt="upload successful"><br>我们在python manage.py shell中，创建一个abc对象：<br><img src="\images\pasted-97.png" alt="upload successful"><br>报错是因为时区问题，不影响<br><img src="\images\pasted-98.png" alt="upload successful"></li><li>(2) 在<strong><em>自定义的管理器</em></strong>中，创建对象方法 （不在类中做这件事）<br><img src="\images\pasted-99.png" alt="upload successful"><br><img src="\images\pasted-100.png" alt="upload successful"><br><img src="\images\pasted-101.png" alt="upload successful"><br><br><br></li></ul><h1 id="模型查询"><a href="#模型查询" class="headerlink" title="模型查询"></a>模型查询</h1><p><img src="\images\pasted-102.png" alt="upload successful"></p><h2 id="查询集"><a href="#查询集" class="headerlink" title="查询集"></a>查询集</h2><p><img src="\images\pasted-103.png" alt="upload successful"></p><h3 id="限制查询集"><a href="#限制查询集" class="headerlink" title="限制查询集"></a>限制查询集</h3><p><img src="\images\pasted-104.png" alt="upload successful"></p><h3 id="查询集的缓存"><a href="#查询集的缓存" class="headerlink" title="查询集的缓存"></a>查询集的缓存</h3><p><img src="\images\pasted-105.png" alt="upload successful"></p><h2 id="字段查询"><a href="#字段查询" class="headerlink" title="字段查询"></a>字段查询</h2><p><img src="\images\pasted-106.png" alt="upload successful"></p><h3 id="比较运算符"><a href="#比较运算符" class="headerlink" title="比较运算符"></a>比较运算符</h3><p><img src="\images\pasted-107.png" alt="upload successful"><br><img src="\images\pasted-108.png" alt="upload successful"><br><br><br></p><h1 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h1><p><img src="\images\pasted-109.png" alt="upload successful"></p><h2 id="F对象"><a href="#F对象" class="headerlink" title="F对象"></a>F对象</h2><p><img src="\images\pasted-110.png" alt="upload successful"></p><h2 id="Q对象"><a href="#Q对象" class="headerlink" title="Q对象"></a>Q对象</h2><p><img src="\images\pasted-111.png" alt="upload successful"></p>]]></content>
@@ -90,8 +102,6 @@
           
           <category> Django学习笔记 </category>
           
-          <category> 3_Django模型 </category>
-          
       </categories>
       
       
@@ -106,7 +116,7 @@
     </entry>
     
     <entry>
-      <title>Django学习笔记_2</title>
+      <title>2_Django视图</title>
       <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2/"/>
       <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2/</url>
       <content type="html"><![CDATA[<p><strong><em>Views.py</em></strong></p><hr><p><br><br><br></p><h1 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h1><p><img src="\images\pasted-112.png" alt="upload successful"></p><h2 id="URL匹配的过程"><a href="#URL匹配的过程" class="headerlink" title="URL匹配的过程"></a>URL匹配的过程</h2><p><img src="\images\pasted-113.png" alt="upload successful"><br><img src="\images\pasted-114.png" alt="upload successful"><br><img src="\images\pasted-115.png" alt="upload successful"><br><img src="\images\pasted-116.png" alt="upload successful"><br>url也可以写在应用(booktest)中:<br><img src="\images\pasted-117.png" alt="upload successful"><br><img src="\images\pasted-118.png" alt="upload successful"><br><img src="\images\pasted-119.png" alt="upload successful"></p><h2 id="URLconf"><a href="#URLconf" class="headerlink" title="URLconf"></a>URLconf</h2><p><img src="\images\pasted-122.png" alt="upload successful"></p><h2 id="其他的URLconfs"><a href="#其他的URLconfs" class="headerlink" title="其他的URLconfs"></a>其他的URLconfs</h2><p><img src="\images\pasted-120.png" alt="upload successful"></p><h2 id="URL的反向解析"><a href="#URL的反向解析" class="headerlink" title="URL的反向解析"></a>URL的反向解析</h2><p><img src="\images\pasted-121.png" alt="upload successful"><br><br><br><br></p><h1 id="错误视图"><a href="#错误视图" class="headerlink" title="错误视图"></a>错误视图</h1><p>Django原生自带几个默认视图用于处理HTTP错误</p><h2 id="404-page-not-found-视图"><a href="#404-page-not-found-视图" class="headerlink" title="404(page not found)视图"></a>404(page not found)视图</h2><p><img src="\images\pasted-123.png" alt="upload successful"></p><h2 id="500-server-error-视图"><a href="#500-server-error-视图" class="headerlink" title="500(server error)视图"></a>500(server error)视图</h2><p><img src="\images\pasted-130.png" alt="upload successful"></p><h2 id="400-bad-request-视图"><a href="#400-bad-request-视图" class="headerlink" title="400(bad request)视图"></a>400(bad request)视图</h2><p><img src="\images\pasted-131.png" alt="upload successful"><br><br><br><br></p><h1 id="HttpRequest对象"><a href="#HttpRequest对象" class="headerlink" title="HttpRequest对象"></a>HttpRequest对象</h1><ul><li>服务器收到http协议的请求后，会根据报文创建HttpRequest对象  </li><li>视图函数的第一个参数是HttpRequest对象</li><li>在django.http模块中定义了HttpRequest对象的API<br><img src="\images\pasted-124.png" alt="upload successful"><h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><img src="\images\pasted-125.png" alt="upload successful"><h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2></li><li>1、get()<br>作用：根据键获取值<br>只能获取一个值<br><a href="http://www.baidu.com/abc?a=1&amp;b=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;b=2&amp;c=3</a></li><li>2、getlist()<br>将键的值以列表的形式返回<br>可以获取多个值<br><a href="http://www.baidu.com/abc?a=1&amp;a=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;a=2&amp;c=3</a>  <h2 id="QueryDict对象"><a href="#QueryDict对象" class="headerlink" title="QueryDict对象"></a>QueryDict对象</h2><img src="\images\pasted-126.png" alt="upload successful"><h2 id="GET属性"><a href="#GET属性" class="headerlink" title="GET属性"></a>GET属性</h2><img src="\images\pasted-127.png" alt="upload successful"><br><img src="\images\pasted-128.png" alt="upload successful"><br><img src="\images\pasted-129.png" alt="upload successful"><h2 id="POST属性"><a href="#POST属性" class="headerlink" title="POST属性"></a>POST属性</h2><img src="\images\pasted-137.png" alt="upload successful"><br><br><br><br></li></ul><h1 id="HttpResponse对象"><a href="#HttpResponse对象" class="headerlink" title="HttpResponse对象"></a>HttpResponse对象</h1><p><img src="\images\pasted-132.png" alt="upload successful"></p><h2 id="属性-1"><a href="#属性-1" class="headerlink" title="属性"></a>属性</h2><p><img src="\images\pasted-133.png" alt="upload successful"></p><h2 id="方法-1"><a href="#方法-1" class="headerlink" title="方法"></a>方法</h2><p><img src="\images\pasted-134.png" alt="upload successful"></p><h2 id="子类HttpResponseRedirect"><a href="#子类HttpResponseRedirect" class="headerlink" title="子类HttpResponseRedirect"></a>子类HttpResponseRedirect</h2><p><img src="\images\pasted-135.png" alt="upload successful"><br><strong><em>HttpResponseRedirect()可简写为redirect()</em></strong></p><h2 id="子类JsonResponse"><a href="#子类JsonResponse" class="headerlink" title="子类JsonResponse"></a>子类JsonResponse</h2><p><img src="\images\pasted-136.png" alt="upload successful"><br><br><br><br></p><h1 id="状态保持"><a href="#状态保持" class="headerlink" title="状态保持"></a>状态保持</h1><p><img src="\images\pasted-138.png" alt="upload successful"></p><h2 id="启用session"><a href="#启用session" class="headerlink" title="启用session"></a>启用session</h2><p><img src="\images\pasted-139.png" alt="upload successful"></p><h2 id="使用session"><a href="#使用session" class="headerlink" title="使用session"></a>使用session</h2><p><img src="\images\pasted-140.png" alt="upload successful"></p><h2 id="用户登录示例"><a href="#用户登录示例" class="headerlink" title="用户登录示例"></a>用户登录示例</h2><h3 id="在views-py中创建视图"><a href="#在views-py中创建视图" class="headerlink" title="在views.py中创建视图"></a>在views.py中创建视图</h3><p><img src="\images\pasted-142.png" alt="upload successful"> </p><h3 id="配置url"><a href="#配置url" class="headerlink" title="配置url"></a>配置url</h3><p><img src="\images\pasted-143.png" alt="upload successful"></p><h3 id="创建模板index-html"><a href="#创建模板index-html" class="headerlink" title="创建模板index.html"></a>创建模板index.html</h3><p><img src="\images\pasted-144.png" alt="upload successful"></p><h3 id="创建模板login-html"><a href="#创建模板login-html" class="headerlink" title="创建模板login.html"></a>创建模板login.html</h3><p><img src="\images\pasted-145.png" alt="upload successful"></p><h2 id="会话过期时间"><a href="#会话过期时间" class="headerlink" title="会话过期时间"></a>会话过期时间</h2><p><img src="\images\pasted-146.png" alt="upload successful"></p><h2 id="存储session"><a href="#存储session" class="headerlink" title="存储session"></a>存储session</h2><p><img src="\images\pasted-147.png" alt="upload successful"></p><h2 id="使用Redis缓存session"><a href="#使用Redis缓存session" class="headerlink" title="使用Redis缓存session"></a>使用Redis缓存session</h2><p><img src="\images\pasted-148.png" alt="upload successful"><br><br><br><br></p><h1 id="登录认证逻辑"><a href="#登录认证逻辑" class="headerlink" title="登录认证逻辑"></a>登录认证逻辑</h1><p>利用django封装好的authenticate()函数，认证登录<br><img src="\images\pasted-141.png" alt="upload successful"><br>Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问</p><pre><code>from django.contrib.auth.decorators import login_required  @login_required  </code></pre><p>如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可<br>(记得清除浏览器缓存)</p>]]></content>
@@ -115,8 +125,6 @@
           
           <category> Django学习笔记 </category>
           
-          <category> 2_Django视图 </category>
-          
       </categories>
       
       
@@ -131,7 +139,7 @@
     </entry>
     
     <entry>
-      <title>Django学习笔记_1</title>
+      <title>1_Django概述</title>
       <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/"/>
       <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/</url>
       <content type="html"><![CDATA[<h1 id="环境安装"><a href="#环境安装" class="headerlink" title="环境安装"></a>环境安装</h1><p>Django安装：pip install django==1.10.3<br>安装前段框架Bootstrap3，利用其结合Django开发Web页面：  pip install django-bootstrap3<br>使用PyMysql连接mysql数据库：  pip install PyMySQL<br><br><br><br></p><h1 id="Django框架介绍"><a href="#Django框架介绍" class="headerlink" title="Django框架介绍"></a>Django框架介绍</h1><p>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MVT模式。它们各自的职责如下：</p><table><thead><tr><th>层次</th><th>职责</th></tr></thead><tbody><tr><td>模型（Model），即数据存取层</td><td>处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。  </td></tr><tr><td>模板(Template)，即业务逻辑层</td><td>处理与表现相关的决定： 如何在页面或其他类型文档中进行显示。</td></tr><tr><td>视图（View），即表现层</td><td>存取模型及调取恰当模板的相关逻辑。模型与模板的桥梁。</td></tr></tbody></table><p>&emsp;&emsp;从以上表述可以看出Django 视图不处理用户输入，而仅仅决定要展现哪些数据给用户，而Django 模板 仅仅决定如何展现Django视图指定的数据。或者说, Django将MVC中的视图进一步分解为 Django视图 和 Django模板两个部分，分别决定 “展现哪些数据” 和 “如何展现”，使得Django的模板可以根据需要随时替换，而不仅仅限制于内置的模板。</p><p>&emsp;&emsp;至于MVC控制器部分，由Django框架的URLconf来实现。URLconf机制是使用正则表达式匹配URL，然后调用合适的Python函数。URLconf对于URL的规则没有任何限制，你完全可以设计成任意的URL风格，不管是传统的，RESTful的，或者是另类的。框架把控制层给封装了，无非与数据交互这层都是数据库表的读,写,删除,更新的操作。在写程序的时候，只要调用相应的方法就行了，感觉很方便。程序员把控制层东西交给Django自动完成了。 只需要编写非常少的代码完成很多的事情。所以，它比MVC框架考虑的问题要深一步，因为我们程序员大都在写控制层的程序。现在这个工作交给了框架，仅需写很少的调用代码，大大提高了工作效率。</p><h2 id="web框架"><a href="#web框架" class="headerlink" title="web框架"></a>web框架</h2><p><img src="\images\pasted-71.png" alt="upload successful"></p><h2 id="什么是ORM？"><a href="#什么是ORM？" class="headerlink" title="什么是ORM？"></a>什么是ORM？</h2><p><img src="\images\pasted-72.png" alt="upload successful"></p><h2 id="Django框架"><a href="#Django框架" class="headerlink" title="Django框架"></a>Django框架</h2><p>&emsp;&emsp;目录分开，就必须有机制将他们在内里进行耦合。在Django中，urls、orm、static、settings等起着重要的作用。一个典型的业务流程是如下图所示：<br><img src="\images\pasted-70.png" alt="upload successful"><br>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MTV模式。<br><br><br><br></p><h1 id="Django优点"><a href="#Django优点" class="headerlink" title="Django优点"></a>Django优点</h1><ul><li>强大的数据库功能<br>    用 python 的类继承，几行代码就可以拥有一个丰富、动态的数据库操作接口（API），如果需要，你也能执行 SQL 语句ORM（Object-Relational-Mapping“对象-关系-映射”），它实现了数据模型与数据库的解耦，即数据模型的设计不需要依赖于特定的数据库，通过简单的配置就可以轻松更换数据库。</li><li>自带强大的后台功能<br>    几行代码就让网站拥有一个强大的后台，轻松管理内容。</li><li>优雅的网址<br>    在urls.py中用正则匹配网址，传递到对应的函数。(需要注意的是:正则是一种独立的语法，并不是哪个语言所拥有的。)</li><li>具有模板系统<br>    强大，易扩展的模板系统，设计简易，代码和样式分开设计，更易管理。</li><li>缓存系统<br>&emsp;&emsp;Django和memcached、redis或者其他的缓存系统联用，表现更出色，提高了页面的加载速度。<br>&emsp;&emsp;templates 文件夹views.py 中的函数渲染 templates 中的 Html 模板，得到动态内容的网页，当然可以用缓存来提高速度。</li><li>国际化<br>    完全支持多语言应用，允许你定义翻译的字符，轻松翻译成不同国家的语言。<br><br><br><br></li></ul><h1 id="Django基本操作"><a href="#Django基本操作" class="headerlink" title="Django基本操作"></a>Django基本操作</h1><h2 id="创建项目-test1"><a href="#创建项目-test1" class="headerlink" title="创建项目(test1)"></a>创建项目(test1)</h2><p>django-admin startproject test1<br><img src="\images\pasted-73.png" alt="upload successful"></p><h2 id="创建应用-booktest"><a href="#创建应用-booktest" class="headerlink" title="创建应用(booktest)"></a>创建应用(booktest)</h2><p>python manage.py startapp booktest<br><img src="\images\pasted-74.png" alt="upload successful"></p><h2 id="创建更改的文件-（生成迁移）"><a href="#创建更改的文件-（生成迁移）" class="headerlink" title="创建更改的文件 （生成迁移）"></a>创建更改的文件 （生成迁移）</h2><p>python manage.py makemigrations </p><h2 id="将生成的py文件应用到数据库-（执行迁移）"><a href="#将生成的py文件应用到数据库-（执行迁移）" class="headerlink" title="将生成的py文件应用到数据库 （执行迁移）"></a>将生成的py文件应用到数据库 （执行迁移）</h2><p>python manage.py migrate</p><h2 id="创建一个管理员用户（按提示输入用户名，邮箱，密码）"><a href="#创建一个管理员用户（按提示输入用户名，邮箱，密码）" class="headerlink" title="创建一个管理员用户（按提示输入用户名，邮箱，密码）"></a>创建一个管理员用户（按提示输入用户名，邮箱，密码）</h2><p>python manage.py createsuperuser</p><h2 id="运行（可以指定ip地址和端口号）"><a href="#运行（可以指定ip地址和端口号）" class="headerlink" title="运行（可以指定ip地址和端口号）"></a>运行（可以指定ip地址和端口号）</h2><p>#python manage.py runserver 127.0.0.1:8001</p>]]></content>
@@ -139,8 +147,6 @@
       <categories>
           
           <category> Django学习笔记 </category>
-          
-          <category> 1_Django概述 </category>
           
       </categories>
       
@@ -215,7 +221,7 @@
           
           <category> CTF </category>
           
-          <category> web </category>
+          <category> Web </category>
           
       </categories>
       
@@ -240,7 +246,7 @@
           
           <category> CTF </category>
           
-          <category> web </category>
+          <category> Web </category>
           
       </categories>
       
@@ -271,7 +277,7 @@
           
           <category> CTF </category>
           
-          <category> web </category>
+          <category> Web </category>
           
       </categories>
       
@@ -388,17 +394,17 @@
     </entry>
     
     <entry>
-      <title>tags</title>
-      <link href="/tags/index.html"/>
-      <url>/tags/index.html</url>
-      <content type="html"><![CDATA[]]></content>
-    </entry>
-    
-    <entry>
       <title>categories</title>
       <link href="/categories/index.html"/>
       <url>/categories/index.html</url>
       <content type="html"><![CDATA[<p>hi,man</p>]]></content>
+    </entry>
+    
+    <entry>
+      <title>tags</title>
+      <link href="/tags/index.html"/>
+      <url>/tags/index.html</url>
+      <content type="html"><![CDATA[]]></content>
     </entry>
     
   
