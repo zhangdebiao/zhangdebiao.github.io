@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="modbus,工控协议," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="lalala's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="术语 校验码校验码是由前面的数据通过某种算法得出的，用以检验该组数据的正确性。代码作为数据在向计算机或其它设备进行输入时，容易产生输入错误，为了减少这种输入错误，编码专家发明了各种校验检错方法，并依据这些方法设置了校验码。常用的校验有：累加和校验SUM、字节异或校验XOR、纵向冗余校验LRC、循环冗余校验CRC…… 离散量输入主要用来读取单个位的数据，如IO的状态； 线圈开关输出信号，主要用来写入">
+<meta name="keywords" content="modbus,工控协议">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Modbus学习笔记">
+<meta property="og:url" content="http://yoururl.com/2018/08/03/Modbus学习笔记/index.html">
+<meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="术语 校验码校验码是由前面的数据通过某种算法得出的，用以检验该组数据的正确性。代码作为数据在向计算机或其它设备进行输入时，容易产生输入错误，为了减少这种输入错误，编码专家发明了各种校验检错方法，并依据这些方法设置了校验码。常用的校验有：累加和校验SUM、字节异或校验XOR、纵向冗余校验LRC、循环冗余校验CRC…… 离散量输入主要用来读取单个位的数据，如IO的状态； 线圈开关输出信号，主要用来写入">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoururl.com/images/pasted-191.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-189.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-190.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-188.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-181.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-182.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-183.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-184.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-185.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-186.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-187.png">
+<meta property="og:updated_time" content="2018-08-02T17:01:31.517Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Modbus学习笔记">
+<meta name="twitter:description" content="术语 校验码校验码是由前面的数据通过某种算法得出的，用以检验该组数据的正确性。代码作为数据在向计算机或其它设备进行输入时，容易产生输入错误，为了减少这种输入错误，编码专家发明了各种校验检错方法，并依据这些方法设置了校验码。常用的校验有：累加和校验SUM、字节异或校验XOR、纵向冗余校验LRC、循环冗余校验CRC…… 离散量输入主要用来读取单个位的数据，如IO的状态； 线圈开关输出信号，主要用来写入">
+<meta name="twitter:image" content="http://yoururl.com/images/pasted-191.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoururl.com/2018/08/03/Modbus学习笔记/"/>
+
+
+
+
+
+  <title>Modbus学习笔记 | lalala's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">lalala's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">努力做一名白帽子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/08/03/Modbus学习笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Modbus学习笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-03T00:09:00+08:00">
+                2018-08-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工控安全/" itemprop="url" rel="index">
+                    <span itemprop="name">工控安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><p><img src="\images\pasted-191.png" alt="upload successful"></p>
+<h2 id="校验码"><a href="#校验码" class="headerlink" title="校验码"></a>校验码</h2><p>校验码是由前面的数据通过某种算法得出的，用以检验该组数据的正确性。代码作为数据在向计算机或其它设备进行输入时，容易产生输入错误，为了减少这种输入错误，编码专家发明了各种校验检错方法，并依据这些方法设置了校验码。<br>常用的校验有：累加和校验SUM、字节异或校验XOR、纵向冗余校验LRC、循环冗余校验CRC……<br><img src="\images\pasted-189.png" alt="upload successful"><br><img src="\images\pasted-190.png" alt="upload successful"></p>
+<h2 id="离散量输入"><a href="#离散量输入" class="headerlink" title="离散量输入"></a>离散量输入</h2><p>主要用来读取单个位的数据，如IO的状态；</p>
+<h2 id="线圈"><a href="#线圈" class="headerlink" title="线圈"></a>线圈</h2><p>开关输出信号，主要用来写入单个位的数据，与离散量构成组成对位的操作；</p>
+<h2 id="输入寄存器"><a href="#输入寄存器" class="headerlink" title="输入寄存器"></a>输入寄存器</h2><p>主要用来读取16位，也就是两个字节的数据；</p>
+<h2 id="保持寄存器"><a href="#保持寄存器" class="headerlink" title="保持寄存器"></a>保持寄存器</h2><p>主要用来写入16位的数据。</p>
+<h2 id="PLC"><a href="#PLC" class="headerlink" title="PLC"></a>PLC</h2><p>可编程逻辑控制器，是一种采用一类可编程的存储器，用于其内部存储程序，执行逻辑运算、顺序控制、定时、计数与算术操作等面向用户的指令，并通过数字或模拟式输入/输出控制各种类型的机械或生产过程。</p>
+<h2 id="串口通信"><a href="#串口通信" class="headerlink" title="串口通信"></a>串口通信</h2><p>随着计算机系统的应用和微机网络的发展，通信功能越来越显得重要.这里所说的通信是指计算机与外界的信息交换.因此，通信既包括计算机与外部设备之间，也包括计算机和计算机之间的信息交换.由于串行通信是在一根传输线上一位一位的传送信息，所用的传输线少，并且可以借助现成的电话网进行信息传送，因此，特别适合于远距离传输.对于那些与计算机相距不远的人－机交换设备和串行存储的外部设备如终端、打印机、逻辑分析仪、磁盘等，采用串行方式交换数据也很普遍.在实时控制和管理方面，采用多台微机处理机组成分级分布控制系统中，各 CPU 之间的通信一般都是串行方式.所以串行接口是微机应用系统常用的接口。许多外设和计算机按串行方式进行通信，这里所说的串行方式，是指外设与接口电路之间的信息传送方式，实际上，CPU 与接口之间仍按并行方式工作.</p>
+<h2 id="串口"><a href="#串口" class="headerlink" title="串口"></a>串口</h2><p>串口是计算机上一种非常通用设备通信的协议，不要与通用串行总线Universal Serial Bus（USB）混淆。大多数计算机包含两个基于RS232的串口。串口同时也是仪器仪表设备通用的通信协议；很多GPIB兼容的设备也带有RS-232口。同时，串口通信协议也可以用于获取远程采集设备的数据。<br>串口通信的概念非常简单，串口按位（bit）发送和接收字节。尽管比按字节（byte）的并行通信慢，但是串口可以在使用一根线发送数据的同时用另一根线接收数据。它很简单并且能够实现远距离通信。比如IEEE488定义并行通行状态时，规定设备线总常不得超过20米，并且任意两个设备间的长度不得超过2米；而对于串口而言，长度可达1200米。<br>典型地，串口用于ASCII码字符的传输。通信使用3根线完成：（1）地线，（2）发送，（3）接收。由于串口通信是异步的，端口能够在一根线上发送数据同时在另一根线上接收数据。其他线用于握手，但是不是必须的。串口通信最重要的参数是波特率、数据位、停止位和奇偶校验。对于两个进行通行的端口，这些参数必须匹配：   </p>
+<h3 id="波特率"><a href="#波特率" class="headerlink" title="波特率"></a>波特率</h3><p>这是一个衡量通信速度的参数。它表示每秒钟传送的bit的个数。例如300波特表示每秒钟发送300个bit。当我们提到时钟周期时，我们就是指波特率。例如如果协议需要4800波特率，那么时钟是4800Hz。这意味着串口通信在数据线上的采样率为4800Hz。通常电话线的波特率为14400，28800和36600。波特率可以远远大于这些值，但是波特率和距离成反比。高波特率常常用于放置的很近的仪器间的通信，典型的例子就是GPIB设备的通信。 </p>
+<h3 id="数据位"><a href="#数据位" class="headerlink" title="数据位"></a>数据位</h3><p>这是衡量通信中实际数据位的参数。当计算机发送一个信息包，实际的数据不会是8位的，标准的值是5、7和8位。如何设置取决于你想传送的信息。比如，标准的ASCII码是0～127（7位）。扩展的ASCII码是0～255（8位）。如果数据使用简单的文本（标准 ASCII码），那么每个数据包使用7位数据。每个包是指一个字节，包括开始/停止位，数据位和奇偶校验位。由于实际数据位取决于通信协议的选取，术语“包”指任何通信的情况。 </p>
+<h3 id="停止位"><a href="#停止位" class="headerlink" title="停止位"></a>停止位</h3><p>用于表示单个包的最后一位。典型的值为1，1.5和2位。由于数据是在传输线上定时的，并且每一个设备有其自己的时钟，很可能在通信中两台设备间出现了小小的不同步。因此停止位不仅仅是表示传输的结束，并且提供计算机校正时钟同步的机会。适用于停止位的位数越多，不同时钟同步的容忍程度越大，但是数据传输率同时也越慢。 </p>
+<h3 id="奇偶校验位"><a href="#奇偶校验位" class="headerlink" title="奇偶校验位"></a>奇偶校验位</h3><p>在串口通信中一种简单的检错方式。有四种检错方式：偶、奇、高和低。当然没有校验位也是可以的。对于偶和奇校验的情况，串口会设置校验位（数据位后面的一位），用一个值确保传输的数据有偶个或者奇个逻辑高位。例如，如果数据是011，那么对于偶校验，校验位为0，保证逻辑高的位数是偶数个。如果是奇校验，校验位位1，这样就有3个逻辑高位。高位和低位不真正的检查数据，简单置位逻辑高或者逻辑低校验。这样使得接收设备能够知道一个位的状态，有机会判断是否有噪声干扰了通信或者是否传输和接收数据是否不同步。<br><img src="\images\pasted-188.png" alt="upload successful"><br><br><br></p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>早在1971年，Modicon公司首次推出了Modbus协议，ModbusRTU和Modbus ASCII诞生于此。后来施耐德电气（SchneiderElectric）收购了Modicon公司，并在1997年推出了ModbusTCP协议。2004年，中国国家标准委员会正式把Modbus作为了国家标准，开启了Modbus为中国工业通信做贡献的时代。<br>通过此协议，控制器相互之间、控制器经由网络和其它设备之间可以通信。Modbus协议具有标准、开放，可以支持多种电气接口，数据帧格式简单紧凑，数据传输量大、实时性好等特点，在工业控制系统中得到了广泛的应用，已经成为通用工业标准。深入分析Modbus协议实现原理和其安全性对提高工控系统安全性有着重要的现实意义。ModbusRTU和ModbusASCII主要用于串行通信领域，而ModbusTCP则常用于以太网通信。现在，Modbus已经成为工业领域通信协议标准，并且现在是工业电子设备之间相当常用的连接方式。<br><img src="\images\pasted-181.png" alt="upload successful"><br><br><br></p>
+<h1 id="协议原理"><a href="#协议原理" class="headerlink" title="协议原理"></a>协议原理</h1><p>Modbus使用一种简单的MasterandSlave主从协议（客户机/服务器协议）进行通信。客户机作为主站，向服务器发送请求；服务器（从站）接到请求后，对请求进行分析并作出应答。其中使用的通信帧被称为应用数据单元（Application Data Unit，ADU），它包括通信地址段、功能代码段、数据段和校验段，如下图：<br><img src="\images\pasted-182.png" alt="upload successful"><br>一般使用上，监控系统(HMI)都为Master，PLC、电表、仪表等都为Slave，HMI系统一直PollingSlave的各种relayandregister最新数值，然后做显示及各种逻辑计算及控制调整等处理。<br>其中，功能代码段和数据段组合称为协议数据单元（Protocol Data Unit or Protocol Description Unit)，PDU）。功能代码段占用一个字节，取值范围为1~255，其中128~255为保留值，用于异常消息应答报文。1~127为功能代码编号，其中65~72和100~110为用户自定义编码，具体请看下面这张图片：<br><br><br><br></p>
+<h1 id="传输方式"><a href="#传输方式" class="headerlink" title="传输方式"></a>传输方式</h1><p>Modbus 协议是一种应用层报文传输协议，包括ASCII、ＲTU、TCP三种报文类型，协议本身并没有定义物理层，只是定义了控制器能够认识和使用的消息结构，而不管它们是经过何种网络进行通信的。<br>Modbus 协议使用串口传输时可以选择ＲTU或ASCII模式，并规定了消息、数据结构、命令和应答方式并需要对数据进行校验。ASCII 模式采用LＲC校验，ＲTU模式采用16 位CＲC校验。通过以太网传输时使用TCP，这种模式不使用校验，因为TCP协议是一个面向连接的可靠协议。<br><br><br><br></p>
+<h1 id="Modbus-RTU和Modbus-ASCII有什么区别？"><a href="#Modbus-RTU和Modbus-ASCII有什么区别？" class="headerlink" title="Modbus RTU和Modbus ASCII有什么区别？"></a>Modbus RTU和Modbus ASCII有什么区别？</h1><p>Modbus是一种应用层协议，它定义了与基础网络无关的数据单元（ADU），可以在以太网（TCP/IP）或串行链路上（RS232、RS485等）进行通信（以太网ADU和串行ADU略有不同）。在串行链路上，Modbus协议有两种传输模式——ASCII模式和RTU模式。其中，ASCII是英文“American Standard Code for Information Interchange”的缩写，中文翻译为“美国国家信息交换标准编码”；RTU是英文“ Remote Terminal Unit”的缩写，中文翻译为“远程终端设备”。<br>首先，让我们来看看Modbus的工作原理。<br>Modbus采用主从（Master-Salve）通信模式，仅有主设备（Master）能对传输进行初始化，从设备（Slave）根据主设备的请求进行应答。典型的主设备包括现场仪表和显示面板，典型的从设备为可编程逻辑控制器（PLC）。<br>在串行链路的主从通信中，Modbus主设备可以连接一个或N（最大为247）个从设备，主从设备之间的通信包括单播模式和广播模式。<br>在广播模式中，Modbus主设备可同时向多个从设备发送请求（设备地址0用于广播模式），从设备对广播请求不进行响应。<br>在单播模式中，主设备发送请求至某个特定的从设备（每个Modbus从设备具有唯一地址），请求的消息帧中会包含功能代码和数据，比如功能代码“01”用来读取离散量线圈的状态。从设备接到请求后，进行应答并把消息反馈主设备。<br><img src="\images\pasted-183.png" alt="upload successful"><br><strong><em>在主从设备的通信中，可以使用ASCII模式或者RTU模式。</em></strong><br>在ASCII（AmericanStandard Code for Information Interchange）传输模式下，消息帧以英文冒号（“：”，ASCII3A Hex）开始，以回车和换号（CRLF，ASCII 0D and 0A Hex）符号结束，允许的传输的字符集为十六进制的0~9和A~F；网络中的从设备监视传输通路上是否有英文冒号（“：”），如果有的话，就对消息帧进行解码，查看消息中的地址是否与自己的地址相同，如果相同的话，就接收其中的数据；如果不同的话，则不予理会。<br><img src="\images\pasted-184.png" alt="upload successful"><br>在ASCII模式下，每个8位的字节被拆分成两个ASCII字符进行发送，比如十六进制数0xAF ,会被分解成ASCII字符“A”和“F”进行发送，发送的字符量比RTU增加一倍。ASCII模式的好处是允许两个字符之间间隔的时间长达1s而不引发通信故障，该模式采用纵向冗余校验（Longitudinal Redundancy Check ，LRC)） 的方法来检验错误，当控制器设为在Modbus 网络上以ＲTU 模式通信，消息中的每个8Bit 字节都包含两个4 Bit 的十六进制字符，这种模式没有开始和结束标记。其优点是: 在同样的波特率下，可比传送更多的数据。<br>在RTU（RemoteTerminal Unit）模式下，每个字节可以传输两个十六进制字符，比如十六进制数0xAF，直接以十六进制0xAF（二进制：10101111）进行发送，因此它的发送密度比ASCII模式高一倍；RTU模式采用循环冗余校验（CRC），下面是对RTU模式的总结：<br>具体格式如图 所示。<br><img src="\images\pasted-185.png" alt="upload successful"><br><br><br></p>
+<h1 id="MODBUS-TCP注意点"><a href="#MODBUS-TCP注意点" class="headerlink" title="MODBUS TCP注意点"></a>MODBUS TCP注意点</h1><h2 id="主机和从机、服务端和客户端"><a href="#主机和从机、服务端和客户端" class="headerlink" title="主机和从机、服务端和客户端"></a>主机和从机、服务端和客户端</h2><h3 id="【在modbus协议中】"><a href="#【在modbus协议中】" class="headerlink" title="【在modbus协议中】"></a>【在modbus协议中】</h3><p>主机发送modbus请求，从机根据请求内容向主机返回响应。在modbus协议中，主机总是主动方，从机总是被动方。</p>
+<h3 id="【在网络应用中】"><a href="#【在网络应用中】" class="headerlink" title="【在网络应用中】"></a>【在网络应用中】</h3><p>在网络应用中存在客户端和服务器端，客户端（例如浏览器）发送请求到服务器，服务器向客户端返回内容（例如HTML文本）。</p>
+<h3 id="【在modbus-tcp中】"><a href="#【在modbus-tcp中】" class="headerlink" title="【在modbus tcp中】"></a>【在modbus tcp中】</h3><p>主机是客户端，而从机是服务器端。千万不要以为服务器端重要，主机也重要，所以主机就是服务器端。</p>
+<h2 id="是否可以多主机"><a href="#是否可以多主机" class="headerlink" title="是否可以多主机"></a>是否可以多主机</h2><p>通过前面的分析，主机为客户端那么modbustcp支持多个主机，在一个局域网中可存在多个主机和多个从机。从机的连接能力（连接主机的数量）由uIP的最大TCP连接个数决定。</p>
+<h2 id="modbus-TCP协议简述"><a href="#modbus-TCP协议简述" class="headerlink" title="modbus TCP协议简述"></a>modbus TCP协议简述</h2><p>modbus TCP和modbus RTU基本相同，但是也存在一些区别<br>a.从机地址变得不再重要，多数情况下忽略。从某种意义上说从机地址被IP地址取代<br>b.CRC校验变得不再重要，甚至可以忽略。由于TCP数据包中已经存在校验，为了不重复造轮子，modbus TCP干脆取消了CRC校验。<br>TCP 模式是为了让Modbus 数据顺利在以太网上传输产生的，使用TCP502 端口。该协议物理层，数据链路层，网络层，传输层都是基于TCP 协议，只在应用层，将Modbus 协议修改后封装进去; 接收端将该TCP 数据包拆封后，重新获得原始Modbus 帧，然后按照Modbus 协议规范进行解析，并将返回的数据包重新封装进TCP 协议中，返回到发送端。与串行链路传输的数据格式不同，TCP 模式去除了附加地址和校验，增加了报文头，其具体格式如下图所示。<br><img src="\images\pasted-186.png" alt="upload successful"><br><strong><em>在modbus TCP中包含一个MBAP头，该头包含以下几个部分</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>区域</th>
+<th>长度</th>
+<th>描述</th>
+<th>客户端</th>
+<th>服务器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>传输标志</td>
+<td>2字节</td>
+<td>MODBUS 请求和响应传输过程中序列号</td>
+<td>客户端生成</td>
+<td>应答时复制该值</td>
+</tr>
+<tr>
+<td>协议标志</td>
+<td>2字节</td>
+<td>Modbus协议默认为0</td>
+<td>客户端生成</td>
+<td>应答时复制该值</td>
+</tr>
+<tr>
+<td>长度</td>
+<td>2字节</td>
+<td>剩余部分的长度</td>
+<td>客户端生成</td>
+<td>应答时由服务器端生成</td>
+</tr>
+<tr>
+<td>单元标志</td>
+<td>1字节</td>
+<td>从机标志（从机地址）</td>
+<td>客户端生成</td>
+<td>应答时复制该值</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>【注意】</li>
+<li>【1】传输标志可理解为序列号，防止 MODBUS TCP通信错位，例如后发生的响应先到了主机，而早发生的响应后到主机</li>
+<li>【2】单元标志可理解为从机地址，此时已经不再重要</li>
+</ul>
+<h2 id="modbus-tcp-和-TCP-IP的关系"><a href="#modbus-tcp-和-TCP-IP的关系" class="headerlink" title="modbus tcp 和 TCP IP的关系"></a>modbus tcp 和 TCP IP的关系</h2><p>modbus TCP可以理解为发生在TCP上的应用层协议，既然是TCP协议那么一个完整的MODBUSTCP报文必然包括TCP首部，IP首部和Ethernet首部。<br><br><br><br></p>
+<h1 id="功能码作用"><a href="#功能码作用" class="headerlink" title="功能码作用"></a>功能码作用</h1><p>启动Modbus事务处理的客户机创建Modbus应用数据单元。功能码（PDU中的）向服务器指示将执行哪种操作。<br>用一个字节编码Modbus数据单元的功能码域。有效范围是十制制1-255（128-255为异常响应保留）。当从客户机向服务器发送报文时，功能码域通过服务器执行哪种操作。<br>从客户机向服务器发送的报文数据域包括附加信息，服务器使用这个信息执行功能码定义的操作。这个域还包括离散项目和寄存器地址、处理项目的数量以及域中的实际数据字节数。<br>在某种请求中，数据域可以是不存在的，在此情况下服务器不需要任何附加信息。功能码仅说明操作。  </p>
+<h2 id="功能码的类型"><a href="#功能码的类型" class="headerlink" title="功能码的类型"></a>功能码的类型</h2><p>功能码主要分为有效功能码、异常功能码和错误功能码。<br>如果在一个正确接收Modbus ADU中，不出现与请求Modbus功能有关的差错，那么服务器至客户机的响应数据会包含请求中的正常功能码。如果出现与请求Modbus功能有关的差错，那么响应数据会包含一个异常码和错误码。<br>例如，客户机能够读一组离散量输出或输入的开/关状态，或者用户能够读/写一组寄存器数据内容。当服务器对客户机响应时，它使用功能码域来指示正常（无差错）响应或出现某种差错（称为异常响应）。对于一个正常响应来说，服务器仅对原始功能码响应，<br>对于异常响应，服务器返回一个与客户机等同的码，设置该原始功能码的最高有效位为逻辑1，并加该异常码后增加错误码，以通知客户机异常原因。</p>
+<h2 id="有效功能码"><a href="#有效功能码" class="headerlink" title="有效功能码"></a>有效功能码</h2><p>有效功能码有二十几种，但是一般使用上都以1、2、3、4、5、6、15、16等八种最为常用，以及另外特殊使用的20、21两种，此为General Reference Register，绝大部份的Modbus设备并不会提供此Register。于PLC上主要的控制数据有下列四种型式。此八种功能码就是处理这些控制资料，详细说明如下各点：</p>
+<h2 id="控制数据四种型式"><a href="#控制数据四种型式" class="headerlink" title="控制数据四种型式"></a>控制数据四种型式</h2><p><strong><em>DI：DigitalInput</em></strong> （数字输入，离散输入），一个地址一个数据位，用户只能读取它的状态，不能修改。以一个 bit表示 On/Off，用来记录控制信号的状态输入，例如：开关，接触点，马达运转，超限switch…等等。于PLC上被称为Input relay、input coil等。<br><strong><em>DO：DigitalOutput</em></strong>（数字输出，线圈输出），一个地址一个数据位，用户可以置位、复位，可以回读状态。以一个 bit表示 On/Off，用来输出控制信号，以激活或停止马达，警铃，灯光…等等。于PLC上被称为Output relay、Output coil等。<br><strong><em>AI：Analog Input</em></strong>（模拟输入，输入寄存器），一个地址16位数据，用户只能读，不能修改，，以16 bits integer表示一个数值，用来记录控制信号的数值输入，例如：温度、流量、料量、速度、转速、文件板开度、液位、重量…等等。于PLC上被称为Input register。<br><strong><em>AO：AnalogOutput</em></strong>（模拟输出，保持寄存器），一个地址16位数据，用户可以写，也可以回读，以16 bits integer表示一个数值，用来输出控制信号的数值，例如：温度、流量、速度、转速、文件板开度、饲料量…等等设定值。于PLC上被称为Output register、Holding register。<br><img src="\images\pasted-187.png" alt="upload successful"><br><br><br></p>
+<h1 id="Modbus-协议安全性分析"><a href="#Modbus-协议安全性分析" class="headerlink" title="Modbus 协议安全性分析"></a>Modbus 协议安全性分析</h1><p>Modbus 协议是典型的工控网协议，研究其安全性对于加强工业控制网络的安全性有重要意义。一般来说，协议安全性问题可以分为两种，一种是协议自身的设计和描述引起的安全问题; 另一种是协议的不正确实现引起的安全问题。Modbus 协议也存在着这两方面的问题。</p>
+<h2 id="Modbus-协议的固有问题"><a href="#Modbus-协议的固有问题" class="headerlink" title="Modbus 协议的固有问题"></a>Modbus 协议的固有问题</h2><p>绝大多数工控协议在设计之初，仅仅考虑了功能实现、提高效率、提高可靠性等方面，而没考虑过安全性问题。Modbus 协议也不例外，尽管其已经成为事实上的工业标准。从前面原理分析可以看出其本身的安全性问题是: 缺乏认证、授权、加密等安全防护机制和功能码滥用问题。  </p>
+<h3 id="缺乏认证"><a href="#缺乏认证" class="headerlink" title="缺乏认证"></a>缺乏认证</h3><p>认证的目的是保证收到的信息来自合法的用户，未认证用户向设备发送控制命令不会被执行。在Modbus 协议通信过程中，没有任何认证方面的相关定义，攻击者只需要找到一个合法的地址就可以使用功能码就能建立一个Modbus 通信会话，从而扰乱整个或者部分控制过程。</p>
+<h3 id="缺乏授权"><a href="#缺乏授权" class="headerlink" title="缺乏授权"></a>缺乏授权</h3><p>授权是保证不同的特权操作需要由拥有不同权限的认证用户来完成，这样可大大降低误操作与内部攻击的概率。目前，Modbus 协议没有基于角色的访问控制机制，也没有对用户分类，没有对用户的权限进行划分，这会导致任意用户可以执行任意功能。</p>
+<h3 id="缺乏加密"><a href="#缺乏加密" class="headerlink" title="缺乏加密"></a>缺乏加密</h3><p>加密可以保证通信过程中双方的信息不被第三方非法获取。Modbus 协议通信过程中，地址和命令全部采用明文传输，因此数据可以很容易的被攻击者<br>捕获和解析，为攻击者提供便利。</p>
+<h3 id="功能码滥用"><a href="#功能码滥用" class="headerlink" title="功能码滥用"></a>功能码滥用</h3><p>功能码是Modbus 协议中的一项重要内容，几乎所有的通信都包含功能码。目前，功能码滥用是导致Modbus 网络异常的一个主要因素。<strong><em>例如不合法报文长度，短周期的无用命令，不正确的报文长度，确认异常代码延迟等都有可能导致拒绝服务攻击。</em></strong></p>
+<h2 id="协议实现产生的问题"><a href="#协议实现产生的问题" class="headerlink" title="协议实现产生的问题"></a>协议实现产生的问题</h2><p>虽然Modbus 协议获得了广泛的应用，但是在实现具体的工业控制系统时，开发者并不具备安全知识或者没有意识到安全问题。这样就导致了使用Modbus 协议的系统中可能存在各种各样的安全漏洞。</p>
+<h3 id="设计安全问题"><a href="#设计安全问题" class="headerlink" title="设计安全问题"></a>设计安全问题</h3><p>Modbus 系统开发者重点关注的是其功能实现问题，安全问题在设计时很少被注意到。设计安全是指设计时充分考虑安全性，解决Modbus 系统可能出现的各种异常和非法操作等问题。比如在通信过程中，某个节点被恶意控制后发出非法数据，就需要考虑这些数据的判别和处理问题。</p>
+<h3 id="缓冲区溢出漏洞"><a href="#缓冲区溢出漏洞" class="headerlink" title="缓冲区溢出漏洞"></a>缓冲区溢出漏洞</h3><p>缓冲区溢出是指在向缓冲区内填充数据时超过了缓冲区本身的容量导致溢出的数据覆盖在合法数据上，这是在软件开发中最常见也是非常危险的漏洞，可以导致系统崩溃，或者被攻击者利用来控制系统。Modbus 系统开发者大多不具备安全开发知识，这样就会产生很多的缓冲区溢出漏洞，一旦被恶意者利用会导致严重的后果。</p>
+<h3 id="Modbus-TCP-安全问题"><a href="#Modbus-TCP-安全问题" class="headerlink" title="Modbus TCP 安全问题"></a>Modbus TCP 安全问题</h3><p>目前，Modbus 协议已经可以在通用计算机和通用操作系统上实现，运行于TCP /IP 之上以满足发展需要。这样，TCP /IP 协议自身存在的安全问题不可避免地会影响到工控网络安全。非法网络数据获取，中间人，拒绝服务， IP 欺骗，病毒木马等在IP 互联网中的常用攻击手段都会影响Modbus 系统安全。</p>
+<h2 id="安全建议"><a href="#安全建议" class="headerlink" title="安全建议"></a>安全建议</h2><p>目前，Modbus 系统采取的安全防护措施普遍不足，这里参考信息安全业内研究并结合工控系统自身的安全问题，提出了一些安全建议，能够有效地降低工业控制系统面临的威胁。</p>
+<h3 id="从源头开始"><a href="#从源头开始" class="headerlink" title="从源头开始"></a>从源头开始</h3><p>工控网络漏洞，很大一部分是其实现过程出现的漏洞。如果从源头开始控制，从Modbus 系统的需求设计、开发实现、内部测试和部署等阶段，全生命周期的介入安全手段，融入安全设计、安全编码以及安全测试等技术，可以极大地消除安全漏洞，降低整个Modbus 系统的安全风险。</p>
+<h3 id="异常行为检测"><a href="#异常行为检测" class="headerlink" title="异常行为检测"></a>异常行为检测</h3><p>异常行为代表着可能发生威胁，不管是有没有攻击者，因此开发针对Modbus 系统的专用异常行为检测设备可以极大提高工控网络的安全性。针对Modbus 系统，首先要分析其存在的各种操作行为，依据“主体，地点，时间，访问方式，操作，客体”等行为描述成一个六元组模型; 进而分析其行为是否属于异常; 最终决定采取记录或者报警等措施。</p>
+<h3 id="安全审计"><a href="#安全审计" class="headerlink" title="安全审计"></a>安全审计</h3><p>Modbus 的安全审计就是对协议数据进行深度解码分析，记录操作的时间、地点、操作者和操作行为等关键信息，实现对Modbus 系统的安全审计日志记录和审计功能，从而提供安全事件爆发后的时候追查能力。</p>
+<h3 id="使用网络安全设备"><a href="#使用网络安全设备" class="headerlink" title="使用网络安全设备"></a>使用网络安全设备</h3><p>使用入侵防御和防火墙等网络安全设备。防火墙是一个串行设备，通过设置，只允许特定的地址访问服务端，禁止外部地址访问Modbus 服务器，可以有效的防止外部入侵; 入侵防御设备可以分析Modbus协议的具体操作内容，有效地检测并阻止来自内部/外部的异常操作和各种渗透攻击行为，对内网提供保护功能。<br><br><br><br><br>PS：本篇文章转载自<a href="http://www.freebuf.com/articles/ics-articles/148637.html" target="_blank" rel="noopener">FREEBUF</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/modbus/" rel="tag"># modbus</a>
+          
+            <a href="/tags/工控协议/" rel="tag"># 工控协议</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/02/智能设备硬件安全测试/" rel="next" title="智能设备硬件安全测试">
+                <i class="fa fa-chevron-left"></i> 智能设备硬件安全测试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/lalala"
+                alt="lalala" />
+            
+              <p class="site-author-name" itemprop="name">lalala</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhangdebiao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:843345000@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#术语"><span class="nav-number">1.</span> <span class="nav-text">术语</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#校验码"><span class="nav-number">1.1.</span> <span class="nav-text">校验码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#离散量输入"><span class="nav-number">1.2.</span> <span class="nav-text">离散量输入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线圈"><span class="nav-number">1.3.</span> <span class="nav-text">线圈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输入寄存器"><span class="nav-number">1.4.</span> <span class="nav-text">输入寄存器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#保持寄存器"><span class="nav-number">1.5.</span> <span class="nav-text">保持寄存器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PLC"><span class="nav-number">1.6.</span> <span class="nav-text">PLC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#串口通信"><span class="nav-number">1.7.</span> <span class="nav-text">串口通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#串口"><span class="nav-number">1.8.</span> <span class="nav-text">串口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#波特率"><span class="nav-number">1.8.1.</span> <span class="nav-text">波特率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据位"><span class="nav-number">1.8.2.</span> <span class="nav-text">数据位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#停止位"><span class="nav-number">1.8.3.</span> <span class="nav-text">停止位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#奇偶校验位"><span class="nav-number">1.8.4.</span> <span class="nav-text">奇偶校验位</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#协议原理"><span class="nav-number">3.</span> <span class="nav-text">协议原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#传输方式"><span class="nav-number">4.</span> <span class="nav-text">传输方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Modbus-RTU和Modbus-ASCII有什么区别？"><span class="nav-number">5.</span> <span class="nav-text">Modbus RTU和Modbus ASCII有什么区别？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MODBUS-TCP注意点"><span class="nav-number">6.</span> <span class="nav-text">MODBUS TCP注意点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#主机和从机、服务端和客户端"><span class="nav-number">6.1.</span> <span class="nav-text">主机和从机、服务端和客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#【在modbus协议中】"><span class="nav-number">6.1.1.</span> <span class="nav-text">【在modbus协议中】</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#【在网络应用中】"><span class="nav-number">6.1.2.</span> <span class="nav-text">【在网络应用中】</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#【在modbus-tcp中】"><span class="nav-number">6.1.3.</span> <span class="nav-text">【在modbus tcp中】</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#是否可以多主机"><span class="nav-number">6.2.</span> <span class="nav-text">是否可以多主机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#modbus-TCP协议简述"><span class="nav-number">6.3.</span> <span class="nav-text">modbus TCP协议简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#modbus-tcp-和-TCP-IP的关系"><span class="nav-number">6.4.</span> <span class="nav-text">modbus tcp 和 TCP IP的关系</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能码作用"><span class="nav-number">7.</span> <span class="nav-text">功能码作用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#功能码的类型"><span class="nav-number">7.1.</span> <span class="nav-text">功能码的类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有效功能码"><span class="nav-number">7.2.</span> <span class="nav-text">有效功能码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#控制数据四种型式"><span class="nav-number">7.3.</span> <span class="nav-text">控制数据四种型式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Modbus-协议安全性分析"><span class="nav-number">8.</span> <span class="nav-text">Modbus 协议安全性分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Modbus-协议的固有问题"><span class="nav-number">8.1.</span> <span class="nav-text">Modbus 协议的固有问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缺乏认证"><span class="nav-number">8.1.1.</span> <span class="nav-text">缺乏认证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺乏授权"><span class="nav-number">8.1.2.</span> <span class="nav-text">缺乏授权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺乏加密"><span class="nav-number">8.1.3.</span> <span class="nav-text">缺乏加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#功能码滥用"><span class="nav-number">8.1.4.</span> <span class="nav-text">功能码滥用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协议实现产生的问题"><span class="nav-number">8.2.</span> <span class="nav-text">协议实现产生的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设计安全问题"><span class="nav-number">8.2.1.</span> <span class="nav-text">设计安全问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓冲区溢出漏洞"><span class="nav-number">8.2.2.</span> <span class="nav-text">缓冲区溢出漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Modbus-TCP-安全问题"><span class="nav-number">8.2.3.</span> <span class="nav-text">Modbus TCP 安全问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全建议"><span class="nav-number">8.3.</span> <span class="nav-text">安全建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#从源头开始"><span class="nav-number">8.3.1.</span> <span class="nav-text">从源头开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异常行为检测"><span class="nav-number">8.3.2.</span> <span class="nav-text">异常行为检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全审计"><span class="nav-number">8.3.3.</span> <span class="nav-text">安全审计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用网络安全设备"><span class="nav-number">8.3.4.</span> <span class="nav-text">使用网络安全设备</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lalala</span>
+
+  
+</div>
+
+<div class="powered-by">
+	<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+		本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+</div>
+|
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共14.7k字</span>
+</div>
+
+<br>
+	
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

