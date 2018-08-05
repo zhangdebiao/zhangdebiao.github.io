@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-08-02T17:54:21.425Z</updated>
+  <updated>2018-08-05T06:50:18.208Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>工控流量分析writeup</title>
+    <link href="http://yoururl.com/2018/08/04/%E5%B7%A5%E6%8E%A7%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90writeup/"/>
+    <id>http://yoururl.com/2018/08/04/工控流量分析writeup/</id>
+    <published>2018-08-04T02:27:00.000Z</published>
+    <updated>2018-08-05T06:50:18.208Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong><em>2018年工业信息安全技能大赛(华中赛区)</em></strong>的几道流量分析题，抽时间写一下write up<br><br><br><br></p><h1 id="工业协议分析3"><a href="#工业协议分析3" class="headerlink" title="工业协议分析3"></a>工业协议分析3</h1><p>先过滤modbus的包，保存为分组字节流502.pcap<br><img src="\images\pasted-193.png" alt="upload successful"><br>再用流量分析脚本（ics_packet_analysis.py），按照数据包长度分流，可以吧不同长度的数据包分处理，方便分析<br><img src="\images\pasted-194.png" alt="upload successful"><br><img src="\images\pasted-195.png" alt="upload successful"><br>直接打印出了这个数据包且将这个数据包以pcap的形式存储下来，用wireshark打开，分析可知这个长度全部都是Wirte Multiple Register功能的包，仔细分析一下<br><img src="\images\pasted-196.png" alt="upload successful"><br>发现可以字符串，modbus中通信是一发一收，不可能有连续的可见数据，可判断这就是恶意流量<br><img src="\images\pasted-197.png" alt="upload successful"><br>尝试16进制解密字符串，拿到flag<br><img src="\images\pasted-198.png" alt="upload successful"><br><br><br><br></p><h1 id="工业协议分析4"><a href="#工业协议分析4" class="headerlink" title="工业协议分析4"></a>工业协议分析4</h1><p>由于流量脚本分析工具只能识别pcap包，所以这里要转换一下<br>wireshark打开，导出特定分组字节，保存位pcap格式即可<br>顺便在过滤一下与工控流量无关的包<br><img src="\images\pasted-199.png" alt="upload successful"><br>继续用流量分析脚本工具，分流，分析<br><img src="\images\pasted-200.png" alt="upload successful"><br>分析一下，例如长度为40的包 没有数据，所以不是要分析的modbus的包，我们来看长度为52的这个包packets_52.pcap<br><img src="\images\pasted-201.png" alt="upload successful"><br>有Read Coils，Read Holiding Registers，Read Input Register三种功能的包，但都是正常的寄存器读写操作，没有异常流量<br>再看长度为115的包，是s7comm协议<br>追踪TCP流，转为Hex去看，然后找不到……<br>回过头在分组字节流重新找，找到有一个重传的异常包<br><img src="\images\pasted-202.png" alt="upload successful"><br>16进制解码4943532657696e7365637572697479，拿到flag<br><img src="\images\pasted-203.png" alt="upload successful"><br><br><br><br></p><h1 id="电力系统协议分析"><a href="#电力系统协议分析" class="headerlink" title="电力系统协议分析"></a>电力系统协议分析</h1><p>直接追踪流，转为Hex转储分析<br>分析可知，这里似乎列出一个文件目录<br><img src="\images\pasted-204.png" alt="upload successful"><br>然后似乎就是一直打开文件，读取文件，关闭文件<br><img src="\images\pasted-205.png" alt="upload successful"><br>这里追踪到可疑文件<br><img src="\images\pasted-206.png" alt="upload successful"><br><img src="\images\pasted-207.png" alt="upload successful"><br><img src="\images\pasted-208.png" alt="upload successful"><br><img src="\images\pasted-209.png" alt="upload successful"><br>flag就是这filedata中的数据<strong><em>61850@102</em></strong><br><br><br><br></p><h1 id="PLC通信协议分析"><a href="#PLC通信协议分析" class="headerlink" title="PLC通信协议分析"></a>PLC通信协议分析</h1><p>这道题问设备地址，私有协议比较难分析，最后也没做出来…<br>后来想想设备地址似乎就两位16进制数，按照比赛要求同一道题两次提交时间间隔30s，也就是说爆破flag似乎也就是只用两个小时…<br>emmm还是我们太乖了…<br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;strong&gt;&lt;em&gt;2018年工业信息安全技能大赛(华中赛区)&lt;/em&gt;&lt;/strong&gt;的几道流量分析题，抽时间写一下write up&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h1 id=&quot;工业协议分析3&quot;&gt;&lt;a href=&quot;#工业协议分析3&quot; class=&quot;hea
+      
+    
+    </summary>
+    
+      <category term="工控安全" scheme="http://yoururl.com/categories/%E5%B7%A5%E6%8E%A7%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="ctf" scheme="http://yoururl.com/tags/ctf/"/>
+    
+      <category term="write up" scheme="http://yoururl.com/tags/write-up/"/>
+    
+      <category term="modbus" scheme="http://yoururl.com/tags/modbus/"/>
+    
+  </entry>
   
   <entry>
     <title>工控学习主要科目</title>
@@ -238,9 +268,9 @@
       <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
     
     
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
       <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
   </entry>
   
@@ -267,9 +297,9 @@
       <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
     
     
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
       <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
   </entry>
   
@@ -419,6 +449,35 @@
   </entry>
   
   <entry>
+    <title>文件上传常规漏洞总结</title>
+    <link href="http://yoururl.com/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
+    <id>http://yoururl.com/2018/04/01/文件上传常规漏洞总结/</id>
+    <published>2018-04-01T14:36:00.000Z</published>
+    <updated>2018-04-08T10:07:43.361Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;从文件上传到getshell&quot;&gt;&lt;a href=&quot;#从文件上传到getshell&quot; class=&quot;headerlink&quot; title=&quot;从文件上传到getshell&quot;&gt;&lt;/a&gt;从文件上传到getshell&lt;/h3&gt;&lt;p&gt;一般找到文件上传页面，常规getshell思
+      
+    
+    </summary>
+    
+      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+    
+      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+      <category term="web" scheme="http://yoururl.com/tags/web/"/>
+    
+      <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
+    
+  </entry>
+  
+  <entry>
     <title>第一次攻防训练赛小记</title>
     <link href="http://yoururl.com/2018/04/01/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0/"/>
     <id>http://yoururl.com/2018/04/01/第一次攻防训练赛小记/</id>
@@ -445,35 +504,6 @@
       <category term="web" scheme="http://yoururl.com/tags/web/"/>
     
       <category term="AWD" scheme="http://yoururl.com/tags/AWD/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>文件上传常规漏洞总结</title>
-    <link href="http://yoururl.com/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoururl.com/2018/04/01/文件上传常规漏洞总结/</id>
-    <published>2018-04-01T14:36:00.000Z</published>
-    <updated>2018-04-08T10:07:43.361Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;从文件上传到getshell&quot;&gt;&lt;a href=&quot;#从文件上传到getshell&quot; class=&quot;headerlink&quot; title=&quot;从文件上传到getshell&quot;&gt;&lt;/a&gt;从文件上传到getshell&lt;/h3&gt;&lt;p&gt;一般找到文件上传页面，常规getshell思
-      
-    
-    </summary>
-    
-      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-      <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
   </entry>
   
