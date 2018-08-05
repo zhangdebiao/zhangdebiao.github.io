@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[西门子PLC指令表]]></title>
+    <url>%2F2018%2F08%2F05%2F%E8%A5%BF%E9%97%A8%E5%AD%90PLC%E6%8C%87%E4%BB%A4%E8%A1%A8%2F</url>
+    <content type="text"><![CDATA[位逻辑指令 时钟指令 通信指令 比较指令 转换指令 计数器指令 浮点数运算指令 整数运算指令 中断指令 逻辑运算指令 程序控制指令 传送指令 移位指令 字符串指令 表指令 定时器指令]]></content>
+      <categories>
+        <category>工控安全</category>
+      </categories>
+      <tags>
+        <tag>ICS</tag>
+        <tag>plc</tag>
+        <tag>梯形图</tag>
+        <tag>西门子</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[西门子PLC梯形图说明]]></title>
     <url>%2F2018%2F08%2F05%2F%E8%A5%BF%E9%97%A8%E5%AD%90PLC%E6%A2%AF%E5%BD%A2%E5%9B%BE%E8%AF%B4%E6%98%8E%2F</url>
     <content type="text"><![CDATA[位逻辑指令1.1 位逻辑指令概述 1.2 -||- 常开接点(地址) 1.3 -|/|-常闭接点(地址) 1.4 XOR位异或 1.5 -|NOT|- 信号流反向 1.6 -( ) 输出线圈 1.7 -(#)- 中间输出 1.8 -(R) 线圈复位 1.9 -(S) 线圈置位 1.10 RS复位置位触发器 1.11 RS置位复位触发器 1.12 -(N)-RLO下降沿检测 1.13 -(P)-PLO上升沿检测 1.14 -(SAVE) 将RLO存入BR存储器 1.15 MEG地址下降沿检测 1.16 POS地址上升沿检测 1.17 立即读操作 1.18 立即写操作 比较指令2.1 比较指令概述 2.2 CMP?I整数比较 2.3 CMP?D双整数比较 2.4 CMP?R实数比较 转换指令3.1 转换指令概述 3.2 BCD_IBCD码转换为整数 3.3 I_BCD整数转换为BCD码 3.4 I_DINT整数转换为双整数 3.5 BCD_DIBCD码转换为双整数 3.6 DI_BCD双整数转换为BCD码 3.7 DI_REAL双整数转换为浮点数 3.8 INV_I整数的二进制反码 3.9 INV_DI双整数的二进制反码 3.10 NEG_I整数的二进制补码 3.11 NEG_DI双整数的二进制补码 3.12 NEG_R浮点数求反 3.13 ROUND舍入为双整数 3.14 TRUNC舍去小数取整为双整数 3.15 CEIL上取整 3.16 FLOOR下取整 计数器指令4.1 计数器指令概述 4.2 S_CUD加减计数 4.3 S_CU加计数器 4.4 S_CD减计数器 4.5 -(SC)计数器置初值 4.6 -(CU)加计数器线圈 4.7 -(CD)减计数器线圈 数据块指令5.1 -(OPN)打开数据块:DB或DI 逻辑控制指令6.1 逻辑控制指令概述 6.2 -(JMP)- 无条件跳转 6.3 -(JMP)- 条件跳转 6.4 -(JMPN)- 若非则跳转 6.5 LABEL标号 整数算术运算指令7.1 整数算术运算指令概述 7.2 判断整数算术运算指令后状态字的位 7.3 ADD_I 整数加法 7.4 SUB_I 整数减法 7.5 MUL_I 整数乘法 7.6 DIV_I 整数除法 7.7 ADD_DI 双整数加法 7.8 SUB_DI 双整数减法 7.9 MUL_DI 双整数乘法 7.10 DIV_DI 双整数除法 7.11 MOD_DI 回送余数的双整数 浮点算术运算指令8.1 浮点算术运算指令概述 8.2 判断浮点算术运算指令后状态字的位 8.3 基础指令 8.3.1 ADD_R实数加法 8.3.2 SUB_R实数减法 8.3.3 MUL_R实数乘法 8.3.4 DIV_R实数除法 8.3.5 ABS浮点数绝对值运算 8.4 扩展指令 8.4.1 SQR浮点数平方 8.4.2 SQRT浮点数平方根 8.4.3 EXP浮点数指数运算 8.4.4 LN浮点数自然对数运算 8.4.5 SIN浮点数正弦运算 8.4.6 COS浮点数余弦运算 8.4.7 TAN浮点数正切运算 8.4.8 ASIN浮点数反正弦运算 8.4.9 ACOS浮点数反余弦运算 8.4.10 ATAN浮点数反正切运算 赋值指令9.1 MOVE赋值 程序控制指令10.1 程序控制指令概述 10.2 -(Call)从线圈调用FC/SFC(无参数) 10.3 CALL_FB从方块调用FB 10.4 CALL_FC从方块调用FC 10.5 CALL_SFB从方块调用SFB 10.6 CALL_SFC从方块调用SFC 10.7 调用多北京块 10.8 从库中调用块 10.9 使用MCR功能的重要注意事项 10.10 -(MCR&lt;)主控继电器接通 10.11 -(MCR&gt;)主控继电器断开 10.12 -(MCRA)主控继电器启动 10.13 -(MCRD)主控继电器停止 10.14 -(RET)返回 移位和循环指令11.1 移位指令 11.1.1 移位指令概述 11.1.2 SHR_I整数右移 11.1.3 SHR_DI双整数右移 11.1.4 SHL_W字左移 11.1.5 SHR_W字右移 11.1.6 SHL_DW双字左移 11.1.7 SHR_DW双字右移 11.2 循环指令 11.2.1 循环指令概述 11.2.2 ROL_DW双字左循环 11.2.3 ROR_DW双字右循环 状态位指令12.1 状态位指令概述 12.2 OV -||- 溢出异常位 12.3 OS -||- 存储溢出异常位 12.4 UO -||- 无序异常位 12.5 BR -||- 异常位二进制结果 12.6 ==0-||- 结果位等于&quot;0&quot; 12.7 &lt;&gt;0-||- 结果位不等于&quot;0&quot; 12.8 &gt;0-||- 结果位大于&quot;0&quot; 12.9 &lt;0-||- 结果位小于&quot;0&quot; 12.10 &gt;=0-||- 结果位大于等于&quot;0&quot; 12.11 &lt;=0-||- 结果位小于等于&quot;0&quot; 定时器指令13.1 定时器指令概述 13.2 存储区中定时器的存储单元和定时器的组成部分 13.3 S_PULSE脉冲S5定时器 13.4 S_PEXT扩展脉冲S5定时器 13.5 S_ODT接通延时S5定时器 13.6 S_ODTS保持型接通延时S5定时器 13.7 S_OFFDT断电延时S5定时器 13.8 -(SP)脉冲定时器线圈 13.9 -(SE)扩展脉冲定时器线圈 13.10 -(SD)接通延时定时器线圈 13.11 -(SS)保持型接通延时定时器线圈 13.12 -(SF)断开延时定时器线圈 字逻辑指令14.1 字逻辑指令概述 14.2 WAND_W字和字相&quot;与&quot; 14.3 WOR_W字和字相&quot;或&quot; 14.4 WAND_DW双字和双字相&quot;与&quot; 14.5 WOR_DW双字和双字相&quot;或&quot; 14.6 WXOR_W字和字相&quot;异或&quot; 14.7 WXOR_DW双字和双字相&quot;异或]]></content>
@@ -8,9 +22,10 @@
         <category>工控安全</category>
       </categories>
       <tags>
+        <tag>ICS</tag>
         <tag>plc</tag>
-        <tag>西门子</tag>
         <tag>梯形图</tag>
+        <tag>西门子</tag>
       </tags>
   </entry>
   <entry>
@@ -21,10 +36,11 @@
         <category>工控安全</category>
       </categories>
       <tags>
+        <tag>ICS</tag>
         <tag>ctf</tag>
         <tag>write up</tag>
         <tag>plc</tag>
-        <tag>梯形图计算</tag>
+        <tag>梯形图</tag>
       </tags>
   </entry>
   <entry>
@@ -36,6 +52,7 @@
       </categories>
       <tags>
         <tag>modbus</tag>
+        <tag>ICS</tag>
         <tag>ctf</tag>
         <tag>write up</tag>
       </tags>
@@ -62,6 +79,7 @@
       <tags>
         <tag>modbus</tag>
         <tag>工控协议</tag>
+        <tag>ICS</tag>
       </tags>
   </entry>
   <entry>
@@ -72,6 +90,7 @@
         <category>工控安全</category>
       </categories>
       <tags>
+        <tag>ICS</tag>
         <tag>固件分析</tag>
       </tags>
   </entry>
@@ -158,8 +177,8 @@
         <category>Web</category>
       </categories>
       <tags>
-        <tag>crypto</tag>
         <tag>web</tag>
+        <tag>crypto</tag>
       </tags>
   </entry>
   <entry>
@@ -217,8 +236,8 @@
         <category>文件上传</category>
       </categories>
       <tags>
-        <tag>文件上传</tag>
         <tag>web</tag>
+        <tag>文件上传</tag>
         <tag>文件包含</tag>
       </tags>
   </entry>
