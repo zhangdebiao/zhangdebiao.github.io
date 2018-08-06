@@ -233,6 +233,36 @@
   </entry>
   
   <entry>
+    <title>5_Django高级</title>
+    <link href="http://yoururl.com/2018/07/31/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-5/"/>
+    <id>http://yoururl.com/2018/07/31/Django学习笔记-5/</id>
+    <published>2018-07-30T17:02:00.000Z</published>
+    <updated>2018-08-06T17:52:59.005Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong><em>django高级应用</em></strong></p><hr><p><br><br><br></p><h1 id="静态文件"><a href="#静态文件" class="headerlink" title="静态文件"></a>静态文件</h1><h2 id="管理静态文件"><a href="#管理静态文件" class="headerlink" title="管理静态文件"></a>管理静态文件</h2><p>项目中的CSS，图片，js都是静态文件</p><h2 id="配置静态文件"><a href="#配置静态文件" class="headerlink" title="配置静态文件"></a>配置静态文件</h2><ul><li><p>在settings文件中定义静态内容</p><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#逻辑规则</span></span><br><span class="line">STATIC_URL = '/static/' </span><br><span class="line"></span><br><span class="line"><span class="comment">#物理存储目录</span></span><br><span class="line">STATICFILES_DIRS = [</span><br><span class="line">   os.path.join(BASE_DIR, 'static'),</span><br><span class="line">]</span><br></pre></td></tr></table></figure></li><li><p>在项目根目录下创建static目录，再创建当前应用名称的目录</p><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysite/<span class="keyword">static</span>/myapp/</span><br></pre></td></tr></table></figure></li><li><p>在模板中可以使用硬编码</p><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/<span class="keyword">static</span>/my_app/myexample.jpg</span><br></pre></td></tr></table></figure></li><li><p>在模板中可以使用static编码</p><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123; % load static <span class="keyword">from</span> staticfiles % &#125;</span><br><span class="line">&lt;img <span class="attribute">src</span>=<span class="string">"&#123; % my_app/myexample.jpg % &#125;"</span> <span class="attribute">alt</span>=<span class="string">"My image"</span>/&gt;</span><br></pre></td></tr></table></figure></li></ul><p><br><br><br></p><h1 id="中间件"><a href="#中间件" class="headerlink" title="中间件"></a>中间件</h1><p><img src="\images\pasted-237.png" alt="upload successful"><br><img src="\images\pasted-238.png" alt="upload successful"><br><br><br><br></p><h1 id="上传图片"><a href="#上传图片" class="headerlink" title="上传图片"></a>上传图片</h1><p><img src="\images\pasted-239.png" alt="upload successful"><br><img src="\images\pasted-240.png" alt="upload successful"><br><img src="\images\pasted-241.png" alt="upload successful"><br><br><br><br></p><h1 id="Admin站点"><a href="#Admin站点" class="headerlink" title="Admin站点"></a>Admin站点</h1><p><img src="\images\pasted-242.png" alt="upload successful"></p><h2 id="ModelAdmin对象"><a href="#ModelAdmin对象" class="headerlink" title="ModelAdmin对象"></a>ModelAdmin对象</h2><p><img src="\images\pasted-245.png" alt="upload successful"></p><h3 id="列表页选项"><a href="#列表页选项" class="headerlink" title="列表页选项"></a>列表页选项</h3><p><img src="\images\pasted-246.png" alt="upload successful"><br><img src="\images\pasted-247.png" alt="upload successful"><br><img src="\images\pasted-248.png" alt="upload successful"><br><img src="\images\pasted-249.png" alt="upload successful"></p><h3 id="增加与修改页选项"><a href="#增加与修改页选项" class="headerlink" title="增加与修改页选项"></a>增加与修改页选项</h3><p><img src="\images\pasted-250.png" alt="upload successful"></p><h2 id="InlineModelAdmin对象"><a href="#InlineModelAdmin对象" class="headerlink" title="InlineModelAdmin对象"></a>InlineModelAdmin对象</h2><p><img src="\images\pasted-251.png" alt="upload successful"></p><h2 id="重写admin模板"><a href="#重写admin模板" class="headerlink" title="重写admin模板"></a>重写admin模板</h2><p><img src="\images\pasted-252.png" alt="upload successful"><br><br><br><br></p><h1 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h1><h2 id="Paginator对象"><a href="#Paginator对象" class="headerlink" title="Paginator对象"></a>Paginator对象</h2><p><img src="\images\pasted-253.png" alt="upload successful"></p><h2 id="Page对象"><a href="#Page对象" class="headerlink" title="Page对象"></a>Page对象</h2><p><img src="\images\pasted-254.png" alt="upload successful"><br><br><br><br></p><h1 id="使用jquery完成ajax"><a href="#使用jquery完成ajax" class="headerlink" title="使用jquery完成ajax"></a>使用jquery完成ajax</h1><p><img src="\images\pasted-255.png" alt="upload successful"></p><p><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;strong&gt;&lt;em&gt;django高级应用&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h1 id=&quot;静态文件&quot;&gt;&lt;a href=&quot;#静态文件&quot; class=&quot;headerlink&quot; title=&quot;静态文件&quot;&gt;&lt;/a&gt;静态文件&lt;
+      
+    
+    </summary>
+    
+      <category term="5_Django高级" scheme="http://yoururl.com/categories/5-Django%E9%AB%98%E7%BA%A7/"/>
+    
+    
+      <category term="python" scheme="http://yoururl.com/tags/python/"/>
+    
+      <category term="django" scheme="http://yoururl.com/tags/django/"/>
+    
+  </entry>
+  
+  <entry>
     <title>4_Django模板</title>
     <link href="http://yoururl.com/2018/07/29/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-4/"/>
     <id>http://yoururl.com/2018/07/29/Django学习笔记-4/</id>
@@ -549,35 +579,6 @@
       <category term="crypto" scheme="http://yoururl.com/tags/crypto/"/>
     
       <category term="rsa" scheme="http://yoururl.com/tags/rsa/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>文件上传常规漏洞总结</title>
-    <link href="http://yoururl.com/2018/04/01/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoururl.com/2018/04/01/文件上传常规漏洞总结/</id>
-    <published>2018-04-01T14:36:00.000Z</published>
-    <updated>2018-04-08T10:07:43.361Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="从文件上传到getshell"><a href="#从文件上传到getshell" class="headerlink" title="从文件上传到getshell"></a>从文件上传到getshell</h3><p>一般找到文件上传页面，常规getshell思路:<br>先检查服务器验证上传文件的逻辑，再想办法绕过</p><blockquote><ul><li>前台js验证——禁用js，burpsuit抓包绕过即可</li><li>后台检查MIME——抓包改MIME</li><li>后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传</li><li>.hatccess上传(apache)——创建一个.hatccseea文件<br>设置命名有”php.gif”的文件当作php文件解析执行：<pre><code>&lt;FilesMatch “php.gif”&gt;SetHandler application/x-httpd-php&lt;/FilesMatch&gt;</code></pre>上传的jpg文件都会以php格式解析：<pre><code>AddType    application/x-httpd-php    .jpg</code></pre></li></ul></blockquote><blockquote><ul><li>后台检查文件后缀名——</li><li>0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)<pre><code>1.php .png(空格改为00)</code></pre></li><li>IIS6.0解析漏洞<pre><code>文件      xxx.asp;.jpg (服务器默认不解析;号后面的内容)文件夹    xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件)</code></pre></li><li>apache解析漏洞<pre><code>www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析)</code></pre></li><li>iis7.0和nginx解析漏洞<pre><code>www.xxx.com/logo.jpg/*.php(开启fix_pathinfo)</code></pre></li></ul></blockquote><h3 id="文件包含漏洞和利用"><a href="#文件包含漏洞和利用" class="headerlink" title="文件包含漏洞和利用"></a>文件包含漏洞和利用</h3><blockquote><ul><li>如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞</li><li>通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00</li><li>文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)</li></ul></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;从文件上传到getshell&quot;&gt;&lt;a href=&quot;#从文件上传到getshell&quot; class=&quot;headerlink&quot; title=&quot;从文件上传到getshell&quot;&gt;&lt;/a&gt;从文件上传到getshell&lt;/h3&gt;&lt;p&gt;一般找到文件上传页面，常规getshell思
-      
-    
-    </summary>
-    
-      <category term="文件上传" scheme="http://yoururl.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-      <category term="文件包含" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
     
   </entry>
   
