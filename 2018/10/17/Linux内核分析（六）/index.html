@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux内核分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="lalala's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="* 1.字符设备控制方法实现 * 2.揭秘系统调用本质 字符设备控制方法实现设备控制简介 何为设备控制：我们所接触的大部分设备，除了读、写、打开关闭等方法外，还应该具有控制方法，比如：控制电机转速、串口配置波特率等。这就是对设备的控制方法。 用户如何进行设备控制：类似与我们在用户空间使用read、open等函数对设备进行操作，我们在用户空间对设备控制的函数是ioctl其原型为 int ioctl(">
+<meta name="keywords" content="linux内核分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux内核分析（六）">
+<meta property="og:url" content="http://yoururl.com/2018/10/17/Linux内核分析（六）/index.html">
+<meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="* 1.字符设备控制方法实现 * 2.揭秘系统调用本质 字符设备控制方法实现设备控制简介 何为设备控制：我们所接触的大部分设备，除了读、写、打开关闭等方法外，还应该具有控制方法，比如：控制电机转速、串口配置波特率等。这就是对设备的控制方法。 用户如何进行设备控制：类似与我们在用户空间使用read、open等函数对设备进行操作，我们在用户空间对设备控制的函数是ioctl其原型为 int ioctl(">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-16T17:53:32.591Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux内核分析（六）">
+<meta name="twitter:description" content="* 1.字符设备控制方法实现 * 2.揭秘系统调用本质 字符设备控制方法实现设备控制简介 何为设备控制：我们所接触的大部分设备，除了读、写、打开关闭等方法外，还应该具有控制方法，比如：控制电机转速、串口配置波特率等。这就是对设备的控制方法。 用户如何进行设备控制：类似与我们在用户空间使用read、open等函数对设备进行操作，我们在用户空间对设备控制的函数是ioctl其原型为 int ioctl(">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoururl.com/2018/10/17/Linux内核分析（六）/"/>
+
+
+
+
+
+  <title>Linux内核分析（六） | lalala's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">lalala's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">努力做一名白帽子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/10/17/Linux内核分析（六）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux内核分析（六）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-17T01:39:00+08:00">
+                2018-10-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/Linux内核分析/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux内核分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <pre><code>* 1.字符设备控制方法实现
+* 2.揭秘系统调用本质
+</code></pre><h1 id="字符设备控制方法实现"><a href="#字符设备控制方法实现" class="headerlink" title="字符设备控制方法实现"></a>字符设备控制方法实现</h1><h2 id="设备控制简介"><a href="#设备控制简介" class="headerlink" title="设备控制简介"></a>设备控制简介</h2><ul>
+<li>何为设备控制：我们所接触的大部分设备，除了读、写、打开关闭等方法外，还应该具有控制方法，比如：控制电机转速、串口配置波特率等。这就是对设备的控制方法。</li>
+<li>用户如何进行设备控制：类似与我们在用户空间使用read、open等函数对设备进行操作，我们在用户空间对设备控制的函数是ioctl其原型为 int ioctl(int fd, int cmd, …)//fd为要控制的设备文件的描述符，cmd是控制命令，…依据第二个参数类似与我们的printf等多参函数。 </li>
+<li>Ioctl调用驱动那个函数：在我们的用户层进行ioctl调用的时候驱动会根据内核版本不同调用不同的函数：<br>2.6.36以前的内核版本会调用 long (<em>ioctl) (struct inode</em>,struct file <em>, unsigned int, unsigned long);<br>2.6.36以后的内核会调用 long (</em>unlocked_ioctl) (struct file *, unsigned int, unsigned long); </li>
+</ul>
+<h2 id="Ioctl实现"><a href="#Ioctl实现" class="headerlink" title="Ioctl实现"></a>Ioctl实现</h2><h3 id="控制命令解析"><a href="#控制命令解析" class="headerlink" title="控制命令解析"></a>控制命令解析</h3><p>我们刚才说到ioctl进行控制的时候有个cmd参数其为int类型的也就是32位，我们的linux为了让这32位更加有意义，所表示的内容更多，所以将其分为了下面几个段  </p>
+<ul>
+<li>Type（类型/幻数8bit）：表明这是属于哪个设备的命令  </li>
+<li>Number（序号8bit）：用来区分统一设备的不同命令  </li>
+<li>Direction（2bit）：参数传递方向，可能的取值，_IOC_NODE（没有数据传输）、_IOC_READ（从设备读）、_IOC_WRITE（向设备写）  </li>
+<li>Size（13/14bit()）：参数长度  </li>
+</ul>
+<h3 id="定义命令"><a href="#定义命令" class="headerlink" title="定义命令"></a>定义命令</h3><p>我们的控制命令如此复杂，为了方便我们的linux系统提供了固定的宏来解决命令的定义，具体如下：  </p>
+<ul>
+<li>_IO(type,nr); ：定义不带参数的命令</li>
+<li>_IOR(type,nr,datatype); ：从设备读参数命令</li>
+<li>_IOW(type,nr,datatype); ：向设备写入参数命令  </li>
+</ul>
+<p>下面定义一个向设备写入参数的命令例子  </p>
+<p>#define MEM_CLEAR _IOW(‘m’,0,int)//通常用一个字母来表示命令的类型  </p>
+<h3 id="Ioctl实现-1"><a href="#Ioctl实现-1" class="headerlink" title="Ioctl实现"></a>Ioctl实现</h3><p>下面我们去向我们上次实现的字符设备中添加ioctl方法，并实现设备重启命令（虚拟重启），对于不支持的命令我们返回-EINVAL代码如下:</p>
+<pre><code>long mem_ioctl(struct file *fd, unsigned int cmd, unsigned long arg){
+    switch(cmd){
+        case MEM_RESTART:
+        printk(&quot;&lt;0&gt; memdev is restart&quot;);
+        break;
+        default:
+        return -EINVAL;
+    }
+    return 0;
+}
+</code></pre><p><br><br><br></p>
+<h1 id="揭秘系统调用本质"><a href="#揭秘系统调用本质" class="headerlink" title="揭秘系统调用本质"></a>揭秘系统调用本质</h1><p>由于我自己的PC的调用过程不太熟悉，下面以arm的调用过程分析一下我们用户层调用read之后发生了什么，是怎么调用到我们驱动写的read函数的呢，我们下面进行深入剖析。  </p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>我们首先使用得到arm上可执行的应用程序 arm-linux-gcc -g -static read_mem.c -o read_mem<br>然后使用arm-linux-objdump -D -S read_mem &gt;dump 得到汇编文件，我们找到main函数的汇编实现</p>
+<pre><code>int main(void)
+{
+    8228: e92d4800 push {fp, lr}
+    822c: e28db004 add fp, sp, #4 ; 0x4
+    8230: e24dd008 sub sp, sp, #8 ; 0x8
+    int fd = 0;
+    8234: e3a03000 mov r3, #0 ; 0x0
+    8238: e50b3008 str r3, [fp, #-8]
+    int test = 0;
+    823c: e3a03000 mov r3, #0 ; 0x0
+    8240: e50b300c str r3, [fp, #-12]
+
+    fd = open(&quot;/dev/memdev0&quot;,O_RDWR);
+    8244: e59f004c ldr r0, [pc, #76] ; 8298 &lt;main+0x70&gt;
+    8248: e3a01002 mov r1, #2 ; 0x2
+    824c: eb0028a3 bl 124e0 &lt;__libc_open&gt;
+    8250: e1a03000 mov r3, r0
+    8254: e50b3008 str r3, [fp, #-8]
+    read(fd,&amp;test,sizeof(int));
+    8258: e24b300c sub r3, fp, #12 ; 0xc
+    825c: e51b0008 ldr r0, [fp, #-8]
+    8260: e1a01003 mov r1, r3
+    8264: e3a02004 mov r2, #4 ; 0x4
+    8268: eb0028e4 bl 12600 &lt;__libc_read&gt;//我们的read函数最终调用了__libc_read
+
+    printf(&quot;the test is %d\n&quot;,test);
+    826c: e51b300c ldr r3, [fp, #-12]
+    8270: e59f0024 ldr r0, [pc, #36] ; 829c &lt;main+0x74&gt;
+    8274: e1a01003 mov r1, r3
+    8278: eb000364 bl 9010 &lt;_IO_printf&gt;
+
+    close(fd);
+    827c: e51b0008 ldr r0, [fp, #-8]
+    8280: eb0028ba bl 12570 &lt;__libc_close&gt;
+    return 0;
+    8284: e3a03000 mov r3, #0 ; 0x0
+}
+</code></pre><p>在上面代码中大部分汇编指令都知道用法，但是svc调用引起注意，通过查阅资料才发现，我们应用程序通过svc 0x00000000可以产生异常，进入内核空间。<br>然后呢，系统处理异常，这中间牵扯好多代码还有中断的一些知识，我们找时间在专门分析，总之经过一大堆的处理最后它会跳到entry-common.S中的下面代码：  </p>
+<pre><code>.align    5
+ENTRY(vector_swi)
+    sub    sp, sp, #S_FRAME_SIZE
+    stmia    sp, {r0 - r12}            @ Calling r0 - r12
+ARM(    add    r8, sp, #S_PC        )
+ARM(    stmdb    r8, {sp, lr}^        )    @ Calling sp, lr
+THUMB(    mov    r8, sp            )
+THUMB(    store_user_sp_lr r8, r10, S_SP    )    @ calling sp, lr
+    mrs    r8, spsr            @ called from non-FIQ mode, so ok.
+    str    lr, [sp, #S_PC]            @ Save calling PC
+    str    r8, [sp, #S_PSR]        @ Save CPSR
+    str    r0, [sp, #S_OLD_R0]        @ Save OLD_R0
+    zero_fp
+
+    /*
+     * Get the system call number.
+     */
+
+#if defined(CONFIG_OABI_COMPAT)
+
+    /*
+     * If we have CONFIG_OABI_COMPAT then we need to look at the swi
+     * value to determine if it is an EABI or an old ABI call.
+     */
+#ifdef CONFIG_ARM_THUMB
+    tst    r8, #PSR_T_BIT
+    movne    r10, #0                @ no thumb OABI emulation
+    ldreq    r10, [lr, #-4]            @ get SWI instruction
+#else
+    ldr    r10, [lr, #-4]            @ get SWI instruction
+  A710(    and    ip, r10, #0x0f000000        @ check for SWI        )
+  A710(    teq    ip, #0x0f000000                        )
+  A710(    bne    .Larm710bug                        )
+#endif
+#ifdef CONFIG_CPU_ENDIAN_BE8
+    rev    r10, r10            @ little endian instruction
+#endif
+
+#elif defined(CONFIG_AEABI)
+
+    /*
+     * Pure EABI user space always put syscall number into scno (r7).
+     */
+  A710(    ldr    ip, [lr, #-4]            @ get SWI instruction    )
+  A710(    and    ip, ip, #0x0f000000        @ check for SWI        )
+  A710(    teq    ip, #0x0f000000                        )
+  A710(    bne    .Larm710bug                        )
+
+#elif defined(CONFIG_ARM_THUMB)
+
+    /* Legacy ABI only, possibly thumb mode. */
+    tst    r8, #PSR_T_BIT            @ this is SPSR from save_user_regs
+    addne    scno, r7, #__NR_SYSCALL_BASE    @ put OS number in
+    ldreq    scno, [lr, #-4]
+
+#else
+
+    /* Legacy ABI only. */
+    ldr    scno, [lr, #-4]            @ get SWI instruction
+  A710(    and    ip, scno, #0x0f000000        @ check for SWI        )
+  A710(    teq    ip, #0x0f000000                        )
+  A710(    bne    .Larm710bug                        )
+
+#endif
+
+#ifdef CONFIG_ALIGNMENT_TRAP
+    ldr    ip, __cr_alignment
+    ldr    ip, [ip]
+    mcr    p15, 0, ip, c1, c0        @ update control register
+#endif
+    enable_irq
+
+    get_thread_info tsk
+    adr    tbl, sys_call_table        @ load syscall table pointer
+</code></pre><p>该段代码中我们先会获取系统调用的标号刚才让大家记住的3，然后呢会去查找sys_call_table我们找到</p>
+<pre><code>.type    sys_call_table, #object
+ENTRY(sys_call_table)
+#include &quot;calls.S&quot;
+#undef ABI
+#undef OBSOLETE
+</code></pre><p>在calls.S中我们找到了下面东西（列出部分）</p>
+<pre><code>*/
+/* 0 */        CALL(sys_restart_syscall)
+        CALL(sys_exit)
+        CALL(sys_fork_wrapper)
+        CALL(sys_read)
+        CALL(sys_write)
+/* 5 */        CALL(sys_open)
+        CALL(sys_close)
+        CALL(sys_ni_syscall)        /* was sys_waitpid */
+        CALL(sys_creat)
+        CALL(sys_link)
+</code></pre><p>我们发现我们刚才记住的数字3刚好对应的是sys_read，在read_write.c中我们可以找到sys_read函数</p>
+<pre><code>SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
+{
+    struct file *file;
+    ssize_t ret = -EBADF;
+    int fput_needed;
+
+    file = fget_light(fd, &amp;fput_needed);
+    if (file) {
+        loff_t pos = file_pos_read(file);
+        ret = vfs_read(file, buf, count, &amp;pos);//调用虚拟文件系统的read
+        file_pos_write(file, pos);
+        fput_light(file, fput_needed);
+    }
+
+    return ret;
+}
+</code></pre><p>关于SYSCALL_DEFINE3这个宏的解析大家可以去<a href="http://blog.csdn.net/p_panyuch/article/details/5648007" target="_blank" rel="noopener">http://blog.csdn.net/p_panyuch/article/details/5648007</a> 这篇文章查看，在此我就不分析了，我们继续找到vfs_read代码如下：</p>
+<pre><code>  ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
+{
+    ssize_t ret;
+
+    if (!(file-&gt;f_mode &amp; FMODE_READ))
+        return -EBADF;
+    if (!file-&gt;f_op || (!file-&gt;f_op-&gt;read &amp;&amp; !file-&gt;f_op-&gt;aio_read))
+        return -EINVAL;
+    if (unlikely(!access_ok(VERIFY_WRITE, buf, count)))
+        return -EFAULT;
+
+    ret = rw_verify_area(READ, file, pos, count);
+    if (ret &gt;= 0) {
+        count = ret;
+        if (file-&gt;f_op-&gt;read)//我们的文件读函数指针不为空
+            ret = file-&gt;f_op-&gt;read(file, buf, count, pos);//执行我们驱动中的读函数
+        else
+            ret = do_sync_read(file, buf, count, pos);
+        if (ret &gt; 0) {
+            fsnotify_access(file);
+            add_rchar(current, ret);
+        }
+        inc_syscr(current);
+    }
+
+    return ret;
+}
+</code></pre><h2 id="过程总结"><a href="#过程总结" class="headerlink" title="过程总结"></a>过程总结</h2><p>通过上面的分析我们已经了解的read函数的调用基本过程，下面我们将read函数的调用过程在进行总结：</p>
+<ul>
+<li>寻找svc异常总体入口，并进入内核空间</li>
+<li>取出系统调用的标号</li>
+<li>根据系统调用标号，在sys_call_table中找到对应的系统调用函数</li>
+<li>根据系统函数比如sys_read找到对应的虚拟文件系统的read            </li>
+<li>虚拟文件系统在调用驱动的read。<br><br><br><br></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux内核分析/" rel="tag"># linux内核分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/17/Linux内核分析（五）/" rel="next" title="Linux内核分析（五）">
+                <i class="fa fa-chevron-left"></i> Linux内核分析（五）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/17/Linux内核分析（七）/" rel="prev" title="Linux内核分析（七）">
+                Linux内核分析（七） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/lalala"
+                alt="lalala" />
+            
+              <p class="site-author-name" itemprop="name">lalala</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhangdebiao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:843345000@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#字符设备控制方法实现"><span class="nav-number">1.</span> <span class="nav-text">字符设备控制方法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#设备控制简介"><span class="nav-number">1.1.</span> <span class="nav-text">设备控制简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ioctl实现"><span class="nav-number">1.2.</span> <span class="nav-text">Ioctl实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#控制命令解析"><span class="nav-number">1.2.1.</span> <span class="nav-text">控制命令解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义命令"><span class="nav-number">1.2.2.</span> <span class="nav-text">定义命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ioctl实现-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">Ioctl实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#揭秘系统调用本质"><span class="nav-number">2.</span> <span class="nav-text">揭秘系统调用本质</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#代码分析"><span class="nav-number">2.1.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过程总结"><span class="nav-number">2.2.</span> <span class="nav-text">过程总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lalala</span>
+
+  
+</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="powered-by">
+	<i class="fa fa-user-md"></i>
+	<span id="busuanzi_container_site_pv">
+		本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+</div>
+|
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共33.0k字</span>
+</div>
+
+<br>
+	
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

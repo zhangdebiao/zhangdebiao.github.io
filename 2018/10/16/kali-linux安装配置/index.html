@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kali," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="lalala's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="U盘给物理机装kali的一些问题：安装教程    挂载不了u盘：用dd命令直接在linux下把kali的镜像文件刻录进U盘dd if=xxx.iso of=/dev/sdb bs=4M   安装系统失败：图形界面安装，分区全分给一个盘(sda)   Debootstart错误 无法确定发布代号分区表错误，重新格式化硬盘，重建分区表   安装GRUB失败iso的一个bug，64位镜像的话插网线，联网">
+<meta name="keywords" content="kali">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kali linux安装配置">
+<meta property="og:url" content="http://yoururl.com/2018/10/16/kali-linux安装配置/index.html">
+<meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="U盘给物理机装kali的一些问题：安装教程    挂载不了u盘：用dd命令直接在linux下把kali的镜像文件刻录进U盘dd if=xxx.iso of=/dev/sdb bs=4M   安装系统失败：图形界面安装，分区全分给一个盘(sda)   Debootstart错误 无法确定发布代号分区表错误，重新格式化硬盘，重建分区表   安装GRUB失败iso的一个bug，64位镜像的话插网线，联网">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoururl.com/images/pasted-288.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-289.png">
+<meta property="og:updated_time" content="2018-10-16T18:45:18.366Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kali linux安装配置">
+<meta name="twitter:description" content="U盘给物理机装kali的一些问题：安装教程    挂载不了u盘：用dd命令直接在linux下把kali的镜像文件刻录进U盘dd if=xxx.iso of=/dev/sdb bs=4M   安装系统失败：图形界面安装，分区全分给一个盘(sda)   Debootstart错误 无法确定发布代号分区表错误，重新格式化硬盘，重建分区表   安装GRUB失败iso的一个bug，64位镜像的话插网线，联网">
+<meta name="twitter:image" content="http://yoururl.com/images/pasted-288.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoururl.com/2018/10/16/kali-linux安装配置/"/>
+
+
+
+
+
+  <title>kali linux安装配置 | lalala's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">lalala's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">努力做一名白帽子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/10/16/kali-linux安装配置/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kali linux安装配置</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-16T20:42:00+08:00">
+                2018-10-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="U盘给物理机装kali的一些问题："><a href="#U盘给物理机装kali的一些问题：" class="headerlink" title="U盘给物理机装kali的一些问题："></a>U盘给物理机装kali的一些问题：</h1><p><strong><a href="https://www.jianshu.com/p/27ca274b70c8" target="_blank" rel="noopener">安装教程</a></strong>  </p>
+<ul>
+<li>挂载不了u盘：<br>用dd命令直接在linux下把kali的镜像文件刻录进U盘<br>dd if=xxx.iso of=/dev/sdb bs=4M  </li>
+<li>安装系统失败：<br>图形界面安装，分区全分给一个盘(sda)  </li>
+<li>Debootstart错误 无法确定发布代号<br>分区表错误，重新格式化硬盘，重建分区表  </li>
+<li>安装GRUB失败<br>iso的一个bug，64位镜像的话插网线，联网装。32位没事<br><br><br><br></li>
+</ul>
+<h1 id="更新源一些问题："><a href="#更新源一些问题：" class="headerlink" title="更新源一些问题："></a>更新源一些问题：</h1><h2 id="无法验证下列签名"><a href="#无法验证下列签名" class="headerlink" title="无法验证下列签名"></a>无法验证下列签名</h2><p>Ubuntu：apt-get update出错：由于没有公钥，无法验证下列签名<br><a href="https://jingyan.baidu.com/article/2d5afd69ec4cce85a2e28ef9.html" target="_blank" rel="noopener">解决方法</a><br><img src="\images\pasted-288.png" alt="upload successful"><br>sudo apt-key adv –recv-keys –keyserver keyserver.Ubuntu.com 7E5FA1EE  </p>
+<h2 id="签名过期"><a href="#签名过期" class="headerlink" title="签名过期:"></a>签名过期:</h2><p>wget -q -O - <a href="https://archive.kali.org/archive-key.asc" target="_blank" rel="noopener">https://archive.kali.org/archive-key.asc</a> | apt-key add</p>
+<h2 id="明文签署文件不可用"><a href="#明文签署文件不可用" class="headerlink" title="明文签署文件不可用"></a>明文签署文件不可用</h2><p>解决方法：换个源更新</p>
+<pre><code>#中科大  
+deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib  
+deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib  
+</code></pre><p>然后执行命令:  </p>
+<pre><code>apt-get update                 #更新系统
+apt-get upgrade                #升级系统
+apt-get dist-upgrade           #升级系统(自选)
+apt-get clean                  #删除/var/cache/apt/archives/ 和 /var/cache/apt/archives/partial/目录下所有包(锁定的除外)
+</code></pre><p><strong>upgrade和dist-upgrade的差别:</strong>  </p>
+<ul>
+<li>upgrade:系统将现有的Package升级,如果有相依性的问题,而此相依性需要安装其它新的Package或影响到其它Package的相依性时,此Package就不会被升级,会保留下来.  </li>
+<li>dist-upgrade:可以聪明的解决相依性的问题,如果有相依性问题,需要安装/移除新的Package,就会试着去安装/移除它.<br>(所以通常这个会被认为是有点风险的升级)<br><br><br><br></li>
+</ul>
+<h1 id="kali无法正常上网"><a href="#kali无法正常上网" class="headerlink" title="kali无法正常上网"></a>kali无法正常上网</h1><p><a href="https://blog.csdn.net/chenyanhui1087/article/details/53127884" target="_blank" rel="noopener">解决办法</a><br><br><br><br></p>
+<h1 id="kali设置固定ip"><a href="#kali设置固定ip" class="headerlink" title="kali设置固定ip"></a>kali设置固定ip</h1><p>/etc/network下的interfaces文件，打开后可以看到eth0为dhcp，将其修改为如下形式：</p>
+<pre><code>auto eth0
+iface eth0 inet static //配置eth0使用默认的静态地址
+address 192.168.77.133 //设置eth0的IP地址
+netmask 255.255.255.0 //配置eth0的子网掩码
+gateway 192.168.77.254 //配置当前主机的默认网关
+</code></pre><p>配置DNS：  /etc/resovl.conf　　</p>
+<pre><code>domain
+nameserver 10.10.10.10
+nameserver 102.54.16.2
+</code></pre><p>完成后保存，然后在终端里边重启网络：</p>
+<pre><code>/etc/init.d/networking restart
+</code></pre><p><br><br><br></p>
+<h1 id="kali安装中文输入法"><a href="#kali安装中文输入法" class="headerlink" title="kali安装中文输入法"></a>kali安装中文输入法</h1><pre><code>apt-get install fcitx
+apt-get install fcitx-googlepinyin
+init 6
+</code></pre><p><br><br><br></p>
+<h1 id="kali安装flash-player"><a href="#kali安装flash-player" class="headerlink" title="kali安装flash player"></a>kali安装flash player</h1><p>在地址栏输入网址<a href="https://get.adobe.com/flashplayer/?loc=cn，下载Linux版本的tar.gz文件。" target="_blank" rel="noopener">https://get.adobe.com/flashplayer/?loc=cn，下载Linux版本的tar.gz文件。</a><br>打开终端，并切换到下载文件所在目录，执行以下命令：  </p>
+<pre><code>tar xzvf install_flash_player_11_linux.x86_64.tar.gz
+</code></pre><p>进入解压出来的文件夹，找到libflashplayer.so拷贝到/usr/lib/mozilla/plugins/下，命令如下：  </p>
+<pre><code>cp libflashplayer.so /usr/lib/mozilla/plugins/
+</code></pre><p><br><br><br></p>
+<h1 id="kali安装百度云"><a href="#kali安装百度云" class="headerlink" title="kali安装百度云"></a>kali安装百度云</h1><pre><code>dpkg -i bcloud-x.x.x.deb 
+apt-get -f install
+</code></pre><p><br><br><br></p>
+<h1 id="kali安装WPS"><a href="#kali安装WPS" class="headerlink" title="kali安装WPS"></a>kali安装WPS</h1><p><a href="https://blog.csdn.net/github_39217805/article/details/73465999" target="_blank" rel="noopener">参考</a>  </p>
+<pre><code>dpkg -i x.x.x.deb 
+apt-get -f install
+gdebi
+</code></pre><p><br><br><br></p>
+<h1 id="kali安装sublime"><a href="#kali安装sublime" class="headerlink" title="kali安装sublime"></a>kali安装sublime</h1><p><a href="https://blog.csdn.net/youngdze/article/details/19980009" target="_blank" rel="noopener">安装</a><br><a href="https://blog.csdn.net/qq_29819449/article/details/80130327" target="_blank" rel="noopener">注册</a><br><br><br><br></p>
+<h1 id="kali安装pycharm"><a href="#kali安装pycharm" class="headerlink" title="kali安装pycharm"></a>kali安装pycharm</h1><p><a href="https://www.jianshu.com/p/11d70cecbfff" target="_blank" rel="noopener">下载和安装</a><br><a href="https://blog.csdn.net/qq_36472696/article/details/75637163?locationNum=5&amp;fps=1" target="_blank" rel="noopener">Linux下将pycharm图标添加至桌面</a><br><a href="https://blog.csdn.net/xjcvip007/article/details/52606193" target="_blank" rel="noopener">设置桌面快捷方式</a><br><a href="https://blog.csdn.net/u014044812/article/details/78727496" target="_blank" rel="noopener">激活</a><br>设置快捷键为pycharm:<br>ln -s /root/下载/pycharm/bin/pycharm.sh /usr/bin/pycharm<br><a href="http://idea.lanyus.com/" target="_blank" rel="noopener">IDEA注册码</a><br><br><br><br></p>
+<h1 id="kali的firefox设置成中文"><a href="#kali的firefox设置成中文" class="headerlink" title="kali的firefox设置成中文"></a>kali的firefox设置成中文</h1><p><a href="https://blog.csdn.net/xingjiarong/article/details/49449015" target="_blank" rel="noopener">参考</a><br><br><br><br></p>
+<h1 id="kali下webshell管理工具"><a href="#kali下webshell管理工具" class="headerlink" title="kali下webshell管理工具"></a>kali下webshell管理工具</h1><h2 id="webacoo"><a href="#webacoo" class="headerlink" title="webacoo"></a>webacoo</h2><p>没有密码，只能用于php  </p>
+<ul>
+<li>生成服务端程序<br>webacoo -g -o a.php  </li>
+<li>客户端连接<br>webacoo -t -u <a href="http://202.196.73.125/a.php" target="_blank" rel="noopener">http://202.196.73.125/a.php</a>   </li>
+</ul>
+<h2 id="Weevely"><a href="#Weevely" class="headerlink" title="Weevely"></a>Weevely</h2><ul>
+<li>~# weevely generate <password> b.php  </password></li>
+<li>~# cat /usr/share/weevely/b.php  </li>
+<li>客户端连接：weevely <a href="http://202.196.73.125/b.php" target="_blank" rel="noopener">http://202.196.73.125/b.php</a> pass<br><br><br><br></li>
+</ul>
+<h1 id="kali安装nessus"><a href="#kali安装nessus" class="headerlink" title="kali安装nessus"></a>kali安装nessus</h1><p><a href="https://blog.csdn.net/u012318074/article/details/72354387?locationNum=13&amp;fps=1" target="_blank" rel="noopener">参考</a><br><a href="https://www.cnblogs.com/youcanch/articles/5671238.html" target="_blank" rel="noopener">使用</a><br>在安装注册过程的4步，常常出现“Plugin Download Fail”问题，这个时候可以采用离线加载继续安装。下载离线安装包all-2.0.tar.gz并将它拷贝到nessus的安装目录下，在命令提示符下切换到nessus的安装目录下输入如下命令（此过程十分漫长情耐心等待）<br>nessuscli update all-2.0.tar.gz<br><br><br><br></p>
+<h1 id="kali下wine中文乱码"><a href="#kali下wine中文乱码" class="headerlink" title="kali下wine中文乱码"></a>kali下wine中文乱码</h1><p><a href="https://blog.csdn.net/williamyi96/article/details/79841690" target="_blank" rel="noopener">参考</a><br><br><br><br></p>
+<h1 id="kali安装docker"><a href="#kali安装docker" class="headerlink" title="kali安装docker"></a>kali安装docker</h1><p><a href="http://blog.csdn.net/u014057054/article/details/72510898" target="_blank" rel="noopener">参考</a><br><br><br><br></p>
+<h1 id="kali安装virtualbox"><a href="#kali安装virtualbox" class="headerlink" title="kali安装virtualbox"></a>kali安装virtualbox</h1><pre><code>1、添加源：
+Add the following line to your /etc/apt/sources.list:
+deb http://download.virtualbox.org/virtualbox/debian artful contrib
+2、添加公钥
+wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+3、更新并安装
+sudo apt-get update
+sudo apt-get install virtualbox
+</code></pre><p><br><br><br></p>
+<h1 id="kali下设置shadowsocks翻墙"><a href="#kali下设置shadowsocks翻墙" class="headerlink" title="kali下设置shadowsocks翻墙"></a>kali下设置shadowsocks翻墙</h1><p><a href="https://blog.csdn.net/szsteel1/article/details/54773544?utm_medium=referral&amp;utm_source=itdadao" target="_blank" rel="noopener">参考</a></p>
+<pre><code>/etc/init.d/shadowsockes restart      #重启服务
+vim /home/lalala/shadowsocks.json     #配置服务端信息
+sslocal -c /home/lalala/shadowsocks.json -d start     #开启客户端
+vim /etc/proxychains.conf #注释掉socks4，添加socks5 127.0.0.1 1080     
+#配置proxychains
+proxychains curl www.google.com 测试
+</code></pre><p><br><br><br></p>
+<h1 id="kali设置Tor"><a href="#kali设置Tor" class="headerlink" title="kali设置Tor"></a>kali设置Tor</h1><p><a href="https://blog.csdn.net/qq_37867887/article/details/75675120" target="_blank" rel="noopener">安装教程</a><br><a href="https://blog.csdn.net/guangyinglanshan/article/details/77236420" target="_blank" rel="noopener">root下无法执行</a><br><br><br><br></p>
+<h1 id="kali安装ftp服务器"><a href="#kali安装ftp服务器" class="headerlink" title="kali安装ftp服务器"></a>kali安装ftp服务器</h1><p><a href="https://www.douban.com/note/415638303/" target="_blank" rel="noopener">参考</a><br><a href="https://wenku.baidu.com/view/6b25c70f1ed9ad51f01df278.html" target="_blank" rel="noopener">创建用户及设置</a><br><br><br><br></p>
+<h1 id="kali添加环境变量"><a href="#kali添加环境变量" class="headerlink" title="kali添加环境变量"></a>kali添加环境变量</h1><p><a href="https://www.cnblogs.com/Bonker/p/4314576.html" target="_blank" rel="noopener">参考</a><br><br><br><br></p>
+<h1 id="kali安装配置Redis"><a href="#kali安装配置Redis" class="headerlink" title="kali安装配置Redis"></a>kali安装配置Redis</h1><p><a href="https://blog.csdn.net/qq_41298906/article/details/78819447" target="_blank" rel="noopener">参考</a><br><br><br><br></p>
+<h1 id="VMware给kali扩容"><a href="#VMware给kali扩容" class="headerlink" title="VMware给kali扩容"></a>VMware给kali扩容</h1><p><a href="http://blog.51cto.com/liwenhn/1937411" target="_blank" rel="noopener">gparted</a><br><br><br><br></p>
+<h1 id="kali下开启sftp传文件"><a href="#kali下开启sftp传文件" class="headerlink" title="kali下开启sftp传文件"></a>kali下开启sftp传文件</h1><pre><code>service ssh start #开启ssh服务
+SSH服务器拒绝了密码，ssh连不上kali
+因为sshd的默认设置不允许root用户用密码远程登录
+修改 vim /etc/ssh/sshd_config
+找到
+# Authentication:
+LoginGraceTime 120
+PermitRootLogin without passwd
+StrictModes yes
+改成:
+Authentication:    
+LoginGraceTime 120
+PermitRootLogin yes
+StrictModes yes
+重启虚拟机
+</code></pre><h2 id="Xshell连接sftp传文件"><a href="#Xshell连接sftp传文件" class="headerlink" title="Xshell连接sftp传文件"></a>Xshell连接sftp传文件</h2><pre><code>在本地提示下以sftp命令登陆拟要发送文件的主机。    Xshell:\&gt; sftp hostname
+在sftp提示下以put命令发送需要的文件。    sftp:/home/user21&gt;put filename
+在sftp提示下以get命令接收需要的文件。    sftp:/home/user21&gt;get filename
+</code></pre><h2 id="cmd连接sftp传文件"><a href="#cmd连接sftp传文件" class="headerlink" title="cmd连接sftp传文件"></a>cmd连接sftp传文件</h2><p>【控制面板】-【程序】-【打开或关闭Windows功能】，弹出Windows功能窗口，里面有个tftp客户端。在前面打勾确定。然后在cmd里就可以使用sftp了。<br>C:\Users\ramma&gt;sftp server<br>user name :<br><img src="\images\pasted-289.png" alt="upload successful"><br><br><br><br></p>
+<h1 id="其他安装"><a href="#其他安装" class="headerlink" title="其他安装"></a>其他安装</h1><p>   apt-get install audacious                #audacious音乐播放器<br>   apt-get install smplayer                 #安装smplayer视频播放器<br>   apt-get install synaptic                  #安装新立德<br><br><br><br></p>
+<h1 id="个人常用快捷键"><a href="#个人常用快捷键" class="headerlink" title="个人常用快捷键"></a>个人常用快捷键</h1><pre><code>alt+enter          开终端    gnome-terminal  
+supur+enter        开浏览器  
+ctrl+ enter        主目录  
+alt+f              搜索  
+supur+d            回到桌面(隐藏所有正常窗口)  
+ctrl + alt +A      截图
+</code></pre><p><br><br><br></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kali/" rel="tag"># kali</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/16/Linux内核漏洞利用/" rel="next" title="Linux内核漏洞利用">
+                <i class="fa fa-chevron-left"></i> Linux内核漏洞利用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/16/Linux内核分析/" rel="prev" title="Linux内核分析（一）">
+                Linux内核分析（一） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/lalala"
+                alt="lalala" />
+            
+              <p class="site-author-name" itemprop="name">lalala</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhangdebiao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:843345000@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#U盘给物理机装kali的一些问题："><span class="nav-number">1.</span> <span class="nav-text">U盘给物理机装kali的一些问题：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新源一些问题："><span class="nav-number">2.</span> <span class="nav-text">更新源一些问题：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#无法验证下列签名"><span class="nav-number">2.1.</span> <span class="nav-text">无法验证下列签名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#签名过期"><span class="nav-number">2.2.</span> <span class="nav-text">签名过期:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#明文签署文件不可用"><span class="nav-number">2.3.</span> <span class="nav-text">明文签署文件不可用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali无法正常上网"><span class="nav-number">3.</span> <span class="nav-text">kali无法正常上网</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali设置固定ip"><span class="nav-number">4.</span> <span class="nav-text">kali设置固定ip</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装中文输入法"><span class="nav-number">5.</span> <span class="nav-text">kali安装中文输入法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装flash-player"><span class="nav-number">6.</span> <span class="nav-text">kali安装flash player</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装百度云"><span class="nav-number">7.</span> <span class="nav-text">kali安装百度云</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装WPS"><span class="nav-number">8.</span> <span class="nav-text">kali安装WPS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装sublime"><span class="nav-number">9.</span> <span class="nav-text">kali安装sublime</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装pycharm"><span class="nav-number">10.</span> <span class="nav-text">kali安装pycharm</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali的firefox设置成中文"><span class="nav-number">11.</span> <span class="nav-text">kali的firefox设置成中文</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali下webshell管理工具"><span class="nav-number">12.</span> <span class="nav-text">kali下webshell管理工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#webacoo"><span class="nav-number">12.1.</span> <span class="nav-text">webacoo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Weevely"><span class="nav-number">12.2.</span> <span class="nav-text">Weevely</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装nessus"><span class="nav-number">13.</span> <span class="nav-text">kali安装nessus</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali下wine中文乱码"><span class="nav-number">14.</span> <span class="nav-text">kali下wine中文乱码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装docker"><span class="nav-number">15.</span> <span class="nav-text">kali安装docker</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装virtualbox"><span class="nav-number">16.</span> <span class="nav-text">kali安装virtualbox</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali下设置shadowsocks翻墙"><span class="nav-number">17.</span> <span class="nav-text">kali下设置shadowsocks翻墙</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali设置Tor"><span class="nav-number">18.</span> <span class="nav-text">kali设置Tor</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装ftp服务器"><span class="nav-number">19.</span> <span class="nav-text">kali安装ftp服务器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali添加环境变量"><span class="nav-number">20.</span> <span class="nav-text">kali添加环境变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali安装配置Redis"><span class="nav-number">21.</span> <span class="nav-text">kali安装配置Redis</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VMware给kali扩容"><span class="nav-number">22.</span> <span class="nav-text">VMware给kali扩容</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kali下开启sftp传文件"><span class="nav-number">23.</span> <span class="nav-text">kali下开启sftp传文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Xshell连接sftp传文件"><span class="nav-number">23.1.</span> <span class="nav-text">Xshell连接sftp传文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cmd连接sftp传文件"><span class="nav-number">23.2.</span> <span class="nav-text">cmd连接sftp传文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他安装"><span class="nav-number">24.</span> <span class="nav-text">其他安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#个人常用快捷键"><span class="nav-number">25.</span> <span class="nav-text">个人常用快捷键</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lalala</span>
+
+  
+</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="powered-by">
+	<i class="fa fa-user-md"></i>
+	<span id="busuanzi_container_site_pv">
+		本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+</div>
+|
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共33.0k字</span>
+</div>
+
+<br>
+	
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

