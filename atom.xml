@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-10-16T18:40:21.578Z</updated>
+  <updated>2018-10-16T18:54:55.845Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Linux文件系统</title>
+    <link href="http://yoururl.com/2018/10/17/Linux%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/"/>
+    <id>http://yoururl.com/2018/10/17/Linux文件系统/</id>
+    <published>2018-10-16T18:48:00.000Z</published>
+    <updated>2018-10-16T18:54:55.845Z</updated>
+    
+    <content type="html"><![CDATA[<p>rootfs其实就是，针对特定的操作系统的架构，一种实现的形式;具体表现为，特定的目录（就理解为windows的文文件夹），目录之间的关系，即组织架构，以及特定的各种文件；<br><br><br>/boot：系统启动的相关文件，如内核， initrd，以及grup（bootloader)，建议单独分区，分区千万不要做lvm<br>/dev：设备文件  </p><ul><li>块设备：随机访问，以数据块为单位</li><li>字符设备：线性访问，以字符为单位</li><li>设备号：主设备和次设备号  </li></ul><p>/etc：配置文件<br>/home：用户的家目录，每一个用户对应一个（当然在创建用户时，可不创建），建议单独分区<br>/root：管理员的家目录，不可单独分区<br>/lib：库文件<br>/lib/modules：内核模块文件</p><ul><li>静态库: 以.a结尾</li><li>动态库: 以.so结尾（类似windows .dll文件）</li></ul><p>/media：挂载点目录，以移动设备为主<br>/mnt：挂载点目录，以额外临时文件系统为主（如：USB设备）<br>/opt：可选目录，时期是用来安装第三方软件<br>/proc：伪文件系统，内核映射文件，不可单独分区，默认为空<br>/sys：伪文件系统，跟硬件设备相关属性的映射文件，不可单独分区，默认为空<br>/tmp：临时文件<br>/var/tmp：临时文件<br>/bin：可执行文件，主要是用户执行命令<br>/sbin：可执行文件，主要是管理命令<br>/usr(universal share read-only)：只读文件<br>/usr/bin：执行文件<br>/usr/sbin：执行文件<br>/usr/lib：库文件<br>/usr/local：第三方软件安装目录  </p><ul><li>/usr/local/bin  </li><li>/usr/local/sbin</li><li>/usr/local/lib<br><br></li></ul><p>busybox详细介绍：<br><a href="https://www.ibm.com/developerworks/cn/linux/l-busybox/" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/linux/l-busybox/</a><br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;rootfs其实就是，针对特定的操作系统的架构，一种实现的形式;具体表现为，特定的目录（就理解为windows的文文件夹），目录之间的关系，即组织架构，以及特定的各种文件；&lt;br&gt;&lt;br&gt;&lt;br&gt;/boot：系统启动的相关文件，如内核， initrd，以及grup（boot
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoururl.com/categories/Linux/"/>
+    
+    
+      <category term="linux文件系统" scheme="http://yoururl.com/tags/linux%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
   
   <entry>
     <title>Linux内核分析（七）</title>
@@ -141,7 +166,7 @@
     <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/"/>
     <id>http://yoururl.com/2018/10/16/Linux内核分析（三）/</id>
     <published>2018-10-16T15:44:00.000Z</published>
-    <updated>2018-10-16T16:03:46.490Z</updated>
+    <updated>2018-10-16T16:03:46.501Z</updated>
     
     <content type="html"><![CDATA[<pre><code>* Linux地址映射* Linux内存分配</code></pre><p>在分析今天的内容之前，我们先看一位大神做的内存管理图。其实这张图可以分为两个部分，一部分是地址映射，另一部分就是内存分配。<br><img src="\images\pasted-297.png" alt="upload successful"></p><h1 id="Linux地址映射"><a href="#Linux地址映射" class="headerlink" title="Linux地址映射"></a>Linux地址映射</h1><p>下面的分析我们依据上图进行分析，首先我们来看其最右边的地址分布图（当然这是虚拟空间）。其地址分布总的可以分为两个部分我们下面慢慢分析（基于32位处理器）。<br><img src="\images\pasted-298.png" alt="upload successful"></p><h2 id="用户空间（0-3G）"><a href="#用户空间（0-3G）" class="headerlink" title="用户空间（0~3G）"></a>用户空间（0~3G）</h2><p>空间简介其从0x00000000到0xBFFFFFFF共3GB的线性地址空间，每个进程都有一个独立的3GB用户空间，当然这是虚拟的空间。<br>如何转换为物理空间这一部分虚拟空间到物理空间的转换方法是我们以前在<a href="http://www.cnblogs.com/wrjvszq/p/4246634.html一文中分析过的MMU地址转换。" target="_blank" rel="noopener">http://www.cnblogs.com/wrjvszq/p/4246634.html一文中分析过的MMU地址转换。</a></p><h2 id="内核空间（3-4G）"><a href="#内核空间（3-4G）" class="headerlink" title="内核空间（3~4G）"></a>内核空间（3~4G）</h2><p>其从0xC0000000到0xFFFFFFFF共1GB大小，内核空间又可以根据映射方式的不同分为下面四块，我们一一分析  </p><h3 id="内核逻辑地址空间"><a href="#内核逻辑地址空间" class="headerlink" title="内核逻辑地址空间"></a>内核逻辑地址空间</h3><p><strong>空间简介</strong><br>其从0xC0000000到high_memory(图中896MB的地方)最大为896MB（也就是说这块空间有可能不满，但最大为896MB），当然是虚拟空间。<br>注：在此注意一下896MB我们一会在分析。<br><strong>如何转换为物理空间</strong><br>这一部分虚拟地址与物理内存中对应的地址只差一个固定偏移量（3G），如果内存物理地址空间从0x00000000地址编址，那么这个固定偏移量就是PAGE_OFFSET（如上图）。  </p><h3 id="Vmalloc空间"><a href="#Vmalloc空间" class="headerlink" title="Vmalloc空间"></a>Vmalloc空间</h3><p><strong>空间简介</strong><br>其地址没有严格的界限，这段空间既可以访问到我们的高端内存，也可以访问到低端内存。<br><strong>如何转换为物理空间</strong><br>不是通过简单的线性关系映射，在此不研究。  </p><h3 id="永久内核映射"><a href="#永久内核映射" class="headerlink" title="永久内核映射"></a>永久内核映射</h3><p><strong>空间简介</strong><br>其固定用来访问高端内存。<br><strong>如何转换为物理空间</strong><br>不是通过简单的线性关系映射，在此不研究。</p><h3 id="固定映射"><a href="#固定映射" class="headerlink" title="固定映射"></a>固定映射</h3><p><strong>空间简介</strong><br>其在系统初始化期间永久映射I/O地址空间，或者特殊的寄存器。</p><h2 id="遗留知识"><a href="#遗留知识" class="headerlink" title="遗留知识"></a>遗留知识</h2><p>在刚才我们前面的分析中我们留下了一些问题下面进行解释。  </p><h3 id="低端内存"><a href="#低端内存" class="headerlink" title="低端内存"></a>低端内存</h3><p>内核逻辑地址空间所映射的物理内存就是低端内存(实际物理内存的大小，但是小于896MB)</p><h3 id="高端内存"><a href="#高端内存" class="headerlink" title="高端内存"></a>高端内存</h3><p>低端内存地址之上的物理内存是高端内存（物理内存896MB之上）。</p><h3 id="896MB来由"><a href="#896MB来由" class="headerlink" title="896MB来由"></a>896MB来由</h3><p>Linux将内存分为内核空间和用户空间，其中内核空间中的0xC0000000~high_memory部分用来映射物理内存，但是我们还需要映射I/O空间和固定的寄存器，所以留出了high_memory~0xFFFFFFFF之间的地址来映射I/O空间和固定的寄存器，而在X86平台根据经验设定了这个high_memory为896MB。  </p><h1 id="Linux内存分配"><a href="#Linux内存分配" class="headerlink" title="Linux内存分配"></a>Linux内存分配</h1><p>通过上面的介绍我们对linux对内存的管理，以及地址的映射有了一个了解，下面我们来分析linux是如何进行内存分配的。<br><img src="\images\pasted-299.png" alt="upload successful"><br>通过上图我们可以分析出内存的分配过程：  </p><ul><li>由malloc、fork等系统调用和kmalloc、vmalloc申请得到虚拟内存。  </li><li>在我们使用该内存的时候，产生请页异常（kmalloc除外）  </li><li>从空闲的页框分配物理内存，和虚拟地址建立映射。  </li></ul><p>注：kmalloc申请空间是不用经过请页异常的，返回的虚拟地址已经对应了物理内存。Kmalloc可以分配到连续的物理内存，vmalloc分配的是非连续的物理内存。<br><br><br><br></p>]]></content>
     
@@ -196,8 +221,8 @@
   
   <entry>
     <title>Linux内核分析（一）</title>
-    <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90/"/>
-    <id>http://yoururl.com/2018/10/16/Linux内核分析/</id>
+    <link href="http://yoururl.com/2018/10/16/Linux%E5%86%85%E6%A0%B8%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/16/Linux内核分析（一）/</id>
     <published>2018-10-16T13:23:00.000Z</published>
     <updated>2018-10-16T16:08:42.874Z</updated>
     
@@ -567,36 +592,6 @@
 &lt;hr&gt;
 &lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
 &lt;h1 id=&quot;ORM&quot;&gt;&lt;a href=&quot;#ORM&quot; class=&quot;headerlink&quot; title=&quot;ORM&quot;&gt;&lt;/a&gt;ORM&lt;/h1&gt;&lt;
-      
-    
-    </summary>
-    
-      <category term="Django学习笔记" scheme="http://yoururl.com/categories/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    
-      <category term="python" scheme="http://yoururl.com/tags/python/"/>
-    
-      <category term="django" scheme="http://yoururl.com/tags/django/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>2_Django视图</title>
-    <link href="http://yoururl.com/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-2/"/>
-    <id>http://yoururl.com/2018/07/28/Django学习笔记-2/</id>
-    <published>2018-07-28T03:48:00.000Z</published>
-    <updated>2018-08-02T17:45:40.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><strong><em>Views.py</em></strong></p><hr><p><br><br><br></p><h1 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h1><p><img src="\images\pasted-112.png" alt="upload successful"></p><h2 id="URL匹配的过程"><a href="#URL匹配的过程" class="headerlink" title="URL匹配的过程"></a>URL匹配的过程</h2><p><img src="\images\pasted-113.png" alt="upload successful"><br><img src="\images\pasted-114.png" alt="upload successful"><br><img src="\images\pasted-115.png" alt="upload successful"><br><img src="\images\pasted-116.png" alt="upload successful"><br>url也可以写在应用(booktest)中:<br><img src="\images\pasted-117.png" alt="upload successful"><br><img src="\images\pasted-118.png" alt="upload successful"><br><img src="\images\pasted-119.png" alt="upload successful"></p><h2 id="URLconf"><a href="#URLconf" class="headerlink" title="URLconf"></a>URLconf</h2><p><img src="\images\pasted-122.png" alt="upload successful"></p><h2 id="其他的URLconfs"><a href="#其他的URLconfs" class="headerlink" title="其他的URLconfs"></a>其他的URLconfs</h2><p><img src="\images\pasted-120.png" alt="upload successful"></p><h2 id="URL的反向解析"><a href="#URL的反向解析" class="headerlink" title="URL的反向解析"></a>URL的反向解析</h2><p><img src="\images\pasted-121.png" alt="upload successful"><br><br><br><br></p><h1 id="错误视图"><a href="#错误视图" class="headerlink" title="错误视图"></a>错误视图</h1><p>Django原生自带几个默认视图用于处理HTTP错误</p><h2 id="404-page-not-found-视图"><a href="#404-page-not-found-视图" class="headerlink" title="404(page not found)视图"></a>404(page not found)视图</h2><p><img src="\images\pasted-123.png" alt="upload successful"></p><h2 id="500-server-error-视图"><a href="#500-server-error-视图" class="headerlink" title="500(server error)视图"></a>500(server error)视图</h2><p><img src="\images\pasted-130.png" alt="upload successful"></p><h2 id="400-bad-request-视图"><a href="#400-bad-request-视图" class="headerlink" title="400(bad request)视图"></a>400(bad request)视图</h2><p><img src="\images\pasted-131.png" alt="upload successful"><br><br><br><br></p><h1 id="HttpRequest对象"><a href="#HttpRequest对象" class="headerlink" title="HttpRequest对象"></a>HttpRequest对象</h1><ul><li>服务器收到http协议的请求后，会根据报文创建HttpRequest对象  </li><li>视图函数的第一个参数是HttpRequest对象</li><li>在django.http模块中定义了HttpRequest对象的API<br><img src="\images\pasted-124.png" alt="upload successful"><h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><img src="\images\pasted-125.png" alt="upload successful"><h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2></li><li>1、get()<br>作用：根据键获取值<br>只能获取一个值<br><a href="http://www.baidu.com/abc?a=1&amp;b=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;b=2&amp;c=3</a></li><li>2、getlist()<br>将键的值以列表的形式返回<br>可以获取多个值<br><a href="http://www.baidu.com/abc?a=1&amp;a=2&amp;c=3" target="_blank" rel="noopener">www.baidu.com/abc?a=1&amp;a=2&amp;c=3</a>  <h2 id="QueryDict对象"><a href="#QueryDict对象" class="headerlink" title="QueryDict对象"></a>QueryDict对象</h2><img src="\images\pasted-126.png" alt="upload successful"><h2 id="GET属性"><a href="#GET属性" class="headerlink" title="GET属性"></a>GET属性</h2><img src="\images\pasted-127.png" alt="upload successful"><br><img src="\images\pasted-128.png" alt="upload successful"><br><img src="\images\pasted-129.png" alt="upload successful"><h2 id="POST属性"><a href="#POST属性" class="headerlink" title="POST属性"></a>POST属性</h2><img src="\images\pasted-137.png" alt="upload successful"><br><br><br><br></li></ul><h1 id="HttpResponse对象"><a href="#HttpResponse对象" class="headerlink" title="HttpResponse对象"></a>HttpResponse对象</h1><p><img src="\images\pasted-132.png" alt="upload successful"></p><h2 id="属性-1"><a href="#属性-1" class="headerlink" title="属性"></a>属性</h2><p><img src="\images\pasted-133.png" alt="upload successful"></p><h2 id="方法-1"><a href="#方法-1" class="headerlink" title="方法"></a>方法</h2><p><img src="\images\pasted-134.png" alt="upload successful"></p><h2 id="子类HttpResponseRedirect"><a href="#子类HttpResponseRedirect" class="headerlink" title="子类HttpResponseRedirect"></a>子类HttpResponseRedirect</h2><p><img src="\images\pasted-135.png" alt="upload successful"><br><strong><em>HttpResponseRedirect()可简写为redirect()</em></strong></p><h2 id="子类JsonResponse"><a href="#子类JsonResponse" class="headerlink" title="子类JsonResponse"></a>子类JsonResponse</h2><p><img src="\images\pasted-136.png" alt="upload successful"><br><br><br><br></p><h1 id="状态保持"><a href="#状态保持" class="headerlink" title="状态保持"></a>状态保持</h1><p><img src="\images\pasted-138.png" alt="upload successful"></p><h2 id="启用session"><a href="#启用session" class="headerlink" title="启用session"></a>启用session</h2><p><img src="\images\pasted-139.png" alt="upload successful"></p><h2 id="使用session"><a href="#使用session" class="headerlink" title="使用session"></a>使用session</h2><p><img src="\images\pasted-140.png" alt="upload successful"></p><h2 id="用户登录示例"><a href="#用户登录示例" class="headerlink" title="用户登录示例"></a>用户登录示例</h2><h3 id="在views-py中创建视图"><a href="#在views-py中创建视图" class="headerlink" title="在views.py中创建视图"></a>在views.py中创建视图</h3><p><img src="\images\pasted-142.png" alt="upload successful"> </p><h3 id="配置url"><a href="#配置url" class="headerlink" title="配置url"></a>配置url</h3><p><img src="\images\pasted-143.png" alt="upload successful"></p><h3 id="创建模板index-html"><a href="#创建模板index-html" class="headerlink" title="创建模板index.html"></a>创建模板index.html</h3><p><img src="\images\pasted-144.png" alt="upload successful"></p><h3 id="创建模板login-html"><a href="#创建模板login-html" class="headerlink" title="创建模板login.html"></a>创建模板login.html</h3><p><img src="\images\pasted-145.png" alt="upload successful"></p><h2 id="会话过期时间"><a href="#会话过期时间" class="headerlink" title="会话过期时间"></a>会话过期时间</h2><p><img src="\images\pasted-146.png" alt="upload successful"></p><h2 id="存储session"><a href="#存储session" class="headerlink" title="存储session"></a>存储session</h2><p><img src="\images\pasted-147.png" alt="upload successful"></p><h2 id="使用Redis缓存session"><a href="#使用Redis缓存session" class="headerlink" title="使用Redis缓存session"></a>使用Redis缓存session</h2><p><img src="\images\pasted-148.png" alt="upload successful"><br><br><br><br></p><h1 id="登录认证逻辑"><a href="#登录认证逻辑" class="headerlink" title="登录认证逻辑"></a>登录认证逻辑</h1><p>利用django封装好的authenticate()函数，认证登录<br><img src="\images\pasted-141.png" alt="upload successful"><br>Django防止越权，直接访问127.0.0.1:8000/manage/不允许访问</p><pre><code>from django.contrib.auth.decorators import login_required  @login_required  </code></pre><p>如果想限制某个试图函数必须登录才能访问，则在函数前面加上@login_required即可<br>(记得清除浏览器缓存)</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&lt;strong&gt;&lt;em&gt;Views.py&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
-&lt;h1 id=&quot;视图&quot;&gt;&lt;a href=&quot;#视图&quot; class=&quot;headerlink&quot; title=&quot;视图&quot;&gt;&lt;/a&gt;视图&lt;/h1&gt;&lt;p&gt;&lt;im
       
     
     </summary>
